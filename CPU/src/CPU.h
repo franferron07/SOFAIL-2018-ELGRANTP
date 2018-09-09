@@ -34,6 +34,7 @@ void leer_configuracion( t_config* , config_inicial*  ); //inicializa la configu
 void prueba_leer_archivo_cfg(config_inicial* c_inicial); //prueba leer archivo configuracion
 
 Socket conectar_safa(config_inicial* c_inicial);
+Socket conectar_dam(config_inicial* c_inicial);
 
 
 
