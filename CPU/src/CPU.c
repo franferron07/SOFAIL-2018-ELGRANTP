@@ -4,7 +4,7 @@
  Author      : Quantum
  Version     :
  Copyright   : Sistemas Operativos 2018
- Description : Hello World in C, Ansi-style
+ Description : Proceso CPU
  ============================================================================
  */
 
@@ -14,11 +14,8 @@ int main(void) {
 	puts("CPU"); /* prints CPU */
 
 	t_config *inicializador;
-
 	c_inicial = malloc(sizeof(config_inicial));
-
 	inicializador = config_create("cpu.cfg");
-
 	if (inicializador == NULL) {
 		free(c_inicial);
 		puts("No se encuentra archivo.");
@@ -27,17 +24,73 @@ int main(void) {
 
 	//leo archivo
 	leer_configuracion(inicializador, c_inicial);
-
 	//muestro consola valor leido de archivo como prueba
 	prueba_leer_archivo_cfg(c_inicial);
-
 	/* libero memoria de inicializacion  */
 	config_destroy(inicializador);
+
+	socket_dam = conectar_dam(c_inicial);
+	socket_safa = conectar_safa(c_inicial);
 
 	/* libero struct config_inicial  */
 	liberarMemoriaConfig(c_inicial);
 
 	return EXIT_SUCCESS;
+}
+
+Socket conectar_dam(config_inicial* c_inicial){
+	Socket socket;
+	//Header header;
+
+	socket = crear_socket(c_inicial->ip_diego , c_inicial->puerto_diego);
+	conectar(socket);
+
+	//Envio a Coordinador Mensaje Protocolo soy un ESI
+	/*
+	header.id_protocolo=IdEsi;
+	if( Escribe_Socket(socket.socket,(char *)&header, sizeof(Header)) == -1 ) {
+		puts( "Error en envio de mensaje" );
+	}*/
+
+	//Recibo un Identificador del Coordinador
+	if( Lee_Socket(socket.socket, (char *)&identificadorCPU, sizeof(int)) == -1 ) {
+		puts("Error de lectura");
+		exit(EXIT_FAILURE);
+	}
+
+	printf("Soy el CPU: %d\n",identificadorCPU);
+
+	printf("Se envio el mensaje. Conexion correcta a dam. \n");
+
+	return socket;
+}
+
+
+Socket conectar_safa(config_inicial* c_inicial){
+	Socket socket;
+	//Header header;
+
+	socket = crear_socket(c_inicial->ip_safa , c_inicial->puerto_safa);
+	conectar(socket);
+
+	//Envio a Coordinador Mensaje Protocolo soy un ESI
+	/*
+	header.id_protocolo=IdEsi;
+	if( Escribe_Socket(socket.socket,(char *)&header, sizeof(Header)) == -1 ) {
+		puts( "Error en envio de mensaje" );
+	}*/
+
+	//Recibo un Identificador del safa
+	/*if( Lee_Socket(socket.socket, (char *)&identificadorCPU, sizeof(int)) == -1 ) {
+		puts("Error de lectura");
+		exit(EXIT_FAILURE);
+	}
+
+	printf("Soy el CPU: %d\n",identificadorCPU);*/
+
+	printf("Se envio el mensaje. Conexion correcta a safa. \n");
+
+	return socket;
 }
 
 /*

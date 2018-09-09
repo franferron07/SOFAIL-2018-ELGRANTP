@@ -24,11 +24,16 @@ typedef struct {
 
 //Variables Globales
 config_inicial *c_inicial = NULL;
+int identificadorCPU;
+Socket socket_safa;
+Socket socket_dam;
 
 //Funciones
 void liberarMemoriaConfig(config_inicial* c_inicial); //libera memoria de la configuracion inicial
 void leer_configuracion( t_config* , config_inicial*  ); //inicializa la configuracion inicial(lectura de archivo)
 void prueba_leer_archivo_cfg(config_inicial* c_inicial); //prueba leer archivo configuracion
+
+Socket conectar_safa(config_inicial* c_inicial);
 
 
 
