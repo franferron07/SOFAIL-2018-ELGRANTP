@@ -11,16 +11,16 @@
 
 #include "safaHeader.h"
 
+
 t_log* logger= NULL;
+Socket socket_servidor;
+
 
 int main(void) {
 
 
-	t_config *inicializador;
-
 	logger = log_create("SafaLog.log", "SAFA",false, LOG_LEVEL_INFO);
-
-
+	t_config *inicializador;
 
 	c_inicial = malloc(sizeof(config_inicial));
 
@@ -29,6 +29,7 @@ int main(void) {
 	if (inicializador == NULL) {
 		free(c_inicial);
 		puts("No se encuentra archivo.");
+		log_info(logger, "No se encuetra archivo de configuracion inicial %s", "INFO");
 		exit(EXIT_FAILURE);
 	}
 
@@ -50,11 +51,13 @@ int main(void) {
 
 
 
-	//destruyo log
-	log_destroy(logger);
 
 	/* libero struct config_inicial  */
 	liberarMemoriaConfig(c_inicial);
+	log_info(logger, "Libero memoria de configuracion inicial %s", "INFO");
+
+	//rompo logger
+	log_destroy(logger);
 
 	return EXIT_SUCCESS;
 }

@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <commons/config.h> //Commons config archivo
 #include <commons/string.h> //Commons string
-#include <commons/log.h> //Commons string
+#include <commons/log.h> //Commons log
 #include <qcommons/socket.h> //Libreria Socket Cliente
 #include <qcommons/socketServer.h> //Libreria Socket Servidor
 
