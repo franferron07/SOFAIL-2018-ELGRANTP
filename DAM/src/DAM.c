@@ -10,10 +10,15 @@
 
 #include "damHeader.h"
 
+t_config *inicializador=NULL;
+t_log* logger= NULL;
+
 int main(void) {
 	puts("DAM"); /* prints DAM */
 
-	t_config *inicializador;
+	logger = log_create("Dam.log", "DAM",false, LOG_LEVEL_INFO);
+
+	log_info(logger, "INICIO DAM");
 
 	c_inicial = malloc(sizeof(config_inicial));
 
@@ -22,17 +27,28 @@ int main(void) {
 	if (inicializador == NULL) {
 		free(c_inicial);
 		puts("No se encuentra archivo.");
+		log_error(logger, "No se encuentra archivo dam.cfg");
 		exit(EXIT_FAILURE);
 	}
 
 	//leo archivo
 	leer_configuracion(inicializador, c_inicial);
+	log_info(logger, "Leido archivo dam.cfg");
 
 	//muestro consola valor leido de archivo como prueba
 	prueba_leer_archivo_cfg(c_inicial);
 
+	socket_safa = conectar_safa(c_inicial);
+	socket_mdj = conectar_mdj(c_inicial);
+	socket_fm9 = conectar_fm9(c_inicial);
+
+	log_info(logger, "Realizada Conexiones safa/mdj/fm9");
+
 	/* libero memoria de inicializacion  */
 	config_destroy(inicializador);
+
+	/* libero loggger de logging */
+	log_destroy(logger);
 
 	/* libero struct config_inicial  */
 	liberarMemoriaConfig(c_inicial);
@@ -56,7 +72,6 @@ void leer_configuracion(t_config *inicializador , config_inicial *c_inicial ){
 }
 
 void prueba_leer_archivo_cfg(config_inicial* c_inicial) {
-	puts("lectura de archivo correcta");
 	puts(c_inicial->puerto_dam);
 	puts(c_inicial->ip_safa);
 	puts(c_inicial->puerto_safa);
@@ -65,6 +80,33 @@ void prueba_leer_archivo_cfg(config_inicial* c_inicial) {
 	puts(c_inicial->ip_fm9);
 	puts(c_inicial->puerto_fm9);
 	printf("%d", c_inicial->transfer_size);
+}
+
+Socket conectar_safa(config_inicial* c_inicial){
+	Socket socket;
+
+	socket = crear_socket(c_inicial->ip_safa , c_inicial->puerto_safa);
+	conectar(socket);
+
+	return socket;
+}
+
+Socket conectar_mdj(config_inicial* c_inicial){
+	Socket socket;
+
+	socket = crear_socket(c_inicial->ip_mdj , c_inicial->puerto_mdj);
+	conectar(socket);
+
+	return socket;
+}
+
+Socket conectar_fm9(config_inicial* c_inicial){
+	Socket socket;
+
+	socket = crear_socket(c_inicial->ip_fm9 , c_inicial->puerto_fm9);
+	conectar(socket);
+
+	return socket;
 }
 
 void liberarMemoriaConfig(config_inicial* c_inicial) {

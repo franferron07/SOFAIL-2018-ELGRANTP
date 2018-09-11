@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <commons/log.h>
 #include <commons/config.h> //Commons config archivo
 #include <commons/string.h> //Commons string
 #include <qcommons/socket.h> //Libreria Socket Cliente
@@ -28,10 +29,17 @@ typedef struct {
 
 //Variables Globales
 config_inicial *c_inicial = NULL;
+Socket socket_safa;
+Socket socket_mdj;
+Socket socket_fm9;
 
 //Funciones
 void liberarMemoriaConfig(config_inicial* c_inicial); //libera memoria de la configuracion inicial
 void leer_configuracion( t_config* , config_inicial*  ); //inicializa la configuracion inicial(lectura de archivo)
 void prueba_leer_archivo_cfg(config_inicial* c_inicial); //prueba leer archivo configuracion
+
+Socket conectar_safa(config_inicial* c_inicial);
+Socket conectar_mdj(config_inicial* c_inicial);
+Socket conectar_fm9(config_inicial* c_inicial);
 
 #endif /* DAMHEADER_H_ */
