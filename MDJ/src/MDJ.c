@@ -17,7 +17,6 @@ int main(void) {
 	montar_configuracion(configuracion_cfg_temporal,mdj_configuracion_inicial);
 
 	config_destroy(configuracion_cfg_temporal);
-
 	mostrar_configuracion(mdj_configuracion_inicial);
 
 	config_destroy_mdj(mdj_configuracion_inicial);
