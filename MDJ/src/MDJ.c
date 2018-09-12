@@ -11,9 +11,7 @@
 #include "mdj.h"
 int main(void) {
 	puts("MDJ"); /* prints MDJ */
-
 	mdj_configuracion_inicial = malloc(sizeof(mdj_configuracion));
-
 	t_config *configuracion_cfg_temporal=cargar_en_memoria_cfg("mdj.cfg");
 
 	montar_configuracion(configuracion_cfg_temporal,mdj_configuracion_inicial);
