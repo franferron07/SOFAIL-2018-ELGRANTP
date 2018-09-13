@@ -13,25 +13,37 @@
 int main(void) {
 	puts("CPU"); /* prints CPU */
 
-	t_config *inicializador;
+	logger = log_create("CPU.log", "CPU",false, LOG_LEVEL_INFO);
+
+	log_info(logger, "INICIO CPU");
+
+	//instancio el inicializador y reservo memoria para c_inicial
 	c_inicial = malloc(sizeof(config_inicial));
 	inicializador = config_create("cpu.cfg");
 	if (inicializador == NULL) {
 		free(c_inicial);
 		puts("No se encuentra archivo.");
+		log_error(logger, "No se encuentra archivo CPU.cfg");
 		exit(EXIT_FAILURE);
 	}
 
 	//leo archivo
 	leer_configuracion(inicializador, c_inicial);
+	log_info(logger, "Leido archivo cpu.cfg");
 	//muestro consola valor leido de archivo como prueba
 	prueba_leer_archivo_cfg(c_inicial);
+
+
+
+	//socket_dam = conectar_dam(c_inicial);
+	socket_safa = conectar_safa(c_inicial);
+	//log_info(logger, "Realizada Conexiones dam/safa");
+
+
 	/* libero memoria de inicializacion  */
 	config_destroy(inicializador);
-
-	socket_dam = conectar_dam(c_inicial);
-	socket_safa = conectar_safa(c_inicial);
-
+	/* libero loggger de logging */
+	log_destroy(logger);
 	/* libero struct config_inicial  */
 	liberarMemoriaConfig(c_inicial);
 
@@ -40,27 +52,9 @@ int main(void) {
 
 Socket conectar_dam(config_inicial* c_inicial){
 	Socket socket;
-	//Header header;
 
 	socket = crear_socket(c_inicial->ip_diego , c_inicial->puerto_diego);
 	conectar(socket);
-
-	//Envio a Coordinador Mensaje Protocolo soy un ESI
-	/*
-	header.id_protocolo=IdEsi;
-	if( Escribe_Socket(socket.socket,(char *)&header, sizeof(Header)) == -1 ) {
-		puts( "Error en envio de mensaje" );
-	}*/
-
-	//Recibo un Identificador del Coordinador
-	if( Lee_Socket(socket.socket, (char *)&identificadorCPU, sizeof(int)) == -1 ) {
-		puts("Error de lectura");
-		exit(EXIT_FAILURE);
-	}
-
-	printf("Soy el CPU: %d\n",identificadorCPU);
-
-	printf("Se envio el mensaje. Conexion correcta a dam. \n");
 
 	return socket;
 }
@@ -68,38 +62,13 @@ Socket conectar_dam(config_inicial* c_inicial){
 
 Socket conectar_safa(config_inicial* c_inicial){
 	Socket socket;
-	//Header header;
 
 	socket = crear_socket(c_inicial->ip_safa , c_inicial->puerto_safa);
 	conectar(socket);
 
-	//Envio a Coordinador Mensaje Protocolo soy un ESI
-	/*
-	header.id_protocolo=IdEsi;
-	if( Escribe_Socket(socket.socket,(char *)&header, sizeof(Header)) == -1 ) {
-		puts( "Error en envio de mensaje" );
-	}*/
-
-	//Recibo un Identificador del safa
-	/*if( Lee_Socket(socket.socket, (char *)&identificadorCPU, sizeof(int)) == -1 ) {
-		puts("Error de lectura");
-		exit(EXIT_FAILURE);
-	}
-
-	printf("Soy el CPU: %d\n",identificadorCPU);*/
-
-	printf("Se envio el mensaje. Conexion correcta a safa. \n");
-
 	return socket;
 }
 
-/*
- * 	char *ip_safa;
-	char *puerto_safa;
-	char *ip_diego;
-	char *puerto_diego;
-	int retardo;
- * */
 
 void leer_configuracion(t_config *inicializador , config_inicial *c_inicial ){
 

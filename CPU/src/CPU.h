@@ -10,9 +10,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <commons/log.h>
 #include <commons/config.h> //Commons config archivo
 #include <commons/string.h> //Commons string
 #include <qcommons/socket.h> //Libreria Socket Cliente
+#include <qcommons/socketServer.h> //Libreria Socket Servidor
 
 typedef struct {
 	char *ip_safa;
@@ -24,7 +26,8 @@ typedef struct {
 
 //Variables Globales
 config_inicial *c_inicial = NULL;
-int identificadorCPU;
+t_config *inicializador=NULL;
+t_log *logger= NULL;
 Socket socket_safa;
 Socket socket_dam;
 
