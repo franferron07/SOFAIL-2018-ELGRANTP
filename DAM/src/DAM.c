@@ -13,6 +13,8 @@
 t_config *inicializador=NULL;
 t_log* logger= NULL;
 
+pthread_t idHilo;
+
 int main(void) {
 	puts("DAM"); /* prints DAM */
 
@@ -38,11 +40,28 @@ int main(void) {
 	//muestro consola valor leido de archivo como prueba
 	prueba_leer_archivo_cfg(c_inicial);
 
-	socket_safa = conectar_safa(c_inicial);
+	/*socket_safa = conectar_safa(c_inicial);
 	socket_mdj = conectar_mdj(c_inicial);
-	socket_fm9 = conectar_fm9(c_inicial);
+	socket_fm9 = conectar_fm9(c_inicial);*/
 
 	log_info(logger, "Realizada Conexiones safa/mdj/fm9");
+
+	//Servidor con Hilos
+	log_info(logger, "Servidor con Hilos");
+	Socket socket = crear_socket("127.0.0.1","8001");
+	//Asocio el servidor a un puerto
+	asociar_puerto(socket);
+	//Escucho Conexiones Entrantes
+	escuchar(socket);
+
+	/*Por cada una de las conexiones que sean aceptadas, se lanza
+	un Hilo encargado de atender la conexión*/
+	while(1)
+	{
+
+		int socketCliente = Acepta_Conexion_Cliente(socket.socket);
+		pthread_create (&idHilo, NULL, (void*)nueva_conexion, &socketCliente);
+	}
 
 	/* libero memoria de inicializacion  */
 	config_destroy(inicializador);
@@ -54,6 +73,12 @@ int main(void) {
 	liberarMemoriaConfig(c_inicial);
 
 	return EXIT_SUCCESS;
+}
+
+void nueva_conexion (void *parametro) {
+    int *sock = (int *) parametro;
+    log_info(logger, "Conectado CPU");
+    //cerrar_socket(*sock);
 }
 
 void leer_configuracion(t_config *inicializador , config_inicial *c_inicial ){

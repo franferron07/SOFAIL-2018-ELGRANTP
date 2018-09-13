@@ -27,3 +27,14 @@
 [INFO] 14:45:08:169 DAM/(4610:4610): Leido archivo cfg Dam.log
 [INFO] 14:45:37:809 DAM/(4661:4661): INICIO DAM
 [INFO] 14:45:37:809 DAM/(4661:4661): Leido archivo dam.cfg
+[INFO] 18:53:45:410 DAM/(6189:6189): INICIO DAM
+[INFO] 18:53:45:410 DAM/(6189:6189): Leido archivo dam.cfg
+[INFO] 18:54:33:112 DAM/(6260:6260): INICIO DAM
+[INFO] 18:54:33:112 DAM/(6260:6260): Leido archivo dam.cfg
+[INFO] 18:54:33:112 DAM/(6260:6260): Realizada Conexiones safa/mdj/fm9
+[INFO] 18:54:33:112 DAM/(6260:6260): Servidor con Hilos
+[INFO] 18:56:02:706 DAM/(6453:6453): INICIO DAM
+[INFO] 18:56:02:707 DAM/(6453:6453): Leido archivo dam.cfg
+[INFO] 18:56:02:707 DAM/(6453:6453): Realizada Conexiones safa/mdj/fm9
+[INFO] 18:56:02:707 DAM/(6453:6453): Servidor con Hilos
+[INFO] 18:58:15:918 DAM/(6453:6545): Conectado CPU

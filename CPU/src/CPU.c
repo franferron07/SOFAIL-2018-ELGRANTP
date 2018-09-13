@@ -35,7 +35,7 @@ int main(void) {
 
 
 
-	//socket_dam = conectar_dam(c_inicial);
+	socket_dam = conectar_dam(c_inicial);
 	socket_safa = conectar_safa(c_inicial);
 	//log_info(logger, "Realizada Conexiones dam/safa");
 
