@@ -15,5 +15,6 @@
 
 int main(void) {
 	puts("FM9"); /* prints FM9 */
+	puts("hola");
 	return EXIT_SUCCESS;
 }
