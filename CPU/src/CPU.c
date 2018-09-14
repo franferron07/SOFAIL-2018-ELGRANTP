@@ -35,9 +35,10 @@ int main(void) {
 
 
 
-	socket_dam = conectar_dam(c_inicial);
-	socket_safa = conectar_safa(c_inicial);
-	//log_info(logger, "Realizada Conexiones dam/safa");
+	//socket_dam = conectar_dam(c_inicial);
+	//socket_safa = conectar_safa(c_inicial);
+	//socket_fm9 = conectar_fm9(c_inicial);
+	log_info(logger, "Realizada Conexiones dam/safa/fm9");
 
 
 	/* libero memoria de inicializacion  */
@@ -69,6 +70,15 @@ Socket conectar_safa(config_inicial* c_inicial){
 	return socket;
 }
 
+Socket conectar_fm9(config_inicial* c_inicial){
+	Socket socket;
+
+	socket = crear_socket(c_inicial->ip_fm9 , c_inicial->puerto_fm9);
+	conectar(socket);
+
+	return socket;
+}
+
 
 void leer_configuracion(t_config *inicializador , config_inicial *c_inicial ){
 
@@ -77,6 +87,8 @@ void leer_configuracion(t_config *inicializador , config_inicial *c_inicial ){
 	c_inicial->puerto_safa = string_duplicate(config_get_string_value(inicializador, "PUERTO_SAFA"));
 	c_inicial->ip_diego = string_duplicate(config_get_string_value(inicializador, "IP_DIEGO"));
 	c_inicial->puerto_diego = string_duplicate(config_get_string_value(inicializador, "PUERTO_DIEGO"));
+	c_inicial->ip_fm9 = string_duplicate(config_get_string_value(inicializador, "IP_FM9"));
+	c_inicial->puerto_fm9 = string_duplicate(config_get_string_value(inicializador, "PUERTO_FM9"));
 	c_inicial->retardo= config_get_int_value(inicializador, "RETARDO");
 
 }
@@ -87,6 +99,8 @@ void prueba_leer_archivo_cfg(config_inicial* c_inicial) {
 	printf("PUERTO_SAFA: %s \n",c_inicial->puerto_safa);
 	printf("IP_DIEGO: %s \n",c_inicial->ip_diego);
 	printf("PUERTO_DIEGO: %s \n" ,c_inicial->puerto_diego);
+	printf("IP_FM9: %s \n",c_inicial->ip_fm9);
+	printf("PUERTO_FM9: %s \n" ,c_inicial->puerto_fm9);
 	printf("RETARDO %d \n", c_inicial->retardo);
 }
 
@@ -96,5 +110,7 @@ void liberarMemoriaConfig(config_inicial* c_inicial) {
 	free(c_inicial->puerto_safa);
 	free(c_inicial->ip_diego);
 	free(c_inicial->puerto_diego);
+	free(c_inicial->ip_fm9);
+	free(c_inicial->puerto_fm9);
 	free(c_inicial);
 }

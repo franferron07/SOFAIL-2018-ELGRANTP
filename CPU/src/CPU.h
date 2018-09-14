@@ -21,6 +21,8 @@ typedef struct {
 	char *puerto_safa;
 	char *ip_diego;
 	char *puerto_diego;
+	char *ip_fm9;
+	char *puerto_fm9;
 	int retardo;
 } config_inicial;
 
@@ -30,6 +32,7 @@ t_config *inicializador=NULL;
 t_log *logger= NULL;
 Socket socket_safa;
 Socket socket_dam;
+Socket socket_fm9;
 
 //Funciones
 void liberarMemoriaConfig(config_inicial* c_inicial); //libera memoria de la configuracion inicial
@@ -38,6 +41,7 @@ void prueba_leer_archivo_cfg(config_inicial* c_inicial); //prueba leer archivo c
 
 Socket conectar_safa(config_inicial* c_inicial);
 Socket conectar_dam(config_inicial* c_inicial);
+Socket conectar_fm9(config_inicial* c_inicial);
 
 
 
