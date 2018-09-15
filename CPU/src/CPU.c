@@ -36,7 +36,7 @@ int main(void) {
 
 
 	//socket_dam = conectar_dam(c_inicial);
-	//socket_safa = conectar_safa(c_inicial);
+	socket_safa = conectar_safa(c_inicial);
 	//socket_fm9 = conectar_fm9(c_inicial);
 	log_info(logger, "Realizada Conexiones dam/safa/fm9");
 
@@ -64,8 +64,12 @@ Socket conectar_dam(config_inicial* c_inicial){
 Socket conectar_safa(config_inicial* c_inicial){
 	Socket socket;
 
+	int test = 0;
+
 	socket = crear_socket(c_inicial->ip_safa , c_inicial->puerto_safa);
 	conectar(socket);
+
+	Escribe_Socket (socket.socket, (char *)&test , sizeof(int) );
 
 	return socket;
 }
