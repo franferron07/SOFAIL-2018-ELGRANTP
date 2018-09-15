@@ -13,8 +13,9 @@
 #include <commons/config.h> //Commons config archivo
 #include <commons/string.h> //Commons string
 #include <commons/log.h> //Commons log
-#include <qcommons/socket.h> //Libreria Socket Cliente
-#include <qcommons/socketServer.h> //Libreria Socket Servidor
+#include <qcommons/socket.h> //Socket Cliente
+#include <qcommons/socketServer.h> //Socket Servidor
+#include <pthread.h> //hilos
 
 typedef struct {
 	char *puerto_safa;
@@ -24,12 +25,17 @@ typedef struct {
 	int retardo;
 } config_inicial;
 
+
 //Variables Globales
 config_inicial *c_inicial = NULL;
+
 
 //Funciones
 void liberarMemoriaConfig(config_inicial* c_inicial); //libera memoria de la configuracion inicial
 void leer_configuracion( t_config* , config_inicial*  ); //inicializa la configuracion inicial(lectura de archivo)
 void prueba_leer_archivo_cfg(config_inicial* c_inicial); //prueba leer archivo configuracion
+void conexion_dam(void*) ; //hilo que maneja conexion con el dam.
+void conexion_cpu(void*); //hilo que maneja conexion con cpu
+
 
 #endif /* SAFAHEADER_H_ */

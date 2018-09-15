@@ -15,7 +15,7 @@
 t_log* logger= NULL;
 Socket socket_servidor;
 
-pthread_t idHilo;
+pthread_t hilo_dam;
 
 
 int main(void) {
@@ -54,16 +54,13 @@ int main(void) {
 	/* crear socket  INADDR_ANY */
 	Socket socket_servidor = crear_socket(  "127.0.0.1" , c_inicial->puerto_safa);
 	log_info(logger, "Creo socket %s", "INFO");
-	puts("creo socket");
 	//Asocio el servidor a un puerto
 	asociar_puerto(socket_servidor);
 
 	//Escucho Conexiones Entrantes
 	escuchar(socket_servidor);
-	puts("escucho socket");
 
-	/*Por cada una de las conexiones que sean aceptadas, se lanza
-		un Hilo encargado de atender la conexión*/
+	/*lanzo hilo por cada una de las conexiones aceptadas*/
 	while(1)
 	{
 		int socketCliente = Acepta_Conexion_Cliente(socket_servidor.socket);
@@ -71,10 +68,53 @@ int main(void) {
 		//Leo un Mensaje del Servidor
 		if( Lee_Socket(socketCliente, (char *)&buffer, sizeof(int)) == -1 ) {
 			puts("Error de lectura");
+			log_info(logger, "Error de lectura %s", "INFO");
 			exit(EXIT_FAILURE);
 		}
 
+		//abro hilo para dma
+		if( buffer == 60 ){
+
+			log_info(logger, "Conexion de DAM %s", "INFO");
+			int rc = pthread_create (&hilo_dam, NULL, (void*)conexion_dam, &socketCliente);
+			if(rc){
+				puts("Error al crear thread DAM");
+				log_info(logger, "Error al crear thread DAM %s", "INFO");
+				exit(EXIT_FAILURE);
+			}
+
+			log_info(logger, "thread DAM creado %s", "INFO");
+
+		}
+
+		//abro hilo cpu
+		if( buffer == 40 ){
+
+			//verificar si tengo que tener algun maximo de cpus conectadas.
+
+			pthread_t hilo_cpu;
+			int rc = pthread_create (&hilo_cpu, NULL, (void*)conexion_cpu, &socketCliente);
+			if(rc){
+				puts("Error al crear thread CPU");
+				log_info(logger, "Error al crear thread CPU %s", "INFO");
+				exit(EXIT_FAILURE);
+			}
+
+			log_info(logger, "thread CPU creado %s", "INFO");
+
+		}
+
+		int conect=0;
+		if( Escribe_Socket(socketCliente, (char *)&conect, sizeof(int)) == -1 ) {
+			puts( "Error en envio de mensaje" );
+			log_info(logger, "Error al enviar mensaje  %s", "INFO");
+			exit(EXIT_FAILURE);
+		}
+
+
 		printf("se recibio el id: %d\n",buffer);
+
+
 
 		//pthread_create (&idHilo, NULL, (void*)nueva_conexion, &socketCliente);
 	}
@@ -94,10 +134,26 @@ int main(void) {
 
 
 
-	void nueva_conexion (void *parametro) {
-		int *sock = (int *) parametro;
-		log_info(logger, "Conectado CPU");
-		//cerrar_socket(*sock);
+	//hilo de conexion con dam, debera quedarse a la espera
+	void conexion_dam(void* socket){
+
+		while(1){
+
+			printf("conexion dam correcta");
+
+		}
+
+
+	}
+
+	void conexion_cpu(void* socket){
+
+		while(1){
+
+			printf("conexion cpu correcta");
+
+		}
+
 	}
 
 
