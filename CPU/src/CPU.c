@@ -34,11 +34,15 @@ int main(void) {
 	prueba_leer_archivo_cfg(c_inicial);
 
 
-
-	//socket_dam = conectar_dam(c_inicial);
+	socket_dam = conectar_dam(c_inicial);
 	socket_safa = conectar_safa(c_inicial);
-	//socket_fm9 = conectar_fm9(c_inicial);
+	socket_fm9 = conectar_fm9(c_inicial);
 	log_info(logger, "Realizada Conexiones dam/safa/fm9");
+
+	while(1){
+
+	}
+
 
 
 	/* libero memoria de inicializacion  */
