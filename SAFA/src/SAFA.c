@@ -11,7 +11,7 @@
 
 #include "safaHeader.h"
 
-
+//globales
 t_log* logger= NULL;
 Socket socket_servidor;
 
