@@ -13,15 +13,11 @@
 
 int main(void) {
 	puts("FM9"); /* prints FM9 */
-
 	logger = log_create("FM9.log", "FM9",false, LOG_LEVEL_INFO);
-
 	log_info(logger, "INICIO FM9");
-
+	//instancio el inicializador y reservo memoria
 	c_inicial = malloc(sizeof(config_inicial));
-
 	inicializador = config_create("fm9.cfg");
-
 	if (inicializador == NULL) {
 		free(c_inicial);
 		puts("No se encuentra archivo.");
@@ -32,10 +28,25 @@ int main(void) {
 	//leo archivo
 	leer_configuracion(inicializador, c_inicial);
 	log_info(logger, "Leido archivo fm9.cfg");
-
 	//muestro consola valor leido de archivo como prueba
 	prueba_leer_archivo_cfg(c_inicial);
 
+	//Servidor con Hilos
+	log_info(logger, "Servidor con Hilos");
+	Socket socket = crear_socket("127.0.0.1",c_inicial->puerto_escucha);
+	//Asocio el servidor a un puerto
+	asociar_puerto(socket);
+	//Escucho Conexiones Entrantes
+	escuchar(socket);
+
+	/*Por cada una de las conexiones que sean aceptadas, se lanza
+	un Hilo encargado de atender la conexión*/
+	while(1)
+	{
+
+		int socketCliente = Acepta_Conexion_Cliente(socket.socket);
+		pthread_create (&idHilo, NULL, (void*)nueva_conexion, &socketCliente);
+	}
 
 
 
@@ -46,13 +57,16 @@ int main(void) {
 	log_destroy(logger);
 	/* libero struct config_inicial  */
 	liberarMemoriaConfig(c_inicial);
-
-
 	return EXIT_SUCCESS;
 }
 
 
-
+void nueva_conexion (void *parametro) {
+    int *sock = (int *) parametro;
+    puts("Nueva conexion perrooo!!");
+    log_info(logger, "Nueva conexion perrooo!!");
+    //cerrar_socket(*sock);
+}
 
 void leer_configuracion(t_config *inicializador , config_inicial *c_inicial ){
 	//tomo las key para inicializar duplicando el string devuelvo para luego hacer los free

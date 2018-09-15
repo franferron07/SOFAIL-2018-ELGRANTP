@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include <commons/log.h>
 #include <commons/config.h> //Commons config archivo
 #include <commons/string.h> //Commons string
@@ -28,9 +29,12 @@ typedef struct {
 config_inicial *c_inicial = NULL;
 t_config *inicializador=NULL;
 t_log *logger= NULL;
+pthread_t idHilo;
+
 
 
 //Funciones
+void nueva_conexion (void *parametro);
 void liberarMemoriaConfig(config_inicial* c_inicial); //libera memoria de la configuracion inicial
 void leer_configuracion( t_config* , config_inicial*  ); //inicializa la configuracion inicial(lectura de archivo)
 void prueba_leer_archivo_cfg(config_inicial* c_inicial); //prueba leer archivo configuracion
