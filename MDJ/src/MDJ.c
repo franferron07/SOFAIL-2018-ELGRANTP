@@ -29,7 +29,6 @@ int main(void) {
 	 asociar_puerto(mdj_socket);
 	 escuchar(mdj_socket);
 	 while(1){
-
 		 compactaClaves(&socketServidor, &numeroClientes);
 
 		 FD_ZERO(&descriptoresLectura);

@@ -22,9 +22,6 @@ typedef struct{
 
 
 
-
-
-
 //variables globales
 mdj_configuracion* mdj_configuracion_inicial=NULL;
 //int mdj_id;
