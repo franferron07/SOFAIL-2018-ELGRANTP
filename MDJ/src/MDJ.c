@@ -11,7 +11,7 @@
 
 #include "mdj.h"
 
-	int i;
+int i;
 
 int main(void) {
 
@@ -22,7 +22,7 @@ int main(void) {
 	int buffer;							/* Buffer para leer de los socket */
 	int socketServidor;				/* Descriptor del socket servidor */
 
-		puts("MDJ"); /* prints MDJ */
+		puts("MDJ escuchando .."); /* prints MDJ */
 	mdj_setear_configuracion_default();
 	 Socket mdj_socket=crear_socket("127.0.0.1", mdj_configuracion_inicial->mdj_puerto);
 	 socketServidor = mdj_socket.socket;
@@ -65,6 +65,9 @@ int main(void) {
 				}
 			}
 		}
+	 	 config_destroy_mdj(mdj_configuracion_inicial);
+	 	 cerrar_socket(mdj_socket);
+
 	 }
 
 void mdj_setear_configuracion_default(){
@@ -73,7 +76,6 @@ void mdj_setear_configuracion_default(){
 	montar_configuracion(configuracion_cfg_temporal,mdj_configuracion_inicial);
 	config_destroy(configuracion_cfg_temporal);
 }
-
 
 
 t_config* cargar_en_memoria_cfg(char* dir){
