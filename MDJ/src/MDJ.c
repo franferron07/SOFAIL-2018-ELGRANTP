@@ -11,7 +11,7 @@
 
 #include "mdj.h"
 
-int i;
+
 
 int main(void) {
 
@@ -21,51 +21,73 @@ int main(void) {
 	int maximo;							/* Número de descriptor más grande */
 	int buffer;							/* Buffer para leer de los socket */
 	int socketServidor;				/* Descriptor del socket servidor */
-
+	int i;
 		puts("MDJ escuchando .."); /* prints MDJ */
 	mdj_setear_configuracion_default();
-	 Socket mdj_socket=crear_socket("127.0.0.1", mdj_configuracion_inicial->mdj_puerto);
-	 socketServidor = mdj_socket.socket;
-	 asociar_puerto(mdj_socket);
-	 escuchar(mdj_socket);
-	 while(1){
-		 compactaClaves(&socketServidor, &numeroClientes);
+	 Socket socket=crear_socket("127.0.0.1","8080");
+	 socketServidor = socket.socket;
+	 	//Asocio el servidor a un puerto
+	 	asociar_puerto(socket);
+	 	//Escucho Conexiones Entrantes
+	 	escuchar(socket);
 
-		 FD_ZERO(&descriptoresLectura);
+	 	while (1)
+	 		{
+	 			/* Cuando un cliente cierre la conexión, se pondrá un -1 en su descriptor
+	 			 * de socket dentro del array socketCliente. La función compactaClaves()
+	 			 * eliminará dichos -1 de la tabla, haciéndola más pequeña.
+	 			 *
+	 			 * Se eliminan todos los clientes que hayan cerrado la conexión */
+	 			compactaClaves (socketCliente, &numeroClientes);
 
-		 FD_SET(socketServidor,&descriptoresLectura);
-		 for (i = 0; i < numeroClientes; i++) {
-			 FD_SET(socketCliente[i],&descriptoresLectura);
-					 ;
-			 maximo=dameMaximo(socketCliente, numeroClientes);
-		 }
-		 if (maximo<socketServidor)maximo=socketServidor;
-		 /* Espera indefinida hasta que alguno de los descriptores tenga algo
-		 			 * que decir: un nuevo cliente o un cliente ya conectado que envía un
-		 			 * mensaje */
-		 select (maximo + 1, &descriptoresLectura, NULL, NULL, NULL);
+	 			/* Se inicializa descriptoresLectura */
+	 			FD_ZERO (&descriptoresLectura);
 
-		 /* Se comprueba si algún cliente ya conectado ha enviado algo */
-		 for (i = 0;  i < numeroClientes; i++) {
-			 if (FD_ISSET(socketCliente[i],&descriptoresLectura)) {/* Se lee lo enviado por el cliente y se escribe en pantalla */
-				if ((Lee_Socket (socketCliente[i], (char *)&buffer, sizeof(int)) > 0))
-					printf ("Cliente %d envía %d\n", i+1, buffer);
-				else{
-					/* Se indica que el cliente ha cerrado la conexión y se
-					 * marca con -1 el descriptor para que compactaClaves() lo
-					 * elimine */
-					printf ("Cliente %d ha cerrado la conexión\n", i+1);
-					socketCliente[i] = -1;
-				}
-				/* Se comprueba si algún cliente nuevo desea conectarse y se le
-							 * admite */
-				if (FD_ISSET (socketServidor, &descriptoresLectura))
-					nuevoCliente (socketServidor, socketCliente, &numeroClientes);
-				}
-			}
-		}
+	 			/* Se añade para select() el socket servidor */
+	 			FD_SET (socketServidor, &descriptoresLectura);
+
+	 			/* Se añaden para select() los sockets con los clientes ya conectados */
+	 			for (i=0; i<numeroClientes; i++)
+	 				FD_SET (socketCliente[i], &descriptoresLectura);
+
+	 			/* Se el valor del descriptor más grande. Si no hay ningún cliente,
+	 			 * devolverá 0 */
+	 			maximo = dameMaximo (socketCliente, numeroClientes);
+
+	 			if (maximo < socketServidor)
+	 				maximo = socketServidor;
+
+	 			/* Espera indefinida hasta que alguno de los descriptores tenga algo
+	 			 * que decir: un nuevo cliente o un cliente ya conectado que envía un
+	 			 * mensaje */
+	 			select(maximo + 1, &descriptoresLectura, NULL, NULL, NULL);
+
+	 			/* Se comprueba si algún cliente ya conectado ha enviado algo */
+	 			for (i=0; i<numeroClientes; i++)
+	 			{
+	 				if (FD_ISSET (socketCliente[i], &descriptoresLectura))
+	 				{
+	 					/* Se lee lo enviado por el cliente y se escribe en pantalla */
+	 					if ((Lee_Socket (socketCliente[i], (char *)&buffer, sizeof(int)) > 0))
+	 						printf ("Cliente %d envía %d\n", i+1, buffer);
+	 					else
+	 					{
+	 						/* Se indica que el cliente ha cerrado la conexión y se
+	 						 * marca con -1 el descriptor para que compactaClaves() lo
+	 						 * elimine */
+	 						printf ("Cliente %d ha cerrado la conexión\n", i+1);
+	 						socketCliente[i] = -1;
+	 					}
+	 				}
+	 			}
+
+	 			/* Se comprueba si algún cliente nuevo desea conectarse y se le
+	 			 * admite */
+	 			if (FD_ISSET (socketServidor, &descriptoresLectura))
+	 				nuevoCliente (socketServidor, socketCliente, &numeroClientes);
+	 		}
 	 	 config_destroy_mdj(mdj_configuracion_inicial);
-	 	 cerrar_socket(mdj_socket);
+	 	 cerrar_socket(socket);
 
 	 }
 
@@ -98,7 +120,9 @@ void montar_configuracion(t_config*  temporal,mdj_configuracion* configuracion){
 void config_destroy_mdj(mdj_configuracion* mdj_configuracion_){
 	free(mdj_configuracion_->mdj_puerto);
 	free(mdj_configuracion_->punto_de_montaje);
-	free(mdj_configuracion_->retardo);
+//	free(mdj_configuracion_->retardo);
+	free(mdj_configuracion_);
+
 }
 void mostrar_configuracion(mdj_configuracion* config){
 	puts("iniciando lectura ..");

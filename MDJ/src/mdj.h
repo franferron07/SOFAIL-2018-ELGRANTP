@@ -33,6 +33,7 @@ void montar_configuracion(t_config* ,mdj_configuracion*);
 void mostrar_configuracion(mdj_configuracion* configuracion_inicial);
 t_config* cargar_en_memoria_cfg(char*);
 void config_destroy_mdj(mdj_configuracion* );
-
+//--------------
+void mdj_setear_configuracion_default();
 
 #endif /* MDJ_H_ */
