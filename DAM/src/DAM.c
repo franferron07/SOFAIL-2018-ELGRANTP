@@ -18,7 +18,7 @@ pthread_t idHilo;
 int main(void) {
 	puts("DAM"); /* prints DAM */
 
-	logger = log_create("Dam.log", "DAM",false, LOG_LEVEL_INFO);
+	logger = log_create("Dam.log", "DAM",true, LOG_LEVEL_INFO);
 
 	log_info(logger, "INICIO DAM");
 
@@ -40,9 +40,9 @@ int main(void) {
 	//muestro consola valor leido de archivo como prueba
 	prueba_leer_archivo_cfg(c_inicial);
 
-	/*socket_safa = conectar_safa(c_inicial);
+	socket_safa = conectar_safa(c_inicial);
 	socket_mdj = conectar_mdj(c_inicial);
-	socket_fm9 = conectar_fm9(c_inicial);*/
+	socket_fm9 = conectar_fm9(c_inicial);
 
 	log_info(logger, "Realizada Conexiones safa/mdj/fm9");
 
@@ -110,8 +110,13 @@ void prueba_leer_archivo_cfg(config_inicial* c_inicial) {
 Socket conectar_safa(config_inicial* c_inicial){
 	Socket socket;
 
+	//Envio Socket/Protocolo Soy DAM
+	int buffer = 60;
+
 	socket = crear_socket(c_inicial->ip_safa , c_inicial->puerto_safa);
 	conectar(socket);
+
+	Escribe_Socket (socket.socket, (char *)&buffer , sizeof(int) );
 
 	return socket;
 }
