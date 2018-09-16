@@ -41,14 +41,14 @@ int main(void) {
 	prueba_leer_archivo_cfg(c_inicial);
 
 	socket_safa = conectar_safa(c_inicial);
-	socket_mdj = conectar_mdj(c_inicial);
+	//socket_mdj = conectar_mdj(c_inicial);
 	socket_fm9 = conectar_fm9(c_inicial);
 
 	log_info(logger, "Realizada Conexiones safa/mdj/fm9");
 
 	//Servidor con Hilos
 	log_info(logger, "Servidor con Hilos");
-	Socket socket = crear_socket("127.0.0.1","8001");
+	Socket socket = crear_socket("127.0.0.1",c_inicial->puerto_dam);
 	//Asocio el servidor a un puerto
 	asociar_puerto(socket);
 	//Escucho Conexiones Entrantes
@@ -111,12 +111,25 @@ Socket conectar_safa(config_inicial* c_inicial){
 	Socket socket;
 
 	//Envio Socket/Protocolo Soy DAM
-	int buffer = 60;
+	int buffer_send = 60;
+
+	int buffer_recv;
 
 	socket = crear_socket(c_inicial->ip_safa , c_inicial->puerto_safa);
 	conectar(socket);
 
-	Escribe_Socket (socket.socket, (char *)&buffer , sizeof(int) );
+	Escribe_Socket (socket.socket, (char *)&buffer_send , sizeof(int) );
+
+	Lee_Socket(socket.socket,(char*)buffer_recv,sizeof(int));
+
+	if( buffer_recv == 0)
+	{
+	    log_info(logger, "Conectado a SAFA");
+	}
+	else
+	{
+	    log_error(logger, "No se Pudo Conectar a SAFA");
+	}
 
 	return socket;
 }

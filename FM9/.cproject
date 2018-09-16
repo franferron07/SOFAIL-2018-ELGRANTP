@@ -27,17 +27,18 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.867704731" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release">
 								<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.exe.release.option.optimization.level.224790370" name="Optimization Level" superClass="gnu.c.compiler.exe.release.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
 								<option id="gnu.c.compiler.exe.release.option.debugging.level.231630642" name="Debug Level" superClass="gnu.c.compiler.exe.release.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
-								<option id="gnu.c.compiler.option.include.paths.2049969926" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+								<option id="gnu.c.compiler.option.include.paths.2049969926" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../../qcommons"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1573834671" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.1455016708" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release">
-								<option id="gnu.c.link.option.libs.961567722" superClass="gnu.c.link.option.libs" useByScannerDiscovery="false" valueType="libs">
+								<option id="gnu.c.link.option.libs.961567722" name="Libraries (-l)" superClass="gnu.c.link.option.libs" useByScannerDiscovery="false" valueType="libs">
+									<listOptionValue builtIn="false" value="pthread"/>
 									<listOptionValue builtIn="false" value="commons"/>
 									<listOptionValue builtIn="false" value="qcommons"/>
 								</option>
-								<option id="gnu.c.link.option.ldflags.2094089137" superClass="gnu.c.link.option.ldflags" useByScannerDiscovery="false" value="-Wl,-rpath='$$ORIGIN/../../qcommons/Qcommons' -L../../qcommons/Qcommons" valueType="string"/>
+								<option id="gnu.c.link.option.ldflags.2094089137" name="Linker flags" superClass="gnu.c.link.option.ldflags" useByScannerDiscovery="false" value="-Wl,-rpath='$$ORIGIN/../../qcommons/Qcommons' -L../../qcommons/Qcommons" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.293852824" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -60,19 +61,24 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="FM9.cdt.managedbuild.target.gnu.exe.1933980414" name="Executable" projectType="cdt.managedbuild.target.gnu.exe"/>
 	</storageModule>
-	<storageModule moduleId="scannerConfiguration">
-		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.1231666586;cdt.managedbuild.config.gnu.exe.release.1231666586.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.1936624477;cdt.managedbuild.tool.gnu.c.compiler.input.652819221">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.435145604;cdt.managedbuild.config.gnu.exe.debug.435145604.;cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1148547225;cdt.managedbuild.tool.gnu.c.compiler.input.393197794">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
 		<configuration configurationName="Fm9">
 			<resource resourceType="PROJECT" workspacePath="/FM9"/>
 		</configuration>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.1231666586;cdt.managedbuild.config.gnu.exe.release.1231666586.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.1936624477;cdt.managedbuild.tool.gnu.c.compiler.input.652819221">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.1231666586.2010394732;cdt.managedbuild.config.gnu.exe.release.1231666586.2010394732.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.867704731;cdt.managedbuild.tool.gnu.c.compiler.input.1573834671">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.435145604;cdt.managedbuild.config.gnu.exe.debug.435145604.;cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1148547225;cdt.managedbuild.tool.gnu.c.compiler.input.393197794">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>
