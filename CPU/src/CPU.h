@@ -10,11 +10,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <commons/log.h>
 #include <commons/config.h> //Commons config archivo
 #include <commons/string.h> //Commons string
 #include <qcommons/socket.h> //Libreria Socket Cliente
 #include <qcommons/socketServer.h> //Libreria Socket Servidor
+
 
 typedef struct {
 	char *ip_safa;
@@ -44,5 +46,19 @@ Socket conectar_dam(config_inicial* c_inicial);
 Socket conectar_fm9(config_inicial* c_inicial);
 
 
+//Funciones de Parser
+void ejecutar_linea(char[]);
+bool _esAbrirArchivo(char* linea);
+bool _esConcentrar(char* linea);
+bool _esAsignarLinea(char* linea);
+bool _esWait(char* linea);
+bool _esSignal(char* linea);
+bool _esFlush(char* linea);
+bool _esClose(char* linea);
+bool _esCrearArchivo(char* linea);
+bool _esBorrarArchivo(char* linea);
+/////////////////////////////////
+//otras
+void LiberarListadeStrings(char** operation);
 
 #endif /* CPU_H_ */

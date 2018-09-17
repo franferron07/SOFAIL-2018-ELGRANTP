@@ -33,27 +33,166 @@ int main(void) {
 	//muestro consola valor leido de archivo como prueba
 	prueba_leer_archivo_cfg(c_inicial);
 
-
+	/*
 	socket_dam = conectar_dam(c_inicial);
 	socket_safa = conectar_safa(c_inicial);
 	socket_fm9 = conectar_fm9(c_inicial);
 	log_info(logger, "Realizada Conexiones dam/safa/fm9");
+	*/
 
 	while(1){
 
+		char linea[50];
+		/*ejemplos de lineas
+		 * 				"abrir /equipos/Racing.txt"
+						"concentrar"
+						"asignar /equipos/Racing.txt 9 GustavoBou"
+						"wait Conmebol"
+						"signal Conmebol"
+						"flush /equipos/Racing.txt"
+						"close /equipos/Racing.txt"
+						"crear /equipos/Racing.txt 11"
+						"borrar /equipos/Racing.txt"
+		*/
+
+		printf("Ingrese la sentencia: ");
+		scanf(" %[^\n]s ",linea);
+
+		ejecutar_linea(linea);
+		strcpy(linea,"");
+
 	}
-
-
-
 	/* libero memoria de inicializacion  */
 	config_destroy(inicializador);
 	/* libero loggger de logging */
 	log_destroy(logger);
 	/* libero struct config_inicial  */
 	liberarMemoriaConfig(c_inicial);
-
 	return EXIT_SUCCESS;
 }
+
+
+
+void ejecutar_linea(char linea[]){
+	//printf("Lei linea: %s\n",linea);
+	printf("linea: %s\n",linea);
+	//char **operation = string_split(linea + strlen("abrir "), " ");
+
+
+	if( _esAbrirArchivo(linea) ){
+		puts("Es abrir archivo");
+		char * path = (char *) malloc(30);
+		strcpy(path,linea + strlen("abrir "));
+		printf("Path encontrado: %s\n",path);
+
+
+		free(path);
+	}else if(_esConcentrar(linea)){
+		printf("Instruccion Concentrar.\n");
+
+	}else if(_esAsignarLinea(linea)){
+		//"asignar /equipos/Racing.txt 9 GustavoBou"
+		printf("Es asignar linea.\n");
+		char **operation = string_split(linea + strlen("asignar "), " ");
+		string_iterate_lines(operation, (void*)puts);
+
+
+
+
+		LiberarListadeStrings(operation);
+	}else if(_esWait(linea)){
+		printf("Es operacion Wait.\n");
+		char * recurso = (char *) malloc(30);
+		strcpy(recurso,linea + strlen("wait "));
+		printf("Recurso a la espera: %s\n",recurso);
+
+
+		free(recurso);
+	}else if(_esSignal(linea)){
+		printf("Es operacion Signal.\n");
+		char * recurso = (char *) malloc(30);
+		strcpy(recurso,linea + strlen("signal "));
+		printf("Recurso a liberar: %s\n",recurso);
+
+		free(recurso);
+	}else if(_esFlush(linea)){
+		puts("Es Flush archivo");
+		char * path = (char *) malloc(30);
+		strcpy(path,linea + strlen("flush "));
+		printf("Archivo a Flushear: %s\n",path);
+
+
+		free(path);
+	}else if(_esClose(linea)){
+		puts("Es Cerrar archivo");
+		char * path = (char *) malloc(30);
+		strcpy(path,linea + strlen("flush "));
+		printf("Archivo a cerrar: %s\n",path);
+
+
+		free(path);
+	}else if(_esCrearArchivo(linea)){
+		//crear /equipos/Racing.txt 11
+		puts("Es Crear archivo");
+		char **operation = string_split(linea + strlen("crear "), " ");
+		string_iterate_lines(operation, (void*)puts);
+
+
+		LiberarListadeStrings(operation);
+	}else if(_esBorrarArchivo(linea)){
+		puts("Es Borrar archivo");
+		char * path = (char *) malloc(30);
+		strcpy(path,linea + strlen("borrar "));
+		printf("Archivo a Borrar: %s\n",path);
+
+
+		free(path);
+	}
+}
+
+
+bool _esBorrarArchivo(char* linea){
+	return string_starts_with(linea, "borrar ");
+}
+
+bool _esCrearArchivo(char* linea){
+	return string_starts_with(linea, "crear ");
+}
+
+bool _esClose(char* linea){
+	return string_starts_with(linea, "close ");
+}
+
+bool _esFlush(char* linea){
+	return string_starts_with(linea, "flush ");
+}
+
+bool _esSignal(char* linea){
+	return string_starts_with(linea, "signal ");
+}
+
+bool _esWait(char* linea){
+	return string_starts_with(linea, "wait ");
+}
+
+bool _esAsignarLinea(char* linea){
+	return string_starts_with(linea, "asignar ");
+}
+
+bool _esConcentrar(char* linea){
+	return string_starts_with(linea, "concentrar");
+}
+
+bool _esAbrirArchivo(char* linea){
+	return string_starts_with(linea, "abrir ");
+}
+
+
+void LiberarListadeStrings(char** operation) {
+	string_iterate_lines(operation, (void*) free);
+	free(operation);
+}
+
 
 Socket conectar_dam(config_inicial* c_inicial){
 	Socket socket;
@@ -63,7 +202,6 @@ Socket conectar_dam(config_inicial* c_inicial){
 
 	return socket;
 }
-
 
 Socket conectar_safa(config_inicial* c_inicial){
 	Socket socket;
