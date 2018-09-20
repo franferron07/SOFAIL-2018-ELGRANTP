@@ -16,6 +16,7 @@ t_log* logger= NULL;
 Socket socket_servidor;
 
 pthread_t hilo_dam;
+pthread_t hilo_consola;
 
 
 int main(void) {
@@ -50,8 +51,11 @@ int main(void) {
 
 
 
+	/* CONSOLA*/
+		pthread_create(&hilo_consola , NULL , (void*)consolaSafa  , NULL );
 
-	/* crear socket  INADDR_ANY */
+
+	/* crear socket  */
 	Socket socket_servidor = crear_socket(  "127.0.0.1" , c_inicial->puerto_safa);
 	log_info(logger, "Creo socket %s", "INFO");
 	//Asocio el servidor a un puerto
@@ -115,8 +119,6 @@ int main(void) {
 		printf("se recibio el id: %d\n",buffer);
 
 
-
-		//pthread_create (&idHilo, NULL, (void*)nueva_conexion, &socketCliente);
 	}
 
 
@@ -155,6 +157,33 @@ int main(void) {
 		}
 
 	}
+
+
+
+void consolaSafa(){
+
+	while(1){
+
+		char *clave= NULL ;
+
+		puts("\nConsola SAFA \n");
+		puts("1-ejecutar");
+		puts("2-status" );
+		puts("3-finalizar");
+		puts("4-metricas");
+
+		char * codigo_str = readline("Elija una opcion: ");
+		int codigo= atoi(codigo_str);
+		free(codigo_str);
+
+	}
+
+}
+
+
+
+
+
 
 
 	void leer_configuracion(t_config *inicializador , config_inicial *c_inicial ){

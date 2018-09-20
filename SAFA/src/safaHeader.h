@@ -16,6 +16,7 @@
 #include <qcommons/socket.h> //Socket Cliente
 #include <qcommons/socketServer.h> //Socket Servidor
 #include <pthread.h> //hilos
+#include <readline/readline.h> //biblioteca del readline para consola
 
 typedef struct {
 	char *puerto_safa;
@@ -36,6 +37,6 @@ void leer_configuracion( t_config* , config_inicial*  ); //inicializa la configu
 void prueba_leer_archivo_cfg(config_inicial* c_inicial); //prueba leer archivo configuracion
 void conexion_dam(void*) ; //hilo que maneja conexion con el dam.
 void conexion_cpu(void*); //hilo que maneja conexion con cpu
-
+void consolaSafa(); /* Consola Safa */
 
 #endif /* SAFAHEADER_H_ */
