@@ -18,6 +18,14 @@ Socket socket_servidor;
 pthread_t hilo_dam;
 pthread_t hilo_consola;
 
+//comienzo safa en un estado corrupto
+int conecto_cpu = 0 ;
+int conecto_dam = 0;
+
+
+pthread_mutex_t plp;
+
+
 
 int main(void) {
 
@@ -49,10 +57,6 @@ int main(void) {
 	/* libero memoria de inicializacion  */
 	config_destroy(inicializador);
 
-
-
-	/* CONSOLA*/
-		pthread_create(&hilo_consola , NULL , (void*)consolaSafa  , NULL );
 
 
 	/* crear socket  */
@@ -89,6 +93,21 @@ int main(void) {
 
 			log_info(logger, "thread DAM creado %s", "INFO");
 
+
+			//chequeo si es el primer cpu que se conecta
+			if( conecto_dam == 0 )
+			{
+				conecto_dam = 1;
+				//verifico si cpu ya conecto para ponerlo en un estado operativo.
+				if( conecto_cpu == 1 ){
+					/* CONSOLA*/
+					pthread_create(&hilo_consola , NULL , (void*)consolaSafa  , NULL );
+				}
+
+			}
+
+
+
 		}
 
 		//abro hilo cpu
@@ -106,6 +125,19 @@ int main(void) {
 
 			log_info(logger, "thread CPU creado %s", "INFO");
 
+
+			//chequeo si es el primer cpu que se conecta
+			if( conecto_cpu == 0 )
+			{
+				conecto_cpu = 1;
+				//verifico si cpu ya conecto para ponerlo en un estado operativo.
+				if( conecto_dam == 1 ){
+					/* CONSOLA*/
+					pthread_create(&hilo_consola , NULL , (void*)consolaSafa  , NULL );
+				}
+			}
+
+
 		}
 
 		int conect=0;
@@ -120,6 +152,9 @@ int main(void) {
 
 
 	}
+
+
+
 
 
 	cerrar_socket(socket_servidor);
@@ -156,6 +191,10 @@ int main(void) {
 
 		}
 
+
+		pthread_detach(pthread_self()); //libera recursos del hilo
+	    pthread_exit(NULL);
+
 	}
 
 
@@ -164,7 +203,7 @@ void consolaSafa(){
 
 	while(1){
 
-		char *clave= NULL ;
+		//char *clave= NULL ;
 
 		puts("\nConsola SAFA \n");
 		puts("1-ejecutar");
@@ -173,7 +212,7 @@ void consolaSafa(){
 		puts("4-metricas");
 
 		char * codigo_str = readline("Elija una opcion: ");
-		int codigo= atoi(codigo_str);
+		//int codigo= atoi(codigo_str);
 		free(codigo_str);
 
 	}

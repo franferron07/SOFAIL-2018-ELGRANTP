@@ -17,6 +17,7 @@
 #include <qcommons/socketServer.h> //Socket Servidor
 #include <pthread.h> //hilos
 #include <readline/readline.h> //biblioteca del readline para consola
+#include<commons/collections/queue.h> //Colas
 
 typedef struct {
 	char *puerto_safa;
