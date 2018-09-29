@@ -28,16 +28,48 @@ typedef struct {
 } config_inicial;
 
 
-//Variables Globales
-config_inicial *c_inicial = NULL;
+//STRUCT direcciones
+typedef struct{
+	char *path;
+	char *direccion;
+} struct_direccion ;
+
+
+//STRUCT DTB
+typedef struct{
+	int idDtb;
+	char *escriptorio;
+	int pc;
+	int inicializado;
+	struct_direccion** direcciones;
+} struct_dtb ;
+
+
+
 
 
 //Funciones
+
 void liberarMemoriaConfig(config_inicial* c_inicial); //libera memoria de la configuracion inicial
 void leer_configuracion( t_config* , config_inicial*  ); //inicializa la configuracion inicial(lectura de archivo)
 void prueba_leer_archivo_cfg(config_inicial* c_inicial); //prueba leer archivo configuracion
 void conexion_dam(void*) ; //hilo que maneja conexion con el dam.
 void conexion_cpu(void*); //hilo que maneja conexion con cpu
+
+//CONSOLA
 void consolaSafa(); /* Consola Safa */
+void ejecutar_path_plp( char* );
+void status_dtb(long);
+void status_colas();
+void finalizar_dtb(long );
+void metricas( long );
+
+
+void hiloPlp(); //Hilo Planificador largo plazo
+
+
+struct_dtb crear_dtb( char* );
+
+
 
 #endif /* SAFAHEADER_H_ */
