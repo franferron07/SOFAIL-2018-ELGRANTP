@@ -12,17 +12,18 @@
 #include "mdj.h"
 
 
+ int i;
+ char buffer[1000];							/* Buffer para leer de los socket */
+
 
 int main(void) {
 
-	int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
-	fd_set descriptoresLectura;	/* Descriptores de interes para select() */
-	int numeroClientes = 0;			/* Número clientes conectados */
-	int maximo;							/* Número de descriptor más grande */
-	int buffer;							/* Buffer para leer de los socket */
-	int socketServidor;				/* Descriptor del socket servidor */
-	int i;
 		puts("MDJ escuchando .."); /* prints MDJ */
+
+		numeroClientes = 0;
+
+		logger = log_create("MDJ.log", "MDJ",false, LOG_LEVEL_INFO);
+		log_info(logger, "INICIO MDJ");
 	mdj_setear_configuracion_default();
 	 Socket socket=crear_socket("127.0.0.1","8080");
 	 socketServidor = socket.socket;
@@ -31,65 +32,89 @@ int main(void) {
 	 	//Escucho Conexiones Entrantes
 	 	escuchar(socket);
 
-	 	while (1)
-	 		{
-	 			/* Cuando un cliente cierre la conexión, se pondrá un -1 en su descriptor
-	 			 * de socket dentro del array socketCliente. La función compactaClaves()
-	 			 * eliminará dichos -1 de la tabla, haciéndola más pequeña.
-	 			 *
-	 			 * Se eliminan todos los clientes que hayan cerrado la conexión */
-	 			compactaClaves (socketCliente, &numeroClientes);
+	 	escuchar_conexiones();
 
-	 			/* Se inicializa descriptoresLectura */
-	 			FD_ZERO (&descriptoresLectura);
-
-	 			/* Se añade para select() el socket servidor */
-	 			FD_SET (socketServidor, &descriptoresLectura);
-
-	 			/* Se añaden para select() los sockets con los clientes ya conectados */
-	 			for (i=0; i<numeroClientes; i++)
-	 				FD_SET (socketCliente[i], &descriptoresLectura);
-
-	 			/* Se el valor del descriptor más grande. Si no hay ningún cliente,
-	 			 * devolverá 0 */
-	 			maximo = dameMaximo (socketCliente, numeroClientes);
-
-	 			if (maximo < socketServidor)
-	 				maximo = socketServidor;
-
-	 			/* Espera indefinida hasta que alguno de los descriptores tenga algo
-	 			 * que decir: un nuevo cliente o un cliente ya conectado que envía un
-	 			 * mensaje */
-	 			select(maximo + 1, &descriptoresLectura, NULL, NULL, NULL);
-
-	 			/* Se comprueba si algún cliente ya conectado ha enviado algo */
-	 			for (i=0; i<numeroClientes; i++)
-	 			{
-	 				if (FD_ISSET (socketCliente[i], &descriptoresLectura))
-	 				{
-	 					/* Se lee lo enviado por el cliente y se escribe en pantalla */
-	 					if ((Lee_Socket (socketCliente[i], (char *)&buffer, sizeof(int)) > 0))
-	 						printf ("Cliente %d envía %d\n", i+1, buffer);
-	 					else
-	 					{
-	 						/* Se indica que el cliente ha cerrado la conexión y se
-	 						 * marca con -1 el descriptor para que compactaClaves() lo
-	 						 * elimine */
-	 						printf ("Cliente %d ha cerrado la conexión\n", i+1);
-	 						socketCliente[i] = -1;
-	 					}
-	 				}
-	 			}
-
-	 			/* Se comprueba si algún cliente nuevo desea conectarse y se le
-	 			 * admite */
-	 			if (FD_ISSET (socketServidor, &descriptoresLectura))
-	 				nuevoCliente (socketServidor, socketCliente, &numeroClientes);
-	 		}
 	 	 config_destroy_mdj(mdj_configuracion_inicial);
 	 	 cerrar_socket(socket);
 
+	 	puts("MDJ terminando .."); /* prints MDJ */
+
+	 	log_info(logger, "Finish.cfg");
+	 	log_destroy(logger);
+
+	 	exit(EXIT_SUCCESS);
+
 	 }
+
+void escuchar_conexiones(){
+	while (1)
+		 		{
+		 			/* Cuando un cliente cierre la conexión, se pondrá un -1 en su descriptor
+		 			 * de socket dentro del array socketCliente. La función compactaClaves()
+		 			 * eliminará dichos -1 de la tabla, haciéndola más pequeña.
+		 			 *
+		 			 * Se eliminan todos los clientes que hayan cerrado la conexión */
+		 			compactaClaves (socketCliente, &numeroClientes);
+
+		 			/* Se inicializa descriptoresLectura */
+		 			FD_ZERO (&descriptoresLectura);
+
+		 			/* Se añade para select() el socket servidor */
+		 			FD_SET (socketServidor, &descriptoresLectura);
+
+		 			/* Se añaden para select() los sockets con los clientes ya conectados */
+		 			for (i=0; i<numeroClientes; i++)
+		 				FD_SET (socketCliente[i], &descriptoresLectura);
+
+		 			/* Se el valor del descriptor más grande. Si no hay ningún cliente,
+		 			 * devolverá 0 */
+		 			maximo = dameMaximo (socketCliente, numeroClientes);
+
+		 			if (maximo < socketServidor)
+		 				maximo = socketServidor;
+
+		 			/* Espera indefinida hasta que alguno de los descriptores tenga algo
+		 			 * que decir: un nuevo cliente o un cliente ya conectado que envía un
+		 			 * mensaje */
+		 			select(maximo + 1, &descriptoresLectura, NULL, NULL, NULL);
+
+		 			/* Se comprueba si algún cliente ya conectado ha enviado algo */
+		 			for (i=0; i<numeroClientes; i++)
+		 			{
+		 				if (FD_ISSET (socketCliente[i], &descriptoresLectura))
+		 				{
+		 					/* Se lee lo enviado por el cliente y se escribe en pantalla */
+		 					if ((Lee_Socket (socketCliente[i], (char *)&buffer, sizeof(buffer)))){
+		 						printf ("Cliente %d envía %s\n", i+1, buffer);
+
+//		 						int n = strlen("Cliente %d envía %s\n")+1001;
+//		 						char leyenda[]="--------------------";
+//		 						int len = sprintf(&leyenda,"Cliente %d envía %s\n", i+1, buffer);
+//		 						printf("%s %d",leyenda,len);puts("");
+//		 						log_info(logger, leyenda);
+		 						log_info(logger, "recibi conexion de un cliente");
+//		 						free(&leyenda);
+		 					}
+		 					else
+		 					{
+		 						/* Se indica que el cliente ha cerrado la conexión y se
+		 						 * marca con -1 el descriptor para que compactaClaves() lo
+		 						 * elimine */
+		 						printf ("Cliente %d ha cerrado la conexión\n", i+1);
+		 						socketCliente[i] = -1;
+		 						log_info(logger, "INICIO MDJ");
+		 					}
+		 				}
+		 			}
+
+		 			/* Se comprueba si algún cliente nuevo desea conectarse y se le
+		 			 * admite */
+		 			if (FD_ISSET (socketServidor, &descriptoresLectura))
+		 				nuevoCliente (socketServidor, socketCliente, &numeroClientes);
+		 		}
+
+}
+
 
 void mdj_setear_configuracion_default(){
 	mdj_configuracion_inicial=malloc(sizeof(mdj_configuracion));
@@ -105,6 +130,8 @@ t_config* cargar_en_memoria_cfg(char* dir){
 	if(aux==NULL){
 		free(mdj_configuracion_inicial);
 		puts("Error");
+
+		log_error(logger, "No se encuentra archivo MDJ.cfg");
 	}
 	//config_create() carga en memoria el archivo .cfg ,en memoria se lo encuentra con &configuracion_temporal
 	return aux;

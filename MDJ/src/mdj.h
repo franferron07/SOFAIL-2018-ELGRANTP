@@ -12,13 +12,27 @@
 #include <commons/string.h> //Commons string
 #include <qcommons/socket.h> //Libreria Socket Cliente
 #include <qcommons/socketServer.h> //Libreria Socket Servidor
+
+#include <commons/log.h>
+#include <stdbool.h>
+#include <unistd.h>
+
 //----------------------------
 typedef struct{
 	char* mdj_puerto;
 	int retardo;
 	char* punto_de_montaje;
+	char * ip;
 }mdj_configuracion;
 //----------------------------
+
+
+t_log *logger= NULL;
+fd_set descriptoresLectura;	/* Descriptores de interes para select() */
+int maximo;							/* Número de descriptor más grande */
+int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
+int numeroClientes;			/* Número clientes conectados */
+int socketServidor;				/* Descriptor del socket servidor */
 
 
 
