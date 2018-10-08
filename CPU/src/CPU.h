@@ -32,14 +32,18 @@ typedef struct {
 config_inicial *c_inicial = NULL;
 t_config *inicializador=NULL;
 t_log *logger= NULL;
+
 Socket socket_safa;
 Socket socket_dam;
 Socket socket_fm9;
 
 //Funciones
-void liberarMemoriaConfig(config_inicial* c_inicial); //libera memoria de la configuracion inicial
-void leer_configuracion( t_config* , config_inicial*  ); //inicializa la configuracion inicial(lectura de archivo)
-void prueba_leer_archivo_cfg(config_inicial* c_inicial); //prueba leer archivo configuracion
+void inicializar_configuracion();
+void cargar_configuracion( t_config* , config_inicial*  ); //inicializa la configuracion inicial(lectura de archivo)
+void imprimir_configuracion(config_inicial* c_inicial); //prueba leer archivo configuracion
+void liberar_memoria_configuracion(config_inicial* c_inicial); //libera memoria de la configuracion inicial
+
+
 
 Socket conectar_safa(config_inicial* c_inicial);
 Socket conectar_dam(config_inicial* c_inicial);
@@ -59,6 +63,6 @@ bool _esCrearArchivo(char* linea);
 bool _esBorrarArchivo(char* linea);
 /////////////////////////////////
 //otras
-void LiberarListadeStrings(char** operation);
+void liberarListaDeStrings(char** operation);
 
 #endif /* CPU_H_ */
