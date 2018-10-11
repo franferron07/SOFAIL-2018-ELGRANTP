@@ -23,7 +23,7 @@ typedef struct{
 	int retardo;
 	char* punto_de_montaje;
 	char * ip;
-}mdj_configuracion;
+}MDJ;
 //----------------------------
 
 
@@ -37,16 +37,16 @@ int socketServidor;				/* Descriptor del socket servidor */
 
 
 //variables globales
-mdj_configuracion* mdj_configuracion_inicial=NULL;
+MDJ* mdj=NULL;
 //int mdj_id;
 
 //funciones
-void liberar_memoria_de_configuracion(mdj_configuracion* configuracion_inicial);
+void liberar_memoria_de_configuracion(MDJ* configuracion_inicial);
 //freeshea el puntero de configuracion inicial
-void montar_configuracion(t_config* ,mdj_configuracion*);
-void mostrar_configuracion(mdj_configuracion* configuracion_inicial);
+void montar_configuracion(t_config* ,MDJ*);
+void mostrar_configuracion(MDJ* configuracion_inicial);
 t_config* cargar_en_memoria_cfg(char*);
-void config_destroy_mdj(mdj_configuracion* );
+void config_destroy_mdj(MDJ* );
 //--------------
 void mdj_setear_configuracion_default();
 
