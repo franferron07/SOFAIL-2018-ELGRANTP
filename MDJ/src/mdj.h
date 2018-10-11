@@ -17,9 +17,13 @@
 #include <stdbool.h>
 #include <unistd.h>
 
+
+#include <stdarg.h>
+#include <pthread.h>
+
 //----------------------------
 typedef struct{
-	char* mdj_puerto;
+	char* puerto;
 	int retardo;
 	char* punto_de_montaje;
 	char * ip;
@@ -34,7 +38,7 @@ int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
 int numeroClientes;			/* Número clientes conectados */
 int socketServidor;				/* Descriptor del socket servidor */
 
-
+Socket mdj_socket; //socket MDJ
 
 //variables globales
 MDJ* mdj=NULL;
@@ -48,6 +52,10 @@ void mostrar_configuracion(MDJ* configuracion_inicial);
 t_config* cargar_en_memoria_cfg(char*);
 void config_destroy_mdj(MDJ* );
 //--------------
-void mdj_setear_configuracion_default();
+void mdj_inicializar();
+
+
+void mostrar_y_guardar_leyenda(char * s, ...); //imprime como printf y guarda en log
+void guardar_leyenda(char * ); // solo guarda log
 
 #endif /* MDJ_H_ */

@@ -1,51 +1,4 @@
-[INFO] 11:03:45:242 MDJ/(5217:5217): INICIO MDJ
-[INFO] 11:08:34:614 MDJ/(5371:5371): INICIO MDJ
-[INFO] 11:11:57:637 MDJ/(5506:5506): INICIO MDJ
-[INFO] 11:12:10:250 MDJ/(5516:5516): INICIO MDJ
-[INFO] 11:13:44:927 MDJ/(5633:5633): INICIO MDJ
-[INFO] 11:14:23:211 MDJ/(5686:5686): INICIO MDJ
-[INFO] 11:14:44:303 MDJ/(5724:5724): INICIO MDJ
-[INFO] 11:15:20:577 MDJ/(5787:5787): INICIO MDJ
-[INFO] 11:16:03:643 MDJ/(5811:5811): INICIO MDJ
-[INFO] 11:16:11:277 MDJ/(5811:5811): recibi conexion de un cliente
-[INFO] 11:16:12:790 MDJ/(5811:5811): recibi conexion de un cliente
-[INFO] 11:16:15:325 MDJ/(5811:5811): recibi conexion de un cliente
-[INFO] 11:16:17:590 MDJ/(5811:5811): INICIO MDJ
-[INFO] 11:18:09:642 MDJ/(5903:5903): INICIO MDJ
-[INFO] 11:18:15:663 MDJ/(5903:5903): recibi conexion de un cliente
-[INFO] 11:18:17:575 MDJ/(5903:5903): recibi conexion de un cliente
-[INFO] 11:18:18:696 MDJ/(5903:5903): INICIO MDJ
-[INFO] 11:20:08:999 MDJ/(6007:6007): INICIO MDJ
-[INFO] 11:21:29:210 MDJ/(6081:6081): INICIO MDJ
-[INFO] 11:21:29:211 MDJ/(6081:6081): ip : 127.0.0.1 y puerto : 8080  
-[INFO] 11:21:36:773 MDJ/(6081:6081): recibi conexion de un cliente
-[INFO] 11:21:37:830 MDJ/(6081:6081): INICIO MDJ
-[INFO] 11:42:39:611 MDJ/(6759:6759): INICIO MDJ
-[INFO] 11:42:39:611 MDJ/(6759:6759): ip : 127.0.0.1 y puerto : (null)  
-[INFO] 11:42:39:611 MDJ/(6759:6759): ip : 127.0.0.1 y puerto : (null)  
-[INFO] 11:43:12:266 MDJ/(6774:6774): INICIO MDJ
-[INFO] 11:43:12:266 MDJ/(6774:6774): ip : 127.0.0.1 y puerto : (null)  
-[INFO] 11:43:12:266 MDJ/(6774:6774): ip : 127.0.0.1 y puerto : (null)  
-[INFO] 11:43:52:147 MDJ/(6824:6824): INICIO MDJ
-[INFO] 11:43:52:147 MDJ/(6824:6824): ip : 127.0.0.1 y puerto : (null)  
-[INFO] 11:43:52:147 MDJ/(6824:6824): ip : 127.0.0.1 y puerto : (null)  
-[INFO] 11:43:57:294 MDJ/(6834:6834): INICIO MDJ
-[INFO] 11:43:57:294 MDJ/(6834:6834): ip : 127.0.0.1 y puerto : (null)  
-[INFO] 11:43:57:294 MDJ/(6834:6834): ip : 127.0.0.1 y puerto : (null)  
-[INFO] 12:02:08:481 MDJ/(7628:7628): INICIO MDJ
-[INFO] 12:02:08:481 MDJ/(7628:7628): ip : 127.0.0.1 y puerto : 8080  
-[INFO] 12:03:37:813 MDJ/(7697:7697): INICIO MDJ
-[INFO] 12:03:37:813 MDJ/(7697:7697): ip : 127.0.0.1 y puerto : 8080  
-[INFO] 12:03:37:813 MDJ/(7697:7697): ip : 127.0.0.1 y puerto : 8080  
-[INFO] 12:04:15:770 MDJ/(7710:7710): INICIO MDJ
-[INFO] 12:04:15:770 MDJ/(7710:7710): ip : 127.0.0.1 y puerto : 8080  
-[INFO] 12:04:15:771 MDJ/(7710:7710): ip : 127.0.0.1 y puerto : 8080  
-[INFO] 12:04:23:551 MDJ/(7710:7710): recibi conexion de un cliente
-[INFO] 12:04:25:615 MDJ/(7710:7710): recibi conexion de un cliente
-[INFO] 12:04:26:584 MDJ/(7710:7710): INICIO MDJ
-[INFO] 12:11:11:829 MDJ/(8013:8013): INICIO MDJ
-[INFO] 12:11:11:829 MDJ/(8013:8013): ip : 127.0.0.1 y puerto : 8080  
-[INFO] 12:11:11:829 MDJ/(8013:8013): ip : 127.0.0.1 y puerto : 8080  
+
 [INFO] 12:12:00:684 MDJ/(8013:8013): recibi conexion de un cliente
 [INFO] 12:12:03:356 MDJ/(8013:8013): recibi conexion de un cliente
 [INFO] 12:12:05:188 MDJ/(8013:8013): INICIO MDJ
@@ -77,3 +30,26 @@
 [INFO] 12:20:31:850 MDJ/(8487:8487): Cliente 1 envía aasd afsffdsafsd
 
 [INFO] 12:20:33:650 MDJ/(8487:8487): INICIO MDJ
+[INFO] 13:57:43:91 MDJ/(4554:4554): INICIO MDJ
+[INFO] 13:57:43:102 MDJ/(4554:4554): ip : 127.0.0.1 y puerto : 8080  
+[INFO] 13:57:43:102 MDJ/(4554:4554): abriendo socket
+[INFO] 13:58:07:300 MDJ/(4554:4554): Cliente 1 envía sajhdas jkadhjasd kljhdsa
+
+[INFO] 13:58:08:933 MDJ/(4554:4554): INICIO MDJ
+[INFO] 14:00:04:195 MDJ/(4627:4627): INICIO MDJ
+[INFO] 14:00:04:195 MDJ/(4627:4627): ip : 127.0.0.1 y puerto : 8080  
+[INFO] 14:00:04:195 MDJ/(4627:4627): abriendo socket
+[INFO] 14:00:12:326 MDJ/(4627:4627): Cliente 1 envía jkhsa jkshsa sakjhsajgsahsagjhsgjsgjkgkjaghagsjhgjag
+[INFO] 14:00:14:156 MDJ/(4627:4627): INICIO MDJ
+[INFO] 14:01:13:486 MDJ/(4717:4717): INICIO MDJ
+[INFO] 14:01:13:487 MDJ/(4717:4717): ip : 127.0.0.1 y puerto : 8080  
+[INFO] 14:01:13:487 MDJ/(4717:4717): abriendo socket
+[INFO] 14:01:19:913 MDJ/(4717:4717): Cliente 1 envía skjhsa sajkhsa sajkhas
+[INFO] 14:01:21:849 MDJ/(4717:4717): Cliente 1 envía jhgsa hsagsa jhgsa
+[INFO] 14:01:23:313 MDJ/(4717:4717): Cliente 1 ha cerrado la conexión
+
+[INFO] 14:02:47:522 MDJ/(4792:4792): INICIO MDJ
+[INFO] 14:02:47:523 MDJ/(4792:4792): ip : 127.0.0.1 y puerto : 8080  
+[INFO] 14:02:47:523 MDJ/(4792:4792): abriendo socket
+[INFO] 14:03:06:394 MDJ/(4792:4792): Cliente 1 envía sajihsa, msajksaas asjyhsaas
+[INFO] 14:03:07:482 MDJ/(4792:4792): Cliente 1 ha cerrado la conexión 
