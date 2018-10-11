@@ -41,7 +41,7 @@ int main(void) {
 
 		printf("Ingrese la sentencia: ");
 		scanf(" %[^\n]s ",linea);
-		ejecutar_linea(linea);
+		ejecutar_linea_fifa(linea);
 
 	}
 
@@ -54,16 +54,14 @@ int main(void) {
 
 
 
-void ejecutar_linea(char linea[]){
+void ejecutar_linea_fifa(char linea[]){
 	//printf("Lei linea: %s\n",linea);
 
-	if( _esAbrirArchivo(linea) ){
+	if( _es_cd_(linea) ){
 		puts("Es abrir archivo");
 		char * path = (char *) malloc(30);
 		strcpy(path,linea + strlen("abrir "));
 		printf("Path encontrado: %s\n",path);
-
-
 		free(path);
 	}else if(_esConcentrar(linea)){
 		printf("Instruccion Concentrar.\n");
@@ -73,9 +71,6 @@ void ejecutar_linea(char linea[]){
 		printf("Es asignar linea.\n");
 		char **operation = string_split(linea + strlen("asignar "), " ");
 		string_iterate_lines(operation, (void*)puts);
-
-
-
 
 		liberarListaDeStrings(operation);
 	}else if(_esWait(linea)){
@@ -163,7 +158,7 @@ bool _esConcentrar(char* linea){
 	return string_starts_with(linea, "concentrar");
 }
 
-bool _esAbrirArchivo(char* linea){
+bool _es_cd_(char* linea){
 	return string_starts_with(linea, "abrir ");
 }
 

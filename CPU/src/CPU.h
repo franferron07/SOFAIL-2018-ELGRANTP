@@ -51,8 +51,8 @@ Socket conectar_fm9(config_inicial* c_inicial);
 
 
 //Funciones de Parser
-void ejecutar_linea(char[]);
-bool _esAbrirArchivo(char* linea);
+void ejecutar_linea_fifa(char[]);
+bool _es_cd_(char* linea);
 bool _esConcentrar(char* linea);
 bool _esAsignarLinea(char* linea);
 bool _esWait(char* linea);
