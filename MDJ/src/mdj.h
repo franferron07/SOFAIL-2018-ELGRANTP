@@ -42,7 +42,8 @@ Socket mdj_socket; //socket MDJ
 
 //variables globales
 MDJ* mdj=NULL;
-//int mdj_id;
+
+Socket mdj_socket;//socket mdj
 
 //funciones
 void liberar_memoria_de_configuracion(MDJ* configuracion_inicial);
