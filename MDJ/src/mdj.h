@@ -56,7 +56,7 @@ void config_destroy_mdj(MDJ* );
 void mdj_inicializar();
 
 
-void mostrar_y_guardar_leyenda(char * s, ...); //imprime como printf y guarda en log
+void mostrar_y_guardar_log(char * s, ...); //imprime como printf y guarda en log
 void guardar_leyenda(char * ); // solo guarda log
 
 #endif /* MDJ_H_ */

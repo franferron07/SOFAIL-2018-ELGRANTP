@@ -10,8 +10,6 @@
 
 
 #include "mdj.h"
-#include <stdarg.h>
-#include <pthread.h>
 #define  MAX_INPUT_BUFFER 1000
 
 int i;
@@ -25,27 +23,32 @@ pthread_attr_t hilo_escucha;
 int main(void) {
 		mdj_init();
 		mostrar_configuracion(mdj);
+		inicializando_socket();
+
 		puts("MDJ escuchando .."); /* prints MDJ */
 
 
-	 	pthread_create(&hilo_escucha, NULL, escuchar_mensajes(), NULL);
+	 	pthread_create(&hilo_escucha, NULL, escuchar_mensajes_entrantes(), NULL);
 	 	pthread_join(&hilo_escucha, NULL);
 
 
 
+		 cerrar_socket(mdj_socket);
 	 	mdj_finish_and_free();
 	 	exit(EXIT_SUCCESS);
 
 	 }
+
+
 void mdj_finish_and_free(){
 	 config_destroy_mdj(mdj);
+
+	 mostrar_y_guardar_log("MDJ terminando..");
 	 log_info(logger, "Finish.cfg");
 	 log_destroy(logger);
-	 cerrar_socket(mdj_socket);
-	 mostrar_y_guardar_leyenda("MDJ terminando..");
 
 }
-void mostrar_y_guardar_leyenda(char * s, ...){
+void mostrar_y_guardar_log(char * s, ...){
 	va_list resto;
 	va_start(resto,s);
 	vsprintf(leyenda_temporal,s, resto );
@@ -69,7 +72,7 @@ void inicializando_socket(){
 		 	escuchar(mdj_socket);
 }
 
-void escuchar_mensajes(){
+void escuchar_mensajes_entrantes(){
 	while (1)
 		 		{
 		 			/* Cuando un cliente cierre la conexión, se pondrá un -1 en su descriptor
@@ -108,7 +111,7 @@ void escuchar_mensajes(){
 		 				{
 		 					/* Se lee lo enviado por el cliente y se escribe en pantalla */
 		 					if ((Lee_Socket (socketCliente[i], (char *)&buffer, sizeof(buffer)))){
-		 						mostrar_y_guardar_leyenda("Cliente %d envía %s \n", i+1, buffer);
+		 						mostrar_y_guardar_log("Cliente %d envía %s \n", i+1, buffer);
 
 		 					}
 		 					else
@@ -116,7 +119,7 @@ void escuchar_mensajes(){
 		 						/* Se indica que el cliente ha cerrado la conexión y se
 		 						 * marca con -1 el descriptor para que compactaClaves() lo
 		 						 * elimine */
-		 						mostrar_y_guardar_leyenda("Cliente %d ha cerrado la conexión \n", i+1);
+		 						mostrar_y_guardar_log("Cliente %d ha cerrado la conexión \n", i+1);
 		 						socketCliente[i] = -1;
 		 					}
 		 				}
@@ -140,7 +143,7 @@ void mdj_init(){
 	montar_configuracion(configuracion_cfg_temporal,mdj);
 	config_destroy(configuracion_cfg_temporal);
 
-	inicializando_socket();
+
 }
 
 
@@ -169,15 +172,15 @@ void montar_configuracion(t_config*  temporal,MDJ* configuracion){
 void config_destroy_mdj(MDJ* mdj_configuracion_){
 	free(mdj_configuracion_->puerto);
 	free(mdj_configuracion_->punto_de_montaje);
-//	free(mdj_configuracion_->retardo);
+	free(mdj_configuracion_->ip);
 	free(mdj_configuracion_);
 
 }
 void mostrar_configuracion(MDJ* config){
-	mostrar_y_guardar_leyenda("iniciando lectura ..\n");
-	mostrar_y_guardar_leyenda("PUNTO_DE_MONTAJE = %s \n",config->punto_de_montaje);
-	mostrar_y_guardar_leyenda("RETARDO = %d \n",config->retardo);
-	mostrar_y_guardar_leyenda("PUERTO MDJ = %s \n",config->puerto);
-	mostrar_y_guardar_leyenda("IP MDJ = %s \n",config->ip);
-	mostrar_y_guardar_leyenda("---fin lectura de congiguracion ---\n\n");
+	mostrar_y_guardar_log("iniciando lectura de configuracion...\n");
+	mostrar_y_guardar_log("PUNTO_DE_MONTAJE = %s \n",config->punto_de_montaje);
+	mostrar_y_guardar_log("RETARDO = %d \n",config->retardo);
+	mostrar_y_guardar_log("PUERTO MDJ = %s \n",config->puerto);
+	mostrar_y_guardar_log("IP MDJ = %s \n",config->ip);
+	mostrar_y_guardar_log("---fin lectura de configuracion --- .. \n\n");
 }
