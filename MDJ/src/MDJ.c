@@ -10,7 +10,6 @@
 
 
 #include "mdj.h"
-#include <string.h>
 #define  MAX_INPUT_BUFFER 1000
 
 int i;
@@ -19,124 +18,27 @@ int i;
  char leyenda_temporal[MAX_INPUT_BUFFER];
  char buffer_input[MAX_INPUT_BUFFER];
 
- char **palabras=NULL;
- char path[MAX_INPUT_BUFFER];
-
 pthread_attr_t hilo_escucha;
 
 int main(void) {
 		mdj_init();
 		mostrar_configuracion(mdj);
+		inicializando_socket();
+
 		puts("MDJ escuchando .."); /* prints MDJ */
 
-//		inicializando_socket();
-//	 	pthread_create(&hilo_escucha, NULL, escuchar_mensajes_entrantes(), NULL);
-//	 	pthread_join(&hilo_escucha, NULL);
-//		cerrar_socket(mdj_socket);
 
-		gets(buffer_input);
-		char** linea = string_split(buffer_input, " ");
-		while(1){
-			sleep(1);
-			puts(*(linea++));
-		}
+	 	pthread_create(&hilo_escucha, NULL, escuchar_mensajes_entrantes(), NULL);
+	 	pthread_join(&hilo_escucha, NULL);
 
 
+
+		 cerrar_socket(mdj_socket);
 	 	mdj_finish_and_free();
 	 	exit(EXIT_SUCCESS);
 
 	 }
-void leer_input_linea_de_filesystem(){
-	gets(buffer_input);//buffer_input almacena la linea de comando de FS(FileSystem)
-	ejecutar_linea_fifa(buffer_input);
 
-
-}
-//void fifa_ejecutar_linea(char* linea){
-////	palabras=string_split(linea, " ");
-void ejecutar_linea_fifa(char linea[]){
-
-		if( _es_cd_(linea) ){
-			puts("listando ficheros de directorio actual");
-			char * path = (char *) malloc(30);
-			strcpy(path,linea + strlen("abrir "));
-			printf("Path encontrado: %s\n",path);
-			free(path);
-		}else if(_es_cd_(linea)){
-			printf("Instruccion Concentrar.\n");
-
-		}else if(_es_ms5_(linea)){
-			//"asignar /equipos/Racing.txt 9 GustavoBou"
-			printf("Es asignar linea.\n");
-			char **operation = string_split(linea + strlen("asignar "), " ");
-			string_iterate_lines(operation, (void*)puts);
-
-			liberarListaDeStrings(operation);
-		}else if(_es_cat_(linea)){
-			printf("Es operacion Wait.\n");
-			char * recurso = (char *) malloc(30);
-			strcpy(recurso,linea + strlen("wait "));
-			printf("Recurso a la espera: %s\n",recurso);
-
-
-			free(recurso);
-		}else if(_esSignal(linea)){
-			printf("Es operacion Signal.\n");
-			char * recurso = (char *) malloc(30);
-			strcpy(recurso,linea + strlen("signal "));
-			printf("Recurso a liberar: %s\n",recurso);
-
-			free(recurso);
-		}else if(_esFlush(linea)){
-			//Recibe como parámetro el path del archivo a guardar en MDJ.
-			puts("Es Flush archivo");
-			char * path = (char *) malloc(30);
-			strcpy(path,linea + strlen("flush "));
-			printf("Archivo a Flushear: %s\n",path);
-
-
-			free(path);
-		}else if(_esClose(linea)){
-			puts("Es Cerrar archivo");
-			char * path = (char *) malloc(30);
-			strcpy(path,linea + strlen("flush "));
-			printf("Archivo a cerrar: %s\n",path);
-
-
-			free(path);
-		}else if(_esCrearArchivo(linea)){
-			//Recibe como parámetro el path y la cantidad de líneas que tendrá el archivo.
-			//crear /equipos/Racing.txt 11
-			puts("Es Crear archivo");
-			char **operation = string_split(linea + strlen("crear "), " ");
-			string_iterate_lines(operation, (void*)puts);
-
-
-			liberarListaDeStrings(operation);
-		}else if(_esBorrarArchivo(linea)){
-			puts("Es Borrar archivo");
-			char * path = (char *) malloc(30);
-			strcpy(path,linea + strlen("borrar "));
-			printf("Archivo a Borrar: %s\n",path);
-
-
-			free(path);
-		}
-	}
-
-
-bool _es_ls_(char* linea){
-		return string_starts_with(linea, "ls ");
-	}
-bool _es_cd_(char* linea){
-		return string_starts_with(linea, "cd ");
-	}
-bool _es_ms5_(char* linea){
-		return string_starts_with(linea, "md5 ");
-	}
-bool _es_cat_(char* linea){
-		return string_starts_with(linea, "cats ");
-	}
 
 void mdj_finish_and_free(){
 	 config_destroy_mdj(mdj);
