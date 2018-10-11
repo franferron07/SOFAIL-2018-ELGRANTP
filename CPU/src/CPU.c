@@ -10,7 +10,6 @@
 
 #include "CPU.h"
 
-
 int main(void) {
 	puts("CPU"); /* prints CPU */
 
