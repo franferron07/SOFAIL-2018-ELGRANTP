@@ -65,7 +65,9 @@ void finalizar_dtb(long );
 void metricas( long );
 
 
-void hiloPlp(); //Hilo Planificador largo plazo
+void plp(); //Hilo Planificador largo plazo
+
+void pcp(); //Hilo Planificador corto plazo
 
 
 struct_dtb crear_dtb( char* );

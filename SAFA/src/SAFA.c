@@ -10,6 +10,7 @@
 
 
 #include "safaHeader.h"
+#include <semaphore.h>
 
 //GLOBALES
 
@@ -21,6 +22,8 @@ Socket socket_servidor;
 pthread_t hilo_dam;
 pthread_t hilo_consola;
 pthread_t hilo_plp;
+pthread_t hilo_pcp;
+
 
 //comienzo safa en un estado corrupto
 int conecto_cpu = 0 ;
@@ -29,12 +32,17 @@ int conecto_dam = 0;
 
 
 
-
+//ids para asignar a los dtbs
 int id_total = 1;
 
+
 //SEMAFOROS
-pthread_mutex_t sem_plp;
-pthread_cond_t sem_nuevo_vacio;
+pthread_mutex_t mutex_sem_nuevo;
+sem_t sem_nuevo_vacio;
+sem_t mutex_dtb_dummy;
+
+sem_t mutex_listo;
+sem_t sem_listo_vacio;
 
 
 
@@ -46,8 +54,14 @@ t_queue *bloqueados=NULL;
 t_queue *terminados=NULL;
 
 
+//creo dtb_dummy
+struct_dtb dtb_dummy;
+
 
 int main(void) {
+
+
+	dtb_dummy.inicializado=0;
 
 
     //CREO COLA DE ESTADOS
@@ -58,9 +72,12 @@ int main(void) {
     terminados=queue_create();
 
 
-    pthread_mutex_init( &sem_plp , NULL );
-    pthread_cond_init( &sem_nuevo_vacio , NULL );
-
+    //inicio semaforos
+    pthread_mutex_init( &mutex_sem_nuevo , NULL );
+    sem_init(&sem_nuevo_vacio, 0, 0);
+    sem_init(&mutex_dtb_dummy, 0, 1);
+    sem_init( &mutex_listo , 0 , 1 );
+    sem_init( &sem_listo_vacio , 0 , 0 );
 
 
     int buffer;
@@ -87,15 +104,17 @@ int main(void) {
 	prueba_leer_archivo_cfg(c_inicial);
 	log_info(logger, "muestro valor por consola %s", "INFO");
 
-	/* libero memoria de inicializacion  */
+	// libero memoria de inicializacion  *
 	config_destroy(inicializador);
 
-	/* CONSOLA*/
+	// CONSOLA
 	pthread_create(&hilo_consola , NULL , (void*)consolaSafa  , NULL );
 
 	//PLP
-	pthread_create(&hilo_plp , NULL , (void*)hiloPlp  , NULL );
+	pthread_create(&hilo_plp , NULL , (void*)plp  , NULL );
 
+	//PCP
+	pthread_create(&hilo_pcp , NULL , (void*)pcp  , NULL );
 
 	/*
 	// crear socket  //
@@ -201,16 +220,26 @@ int main(void) {
 
 */
 
-	pthread_join(hilo_consola,NULL);
 	pthread_join(hilo_plp,NULL);
+	pthread_join(hilo_pcp,NULL);
+	pthread_join(hilo_consola,NULL);
 
 
-	/* libero struct config_inicial  */
+
+	// libero struct config_inicial  //
 	liberarMemoriaConfig(c_inicial);
 	log_info(logger, "Libero memoria de configuracion inicial %s", "INFO");
 
-	//rompo logger
+	//destruyo logger
 	log_destroy(logger);
+
+
+	//destruyo semaforos
+	sem_destroy(&sem_nuevo_vacio);
+	sem_destroy(&mutex_dtb_dummy);
+	sem_destroy(&mutex_listo);
+	sem_destroy(&sem_listo_vacio);
+
 
 	return EXIT_SUCCESS;
 }
@@ -247,7 +276,7 @@ void conexion_cpu(void* socket){
 
 
 
-void hiloPlp(){
+void plp(){
 
 
 	//aca verificar grado de multiprogramacion , si se lo permite hacer el pop
@@ -255,23 +284,45 @@ void hiloPlp(){
 	while(1){
 
 		//controlo lista no vacia
-		//pthread_cond_wait(&sem_nuevo_vacio, NULL);
+		sem_wait( &sem_nuevo_vacio);
 
 		struct_dtb *dtb;
-		pthread_mutex_lock(&sem_plp );
-
-		    pthread_cond_wait( &sem_nuevo_vacio , &sem_plp);
+		//seccion critica
+		pthread_mutex_lock(&mutex_sem_nuevo );
 
 			dtb = queue_pop( nuevos);
 
-		pthread_mutex_unlock(&sem_plp );
+		pthread_mutex_unlock(&mutex_sem_nuevo );
 
 		//hecho el pop debo ir a desbloquear el dtb dummy , incializarlo ,  y pasarlo a cola de ready.
+
+		//inicializo dtb dummy
+		sem_wait( &mutex_dtb_dummy );
+
+			dtb_dummy.idDtb = dtb->idDtb;
+			dtb_dummy.escriptorio = string_duplicate( dtb->escriptorio );
+
+		sem_post(&mutex_dtb_dummy);
+
+		//si grado de multprogramacion lo permite pasarlo a new.  -->pendiente
+
+		//agrego a cola de listos el dummy
+		sem_wait( &mutex_listo );
+
+			queue_push( listos , &dtb_dummy  );
+
+		sem_post( &mutex_listo );
+
 
 	}
 
 }
 
+
+void pcp(){
+
+
+}
 
 
 void consolaSafa(){
@@ -391,12 +442,12 @@ void ejecutar_path_plp( char* path){
 
 	struct_dtb dtb_nuevo = crear_dtb(path);
 
-	pthread_mutex_lock( &sem_plp );
+	pthread_mutex_lock( &mutex_sem_nuevo );
 
 	 queue_push(nuevos,  &dtb_nuevo);
 
 	pthread_cond_signal(&sem_nuevo_vacio);
-	pthread_mutex_unlock( &sem_plp );
+	pthread_mutex_unlock( &mutex_sem_nuevo );
 
 
 }
@@ -407,7 +458,7 @@ struct_dtb crear_dtb( char *path ){
 	struct_dtb dtb_nuevo;
 	dtb_nuevo.idDtb =id_total;
 	dtb_nuevo.escriptorio = string_duplicate( path );
-	dtb_nuevo.inicializado = 0;
+	dtb_nuevo.inicializado = 1;
 	dtb_nuevo.direcciones = NULL;
 
 	id_total++;
