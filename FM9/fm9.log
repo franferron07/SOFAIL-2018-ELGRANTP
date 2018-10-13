@@ -1,0 +1,34 @@
+[INFO] 19:09:19:266 El-Gran-TP-FM9/(8897:8897): 
+	[31;1m===========================================[0m
+	.::	Bievenido a El Gran TP - FM9	::.
+	[31;1m===========================================[0m
+[INFO] 19:09:19:268 El-Gran-TP-FM9/(8897:8897): .:: Cargando configuracion ::.
+[INFO] 19:09:19:268 El-Gran-TP-FM9/(8897:8897): .:: Imprimiendo configuracion ::.
+[INFO] 19:09:19:268 El-Gran-TP-FM9/(8897:8897): PUERTO: 8003
+[INFO] 19:09:19:268 El-Gran-TP-FM9/(8897:8897): MODO: SEG
+[INFO] 19:09:19:268 El-Gran-TP-FM9/(8897:8897): TAMANIO: 2048
+[INFO] 19:09:19:268 El-Gran-TP-FM9/(8897:8897): MAX_LINEA: 128
+[INFO] 19:09:19:268 El-Gran-TP-FM9/(8897:8897): TAM_PAGINA: 1024
+[INFO] 19:41:40:278 El-Gran-TP-FM9/(10346:10346): 
+	[31;1m===========================================[0m
+	.::	Bievenido a El Gran TP - FM9	::.
+	[31;1m===========================================[0m
+[INFO] 19:41:40:328 El-Gran-TP-FM9/(10346:10346): .:: Cargando configuracion ::.
+[INFO] 19:41:40:328 El-Gran-TP-FM9/(10346:10346): .:: Imprimiendo configuracion ::.
+[INFO] 19:41:40:328 El-Gran-TP-FM9/(10346:10346): PUERTO: 8003
+[INFO] 19:41:40:328 El-Gran-TP-FM9/(10346:10346): MODO: SEG
+[INFO] 19:41:40:328 El-Gran-TP-FM9/(10346:10346): TAMANIO: 2048
+[INFO] 19:41:40:328 El-Gran-TP-FM9/(10346:10346): MAX_LINEA: 128
+[INFO] 19:41:40:328 El-Gran-TP-FM9/(10346:10346): TAM_PAGINA: 1024
+[INFO] 19:41:40:330 El-Gran-TP-FM9/(10346:10352): Se inicio hilo con la consola
+[INFO] 19:41:40:330 El-Gran-TP-FM9/(10346:10351): Se inicio hilo principal FM9
+[INFO] 19:41:47:110 El-Gran-TP-FM9/(10346:10352): Comando dump, no se ha ingresado parámetro!
+
+[INFO] 19:41:52:960 El-Gran-TP-FM9/(10346:10352): Comando dump, no se ha ingresado parámetro!
+
+[WARNING] 19:41:56:310 El-Gran-TP-FM9/(10346:10352): El comando ingresado no fue encontrado
+
+[WARNING] 19:41:59:230 El-Gran-TP-FM9/(10346:10352): El comando ingresado no fue encontrado
+
+[WARNING] 19:42:03:548 El-Gran-TP-FM9/(10346:10352): El comando ingresado no fue encontrado
+

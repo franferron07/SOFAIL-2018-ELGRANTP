@@ -1,93 +1,76 @@
-/*
- ============================================================================
- Name        : FM9.c
- Author      : Quantum
- Version     :
- Copyright   : Sistemas Operativos 2018
- Description : Hello World in C, Ansi-style
- ============================================================================
- */
-
 #include "FM9.h"
 
-
-int main(void) {
-	puts("FM9"); /* prints FM9 */
-	logger = log_create("FM9.log", "FM9",false, LOG_LEVEL_INFO);
-	log_info(logger, "INICIO FM9");
-	//instancio el inicializador y reservo memoria
-	c_inicial = malloc(sizeof(config_inicial));
-	inicializador = config_create("fm9.cfg");
-	if (inicializador == NULL) {
-		free(c_inicial);
-		puts("No se encuentra archivo.");
-		log_error(logger, "No se encuentra archivo fm9.cfg");
-		exit(EXIT_FAILURE);
+int main(int argc, char *argv[]) {
+	if (inicializar() < 0) {
+		liberar_recursos(EXIT_FAILURE);
+		return -1;
 	}
 
-	//leo archivo
-	leer_configuracion(inicializador, c_inicial);
-	log_info(logger, "Leido archivo fm9.cfg");
-	//muestro consola valor leido de archivo como prueba
-	prueba_leer_archivo_cfg(c_inicial);
+	imprimir_config();
 
-	//Servidor con Hilos
-	log_info(logger, "Servidor con Hilos");
-	Socket socket = crear_socket("127.0.0.1",c_inicial->puerto_escucha);
+	pthread_create(&hilo_principal, NULL, (void*) iniciar_fm9, NULL);
+	pthread_create(&hilo_consola, NULL, (void*) escuchar_consola, NULL);
+
+	pthread_join(hilo_consola, NULL);
+
+	Socket socket = crear_socket("127.0.0.1", string_itoa(fm9.puerto));
 	//Asocio el servidor a un puerto
 	asociar_puerto(socket);
 	//Escucho Conexiones Entrantes
 	escuchar(socket);
 
 	/*Por cada una de las conexiones que sean aceptadas, se lanza
-	un Hilo encargado de atender la conexión*/
-	while(1)
-	{
+	 un Hilo encargado de atender la conexión*/
+	while (1) {
 
-		int socketCliente = Acepta_Conexion_Cliente(socket.socket);
-		pthread_create (&idHilo, NULL, (void*)nueva_conexion, &socketCliente);
+		int socket_cliente = Acepta_Conexion_Cliente(socket.socket);
+		pthread_create(&id_hilo, NULL, (void*) nueva_conexion, &socket_cliente);
 	}
 
-
-
-
-	/* libero memoria de inicializacion  */
-	config_destroy(inicializador);
-	/* libero loggger de logging */
-	log_destroy(logger);
-	/* libero struct config_inicial  */
-	liberarMemoriaConfig(c_inicial);
-	return EXIT_SUCCESS;
+	pthread_cancel(hilo_principal);
+	liberar_recursos(EXIT_SUCCESS);
+	return 0;
 }
 
+int inicializar() {
+	if (crear_log() == EXIT_FAILURE)
+		terminar_exitosamente(EXIT_FAILURE);
 
-void nueva_conexion (void *parametro) {
-    int *sock = (int *) parametro;
-    puts("Nueva conexion perrooo!!");
-    log_info(logger, "Nueva conexion perrooo!!");
-    //cerrar_socket(*sock);
+	print_header(FM9, fm9_log);
+
+	if (cargar_archivo_config(FILE_CONFIG_FM9) < 0) {
+		return -1;
+	}
+
+	return 0;
 }
 
-void leer_configuracion(t_config *inicializador , config_inicial *c_inicial ){
-	//tomo las key para inicializar duplicando el string devuelvo para luego hacer los free
-	c_inicial->puerto_escucha = string_duplicate(config_get_string_value(inicializador, "PUERTO"));
-	c_inicial->modo_ejecucion = string_duplicate(config_get_string_value(inicializador, "MODO"));
-	c_inicial->tam_memoria = config_get_int_value(inicializador, "TAMANIO");
-	c_inicial->tam_linea = config_get_int_value(inicializador, "MAX_LINEA");
-	c_inicial->tam_pagina = config_get_int_value(inicializador, "TAM_PAGINA");
+void escuchar_consola() {
+	log_info(fm9_log, "Se inicio hilo con la consola");
+
+	while (true) {
+		if (consola_leer_comando(fm9_log) == CONSOLA_TERMINAR) {
+			pthread_exit(0);
+			return;
+		}
+	}
 }
 
-void prueba_leer_archivo_cfg(config_inicial* c_inicial) {
-	puts("lectura de archivo correcta");
-	printf("PUERTO: %s \n",c_inicial->puerto_escucha);
-	printf("MODO: %s \n",c_inicial->modo_ejecucion);
-	printf("TAMANIO: %d \n",c_inicial->tam_memoria);
-	printf("MAX_LINEA: %d \n" ,c_inicial->tam_linea);
-	printf("TAM_PAGINA: %d \n",c_inicial->tam_pagina);
+void iniciar_fm9() {
+	log_info(fm9_log, "Se inicio hilo principal FM9");
 }
 
-void liberarMemoriaConfig(config_inicial* c_inicial) {
-	free(c_inicial->puerto_escucha);
-	free(c_inicial->modo_ejecucion);
-	free(c_inicial);
+void liberar_recursos(int tipo_salida) {
+	print_footer(FM9, fm9_log);
+	destruir_archivo_log(fm9_log);
+	terminar_exitosamente(tipo_salida);
+}
+
+void terminar_exitosamente(int ret_val) {
+	exit(ret_val);
+}
+
+void nueva_conexion(void *parametro) {
+	int *sock = (int *) parametro;
+	log_info(fm9_log, "Nueva conexion %d perrooo!!", sock);
 }
