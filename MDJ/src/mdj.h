@@ -49,7 +49,7 @@ Socket mdj_socket;//socket mdj
 void liberar_memoria_de_configuracion(MDJ* configuracion_inicial);
 //freeshea el puntero de configuracion inicial
 void montar_configuracion(t_config* ,MDJ*);
-void mostrar_configuracion(MDJ* configuracion_inicial);
+void mostrar_configuracion();
 t_config* cargar_en_memoria_cfg(char*);
 void config_destroy_mdj(MDJ* );
 //--------------
@@ -57,6 +57,6 @@ void mdj_inicializar();
 
 
 void mostrar_y_guardar_log(char * s, ...); //imprime como printf y guarda en log
-void guardar_leyenda(char * ); // solo guarda log
+void guardar_log(char * ); // solo guarda log
 
 #endif /* MDJ_H_ */

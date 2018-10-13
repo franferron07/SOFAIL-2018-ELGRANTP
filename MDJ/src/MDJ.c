@@ -10,58 +10,88 @@
 
 
 #include "mdj.h"
+#include <string.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 #define  MAX_INPUT_BUFFER 1000
-
 int i;
- char buffer[MAX_INPUT_BUFFER];							/* Buffer para leer de los socket */
+// char buffer[MAX_INPUT_BUFFER];							/* Buffer para leer de los socket */
+ char *buffer=NULL;				/* Buffer para leer de los socket */
  numeroClientes = 0;
  char leyenda_temporal[MAX_INPUT_BUFFER];
- char buffer_input[MAX_INPUT_BUFFER];
+ char* buffer_input_keyboard=NULL; //linea de entrada de teclado
 
+ char* path_seleccionado[MAX_INPUT_BUFFER];
 pthread_attr_t hilo_escucha;
+pthread_attr_t hilo_consola_fifa;
+//pthread_mutex_t mutex_recibo_mensaje;
 
 int main(void) {
 		mdj_init();
-		mostrar_configuracion(mdj);
-		inicializando_socket();
+		mostrar_configuracion();
+
 
 		puts("MDJ escuchando .."); /* prints MDJ */
 
+//		pthread_create(&hilo_consola_fifa,NULL,consola_fifa(),NULL);
 
-	 	pthread_create(&hilo_escucha, NULL, escuchar_mensajes_entrantes(), NULL);
-	 	pthread_join(&hilo_escucha, NULL);
+			pthread_create(&hilo_escucha, NULL, escuchar_mensajes_entrantes(), NULL);
 
 
+			pthread_join(&hilo_escucha, NULL);
+//			pthread_join(&hilo_consola_fifa,NULL);
 
-		 cerrar_socket(mdj_socket);
 	 	mdj_finish_and_free();
 	 	exit(EXIT_SUCCESS);
 
 	 }
+void consola_fifa(){
+	puts("press \"exit\" para salir de consola ");
+	while(1){
+		 buffer_input_keyboard = readline("fifa@mdj=> ");
+//		 if(buffer_input_keyboard) add_history(buffer_input_keyboard);//agrega al historial , como la terminal
+		 guardar_log_v2("fifa@mdj=> %s",buffer_input_keyboard);
+		 if(!strncmp(buffer_input_keyboard, "exit", 4)) break; //pthread_exit(EXIT_FAILURE);//si hay algun hilo usando esta funcion sale , por "exit"{
+		 ejecutar_linea_entrante();
+		 free(buffer_input_keyboard);
+	}
+}
+void  ejecutar_linea_entrante(){
+	printf("ingreso \"%s\"  con %d letras \n", buffer_input_keyboard,strlen(buffer_input_keyboard));
+	system(buffer_input_keyboard);
 
-
+}
 void mdj_finish_and_free(){
 	 config_destroy_mdj(mdj);
-
 	 mostrar_y_guardar_log("MDJ terminando..");
 	 log_info(logger, "Finish.cfg");
 	 log_destroy(logger);
-
+	 free(buffer);
 }
 void mostrar_y_guardar_log(char * s, ...){
 	va_list resto;
 	va_start(resto,s);
 	vsprintf(leyenda_temporal,s, resto );
-	guardar_leyenda(leyenda_temporal);
-//	puts("");
 	printf(leyenda_temporal);
+	log_info(logger,leyenda_temporal);
 	va_end(resto);
 //	free(s);
 }
-void guardar_leyenda(char * s){
-	log_info(logger, s);
+void guardar_log(char* s ){
+	log_info(logger,s);
+}
+
+void guardar_log_v2(char * s, ...){
+	va_list resto;
+	va_start(resto,s);
+	vsprintf(leyenda_temporal,s, resto );
+//	printf(leyenda_temporal);
+	log_info(logger,leyenda_temporal);
+	va_end(resto);
 //	free(s);
 }
+
+
 void inicializando_socket(){
 	mdj_socket=crear_socket(mdj->ip,mdj->puerto);
 		 puts("conectando socket");
@@ -73,6 +103,7 @@ void inicializando_socket(){
 }
 
 void escuchar_mensajes_entrantes(){
+	inicializando_socket();
 	while (1)
 		 		{
 		 			/* Cuando un cliente cierre la conexión, se pondrá un -1 en su descriptor
@@ -110,8 +141,13 @@ void escuchar_mensajes_entrantes(){
 		 				if (FD_ISSET (socketCliente[i], &descriptoresLectura))
 		 				{
 		 					/* Se lee lo enviado por el cliente y se escribe en pantalla */
-		 					if ((Lee_Socket (socketCliente[i], (char *)&buffer, sizeof(buffer)))){
+//		 					int bytes_recibidos=Lee_Socket(  socketCliente[i], (char *)&buffer, sizeof(buffer));
+		 					int recibi_caracteres= Lee_Socket(  socketCliente[i],buffer, MAX_INPUT_BUFFER);
+		 					int cant_caracteres_recibidos=strlen(buffer);
+		 					if (recibi_caracteres){
 		 						mostrar_y_guardar_log("Cliente %d envía %s \n", i+1, buffer);
+		 						mostrar_y_guardar_log("cant letras recibidos => %d \n ",cant_caracteres_recibidos);
+//		 						mostrar_y_guardar_log("cant caracteres recibidos => %d \n ",cant_caracteres_recibidos);
 
 		 					}
 		 					else
@@ -119,8 +155,12 @@ void escuchar_mensajes_entrantes(){
 		 						/* Se indica que el cliente ha cerrado la conexión y se
 		 						 * marca con -1 el descriptor para que compactaClaves() lo
 		 						 * elimine */
-		 						mostrar_y_guardar_log("Cliente %d ha cerrado la conexión \n", i+1);
+		 						guardar_log_v2("Cliente %d ha cerrado la conexión \n", i+1);
+//		 						perror(leyenda_temporal);
+		 						 goto salto2;
 		 						socketCliente[i] = -1;
+		 						pthread_exit(NULL);//ver si corta el hilo
+//		 						return 0;
 		 					}
 		 				}
 		 			}
@@ -131,19 +171,21 @@ void escuchar_mensajes_entrantes(){
 		 				nuevoCliente (socketServidor, socketCliente, &numeroClientes);
 		 		}
 
+	salto2://puts("");
+	cerrar_socket(mdj_socket);
 }
 
 
 void mdj_init(){
 	logger = log_create("MDJ.log", "MDJ",false, LOG_LEVEL_INFO);
-	guardar_leyenda("INICIO MDJ");
+	guardar_log("INICIO MDJ");
 
 	mdj=malloc(sizeof(MDJ));
 	t_config *configuracion_cfg_temporal=cargar_en_memoria_cfg("mdj.cfg");
 	montar_configuracion(configuracion_cfg_temporal,mdj);
 	config_destroy(configuracion_cfg_temporal);
 
-
+	buffer=malloc(MAX_INPUT_BUFFER);
 }
 
 
@@ -152,9 +194,8 @@ t_config* cargar_en_memoria_cfg(char* dir){
 	aux=config_create(dir);
 	if(aux==NULL){
 		free(mdj);
-		puts("Error");
-
-		log_error(logger, "No se encuentra archivo MDJ.cfg");
+		mostrar_y_guardar_log("No se encuentra archivo MDJ.cfg");
+		log_error(logger, leyenda_temporal);
 	}
 	//config_create() carga en memoria el archivo .cfg ,en memoria se lo encuentra con &configuracion_temporal
 	return aux;
@@ -176,11 +217,11 @@ void config_destroy_mdj(MDJ* mdj_configuracion_){
 	free(mdj_configuracion_);
 
 }
-void mostrar_configuracion(MDJ* config){
-	mostrar_y_guardar_log("iniciando lectura de configuracion...\n");
-	mostrar_y_guardar_log("PUNTO_DE_MONTAJE = %s \n",config->punto_de_montaje);
-	mostrar_y_guardar_log("RETARDO = %d \n",config->retardo);
-	mostrar_y_guardar_log("PUERTO MDJ = %s \n",config->puerto);
-	mostrar_y_guardar_log("IP MDJ = %s \n",config->ip);
-	mostrar_y_guardar_log("---fin lectura de configuracion --- .. \n\n");
+void mostrar_configuracion(){
+	printf("iniciando lectura de configuracion...\n");
+	printf("PUNTO_DE_MONTAJE = %s \n",mdj->punto_de_montaje);
+	printf("RETARDO = %d \n",mdj->retardo);
+	printf("PUERTO MDJ = %s \n",mdj->puerto);
+	printf("IP MDJ = %s \n",mdj->ip);
+	printf("---fin lectura de configuracion --- .. \n\n");
 }
