@@ -10,52 +10,7 @@
 
 
 #include "safaHeader.h"
-#include <semaphore.h>
 
-//GLOBALES
-
-config_inicial *c_inicial = NULL;
-
-t_log* logger= NULL;
-Socket socket_servidor;
-
-pthread_t hilo_dam;
-pthread_t hilo_consola;
-pthread_t hilo_plp;
-pthread_t hilo_pcp;
-
-
-//comienzo safa en un estado corrupto
-int conecto_cpu = 0 ;
-int conecto_dam = 0;
-
-
-
-
-//ids para asignar a los dtbs
-int id_total = 1;
-
-
-//SEMAFOROS
-pthread_mutex_t mutex_sem_nuevo;
-sem_t sem_nuevo_vacio;
-sem_t mutex_dtb_dummy;
-
-sem_t mutex_listo;
-sem_t sem_listo_vacio;
-
-
-
-//ESTADOS
-t_queue *nuevos=NULL;
-t_queue *listos=NULL;
-t_queue *ejecucion=NULL;
-t_queue *bloqueados=NULL;
-t_queue *terminados=NULL;
-
-
-//creo dtb_dummy
-struct_dtb dtb_dummy;
 
 
 int main(void) {
@@ -73,11 +28,16 @@ int main(void) {
 
 
     //inicio semaforos
-    pthread_mutex_init( &mutex_sem_nuevo , NULL );
+    sem_init( &sem_nuevo_mutex , 0 , 1 );
     sem_init(&sem_nuevo_vacio, 0, 0);
-    sem_init(&mutex_dtb_dummy, 0, 1);
-    sem_init( &mutex_listo , 0 , 1 );
+    sem_init(&sem_dtb_dummy_mutex, 0, 1);
+    sem_init( &sem_listo_mutex , 0 , 1 );
     sem_init( &sem_listo_vacio , 0 , 0 );
+
+    sem_init( &sem_listo_max , 0 , c_inicial->multiprogramacion );
+
+    sem_init( &sem_cpu_mutex , 0 , 1 );
+
 
 
     int buffer;
@@ -116,7 +76,8 @@ int main(void) {
 	//PCP
 	pthread_create(&hilo_pcp , NULL , (void*)pcp  , NULL );
 
-	/*
+
+
 	// crear socket  //
 	Socket socket_servidor = crear_socket(  "127.0.0.1" , c_inicial->puerto_safa);
 	log_info(logger, "Creo socket %s", "INFO");
@@ -218,7 +179,7 @@ int main(void) {
 
 	cerrar_socket(socket_servidor);
 
-*/
+
 
 	pthread_join(hilo_plp,NULL);
 	pthread_join(hilo_pcp,NULL);
@@ -236,10 +197,13 @@ int main(void) {
 
 	//destruyo semaforos
 	sem_destroy(&sem_nuevo_vacio);
-	sem_destroy(&mutex_dtb_dummy);
-	sem_destroy(&mutex_listo);
+	sem_destroy(&sem_nuevo_mutex);
+	sem_destroy(&sem_dtb_dummy_mutex);
+	sem_destroy(&sem_listo_mutex);
 	sem_destroy(&sem_listo_vacio);
+	sem_destroy(&sem_listo_max);
 
+	sem_destroy(&sem_cpu_mutex);
 
 	return EXIT_SUCCESS;
 }
@@ -262,9 +226,28 @@ void conexion_dam(void* socket){
 
 void conexion_cpu(void* socket){
 
+	//inicializo struct cpu y lo pongo en list cpu
+	struct_cpu *cpu;
+	cpu = crear_struct_cpu( (int)*socket) ;
+
+	//pongo struct cpu en la cola de cpus para esperar dtbs  a ejecutar
+	sem_wait( &sem_cpu_mutex );
+
+		queue_push( cpus , cpu );
+
+	sem_post( &sem_cpu_mutex );
+
+
+
 	while(1){
 
-		printf("conexion cpu correcta");
+		//espero que pcp haga un post para comenzar ejecucion
+		sem_wait( &cpu->sem_mutex_ejecucion_cpu );
+
+			//aca va a comenzar a hablar con cpu real para pasarle los datos del dtb
+			printf("conexion cpu correcta");
+
+		sem_post( &cpu->sem_mutex_ejecucion_cpu );
 
 	}
 
@@ -275,43 +258,51 @@ void conexion_cpu(void* socket){
 }
 
 
+struct_cpu* crear_struct_cpu( int socket ){
+
+	struct_cpu cpu_nueva;
+
+	cpu_nueva.ocupada=0;
+	sem_init( &cpu_nueva.sem_mutex_ejecucion_cpu , 0 , 0 );
+	cpu_nueva.socket = socket;
+
+
+	return &cpu_nueva;
+
+}
+
+
+
 
 void plp(){
 
-
-	//aca verificar grado de multiprogramacion , si se lo permite hacer el pop
+	struct_dtb *dtb;
 
 	while(1){
 
 		//controlo lista no vacia
 		sem_wait( &sem_nuevo_vacio);
 
-		struct_dtb *dtb;
-		//seccion critica
-		pthread_mutex_lock(&mutex_sem_nuevo );
+			//Tomo de nuevos dtb
+			sem_wait(&sem_nuevo_mutex );
 
-			dtb = queue_pop( nuevos);
+				dtb = queue_pop( nuevos);
+			sem_post(&sem_nuevo_mutex );
 
-		pthread_mutex_unlock(&mutex_sem_nuevo );
+			//tomo dtb dummy y lo inicializo
+			sem_wait( &sem_dtb_dummy_mutex );
 
-		//hecho el pop debo ir a desbloquear el dtb dummy , incializarlo ,  y pasarlo a cola de ready.
+				dtb_dummy.idDtb = dtb->idDtb;
+				dtb_dummy.escriptorio = string_duplicate( dtb->escriptorio );
 
-		//inicializo dtb dummy
-		sem_wait( &mutex_dtb_dummy );
+			//agrego a cola de listos el dummy verificando multiprogramacion
+			sem_wait( &sem_listo_max );
 
-			dtb_dummy.idDtb = dtb->idDtb;
-			dtb_dummy.escriptorio = string_duplicate( dtb->escriptorio );
+			sem_wait( &sem_listo_mutex );
+				queue_push( listos , &dtb_dummy  );
+			sem_post( &sem_listo_mutex );
 
-		sem_post(&mutex_dtb_dummy);
-
-		//si grado de multprogramacion lo permite pasarlo a new.  -->pendiente
-
-		//agrego a cola de listos el dummy
-		sem_wait( &mutex_listo );
-
-			queue_push( listos , &dtb_dummy  );
-
-		sem_post( &mutex_listo );
+			sem_post( &sem_listo_vacio );
 
 
 	}
@@ -320,6 +311,37 @@ void plp(){
 
 
 void pcp(){
+
+	struct_dtb *dtb = NULL;
+	struct_cpu *cpu_libre = NULL;
+
+	while(1){
+
+		sem_wait( &sem_listo_vacio );
+
+			//obtengo dtb segun algoritmo
+			dtb = obtener_proximo_dtb( c_inicial->algoritmo );
+
+			//pasarlo a ejecucion de la cpu libre
+			cpu_libre = obtener_cpu_libre();
+			if( *cpu_libre != NULL ){
+					cpu_libre->dtb_ejecutar( dtb );
+				sem_post(&cpu_libre->sem_mutex_ejecucion_cpu); //aviso a hilo cpu que puede comenzar con la ejecucion del dtb
+			}
+
+
+		//estas ejecuciones tendran que hacerlo los algoritmos
+		sem_wait( &sem_listo_mutex );
+			dtb = queue_pop(listos);
+		sem_post( &sem_listo_mutex );
+
+		sem_post( &sem_listo_max );
+
+
+		//segun algoritmo
+
+
+	}
 
 
 }
@@ -442,12 +464,11 @@ void ejecutar_path_plp( char* path){
 
 	struct_dtb dtb_nuevo = crear_dtb(path);
 
-	pthread_mutex_lock( &mutex_sem_nuevo );
+	sem_wait( &sem_nuevo_mutex );
 
-	 queue_push(nuevos,  &dtb_nuevo);
-
-	pthread_cond_signal(&sem_nuevo_vacio);
-	pthread_mutex_unlock( &mutex_sem_nuevo );
+		queue_push(nuevos,  &dtb_nuevo);
+	sem_post(&sem_nuevo_vacio);
+	sem_post( &sem_nuevo_mutex );
 
 
 }
@@ -459,6 +480,7 @@ struct_dtb crear_dtb( char *path ){
 	dtb_nuevo.idDtb =id_total;
 	dtb_nuevo.escriptorio = string_duplicate( path );
 	dtb_nuevo.inicializado = 1;
+	dtb_nuevo.quantum = c_inicial->quantum;
 	dtb_nuevo.direcciones = NULL;
 
 	id_total++;
