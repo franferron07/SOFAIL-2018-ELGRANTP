@@ -14,34 +14,38 @@
 #include <commons/log.h>
 #include <commons/config.h> //Commons config archivo
 #include <commons/string.h> //Commons string
-#include <qcommons/socket_viejo.h> //Libreria Socket Cliente
-#include <qcommons/socketServer.h> //Libreria Socket Servidor
+#include <qcommons/socket.h> //Libreria Sockets
+#include <qcommons/console.h>
 
-typedef struct {
-	char *puerto_dam;
-	char *ip_safa;
-	char *puerto_safa;
-	char *ip_mdj;
-	char *puerto_mdj;
-	char *ip_fm9;
-	char *puerto_fm9;
-	int transfer_size;
-} config_inicial;
+#include "config/config.h"
+
+//CONSTANTES
+#define TAMANIO_CANT_CLIENTES 3
+#define FILE_CONFIG_DAM "dam.cfg"
+#define DAM "DAM"
 
 //Variables Globales
-config_inicial *c_inicial = NULL;
-Socket socket_safa;
-Socket socket_mdj;
-Socket socket_fm9;
+int socket_dam;
+
+int socket_fm9;
+int socket_safa;
+int socket_mdj;
 
 //Funciones
-void nueva_conexion (void *parametro);
-void liberarMemoriaConfig(config_inicial* c_inicial); //libera memoria de la configuracion inicial
-void leer_configuracion( t_config* , config_inicial*  ); //inicializa la configuracion inicial(lectura de archivo)
-void prueba_leer_archivo_cfg(config_inicial* c_inicial); //prueba leer archivo configuracion
+int inicializar();
 
-Socket conectar_safa(config_inicial* c_inicial);
-Socket conectar_mdj(config_inicial* c_inicial);
-Socket conectar_fm9(config_inicial* c_inicial);
+void servidorDAM();
+void aceptarConexiones();
+void realizarConexiones();
+
+int conectar_safa(dam_config);
+int conectar_mdj(dam_config);
+int conectar_fm9(dam_config);
+
+void conexion_cpu (void *parametro);
+
+void liberar_recursos(int tipo_salida);
+void terminar_exitosamente();
+
 
 #endif /* DAMHEADER_H_ */
