@@ -7,46 +7,38 @@
 #ifndef CPU_H_
 #define CPU_H_
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <qcommons/console.h>
 #include <stdbool.h>
-#include <commons/log.h>
-#include <commons/config.h> //Commons config archivo
 #include <commons/string.h> //Commons string
 #include <qcommons/socket_viejo.h> //Libreria Socket Cliente
 #include <qcommons/socketServer.h> //Libreria Socket Servidor
 
+#include "config/config.h"
 
-typedef struct {
-	char *ip_safa;
-	char *puerto_safa;
-	char *ip_diego;
-	char *puerto_diego;
-	char *ip_fm9;
-	char *puerto_fm9;
-	int retardo;
-} config_inicial;
+#define FILE_CONFIG_CPU "cpu.cfg"
+#define CPU "CPU"
+
 
 //Variables Globales
-config_inicial *c_inicial = NULL;
+cpu_config *c_inicial = NULL;
 t_config *inicializador=NULL;
 t_log *logger= NULL;
 
 Socket socket_safa;
 Socket socket_dam;
 Socket socket_fm9;
+int quantum;
 
 //Funciones
-void inicializar_configuracion();
-void cargar_configuracion( t_config* , config_inicial*  ); //inicializa la configuracion inicial(lectura de archivo)
-void imprimir_configuracion(config_inicial* c_inicial); //prueba leer archivo configuracion
-void liberar_memoria_configuracion(config_inicial* c_inicial); //libera memoria de la configuracion inicial
+void liberar_memoria_cpu();
+int inicializar();
+void liberar_recursos(int tipo_salida);
+void terminar_exitosamente();
 
 
-
-Socket conectar_safa(config_inicial* c_inicial);
-Socket conectar_dam(config_inicial* c_inicial);
-Socket conectar_fm9(config_inicial* c_inicial);
+Socket conectar_safa(cpu_config* c_inicial);
+Socket conectar_dam(cpu_config* c_inicial);
+Socket conectar_fm9(cpu_config* c_inicial);
 
 
 //Funciones de Parser

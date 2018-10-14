@@ -10,20 +10,24 @@
 
 #include "CPU.h"
 
-int main(void) {
-	puts("CPU"); /* prints CPU */
+int main(int argc, char *argv[]) {
+	if (inicializar() < 0) {
+		liberar_recursos(EXIT_FAILURE);
+		return -1;
+	}
 
-	logger = log_create("CPU.log", "CPU",false, LOG_LEVEL_INFO);
-	log_info(logger, "INICIO CPU");
+	imprimir_config();
 
-	inicializar_configuracion();
 
-	/*
+
+/*
 	socket_dam = conectar_dam(c_inicial);
 	socket_safa = conectar_safa(c_inicial);
 	socket_fm9 = conectar_fm9(c_inicial);
 	log_info(logger, "Realizada Conexiones dam/safa/fm9");
-	*/
+*/
+
+
 	while(1){
 		char linea[50];
 		/*ejemplos de lineas
@@ -36,7 +40,7 @@ int main(void) {
 						"close /equipos/Racing.txt"
 						"crear /equipos/Racing.txt 11"
 						"borrar /equipos/Racing.txt"
-		*/
+*/
 
 		printf("Ingrese la sentencia: ");
 		scanf(" %[^\n]s ",linea);
@@ -44,6 +48,29 @@ int main(void) {
 
 	}
 
+
+/*
+	int buffer_recv;
+
+	while(1){
+		Lee_Socket(socket_safa, (char*)buffer_recv,sizeof(int));
+
+		if(buffer_recv == 20)
+		{
+		    log_info(logger, "estoy recibiendo quantum");
+		    Lee_Socket(socket_safa, (char*)buffer_recv,sizeof(int));
+		    quantum = buffer_recv;
+
+		}
+		else
+		{
+		    log_error(logger, "No se Pudo Conectar a SAFA");
+		}
+
+
+
+	}
+*/
 
 
 	/* libero loggger de logging */
@@ -54,7 +81,6 @@ int main(void) {
 
 
 void ejecutar_linea(char linea[]){
-	//printf("Lei linea: %s\n",linea);
 
 	if( _esAbrirArchivo(linea) ){
 		puts("Es abrir archivo");
@@ -72,8 +98,6 @@ void ejecutar_linea(char linea[]){
 		printf("Es asignar linea.\n");
 		char **operation = string_split(linea + strlen("asignar "), " ");
 		string_iterate_lines(operation, (void*)puts);
-
-
 
 
 		liberarListaDeStrings(operation);
@@ -173,21 +197,21 @@ void liberarListaDeStrings(char** operation) {
 }
 
 
-Socket conectar_dam(config_inicial* c_inicial){
+Socket conectar_dam(cpu_config* c_inicial){
 	Socket socket;
 
-	socket = crear_socket(c_inicial->ip_diego , c_inicial->puerto_diego);
+	socket = crear_socket((char *)c_inicial->ip_diego ,(char *)c_inicial->puerto_diego);
 	conectar(socket);
 
 	return socket;
 }
 
-Socket conectar_safa(config_inicial* c_inicial){
+Socket conectar_safa(cpu_config* c_inicial){
 	Socket socket;
 
 	int test = 0;
 
-	socket = crear_socket(c_inicial->ip_safa , c_inicial->puerto_safa);
+	socket = crear_socket((char *)c_inicial->ip_safa , (char *)c_inicial->puerto_safa);
 	conectar(socket);
 
 	Escribe_Socket (socket.socket, (char *)&test , sizeof(int) );
@@ -195,73 +219,41 @@ Socket conectar_safa(config_inicial* c_inicial){
 	return socket;
 }
 
-Socket conectar_fm9(config_inicial* c_inicial){
+Socket conectar_fm9(cpu_config* c_inicial){
 	Socket socket;
 
-	socket = crear_socket(c_inicial->ip_fm9 , c_inicial->puerto_fm9);
+	socket = crear_socket((char *)c_inicial->ip_fm9 , (char *)c_inicial->puerto_fm9);
 	conectar(socket);
 
 	return socket;
 }
 
+int inicializar() {
+	if (crear_log() == EXIT_FAILURE)
+		terminar_exitosamente(EXIT_FAILURE);
 
-void inicializar_configuracion() {
-	//instancio el inicializador y reservo memoria para c_inicial
-	c_inicial = malloc(sizeof(config_inicial));
-	inicializador = config_create("cpu.cfg");
-	if (inicializador == NULL) {
-		free(c_inicial);
-		puts("No se encuentra archivo.");
-		log_error(logger, "No se encuentra archivo CPU.cfg");
-		exit(EXIT_FAILURE);
+	print_header(CPU, cpu_log);
+
+	if (cargar_archivo_config(FILE_CONFIG_CPU) < 0) {
+		return -1;
 	}
-	//leo archivo
-	cargar_configuracion(inicializador, c_inicial);
-	log_info(logger, "Leido archivo cpu.cfg");
-	//muestro consola valor leido de archivo como prueba
-	imprimir_configuracion(c_inicial);
-	/* libero memoria de inicializacion  */
-	config_destroy(inicializador);
+
+	return 0;
 }
 
-void cargar_configuracion(t_config *inicializador , config_inicial *c_inicial ){
 
-	//tomo las key para inicializar duplicando el string devuelvo para luego hacer los free
-	c_inicial->ip_safa = string_duplicate(config_get_string_value(inicializador, "IP_SAFA"));
-	c_inicial->puerto_safa = string_duplicate(config_get_string_value(inicializador, "PUERTO_SAFA"));
-	c_inicial->ip_diego = string_duplicate(config_get_string_value(inicializador, "IP_DIEGO"));
-	c_inicial->puerto_diego = string_duplicate(config_get_string_value(inicializador, "PUERTO_DIEGO"));
-	c_inicial->ip_fm9 = string_duplicate(config_get_string_value(inicializador, "IP_FM9"));
-	c_inicial->puerto_fm9 = string_duplicate(config_get_string_value(inicializador, "PUERTO_FM9"));
-	c_inicial->retardo= config_get_int_value(inicializador, "RETARDO");
-
+void liberar_recursos(int tipo_salida) {
+	print_footer(CPU, cpu_log);
+	destruir_archivo_log(cpu_log);
+	terminar_exitosamente(tipo_salida);
 }
 
-void imprimir_configuracion(config_inicial* c_inicial) {
-	puts("lectura de archivo correcta");
-	printf("IP_SAFA: %s \n",c_inicial->ip_safa);
-	printf("PUERTO_SAFA: %s \n",c_inicial->puerto_safa);
-	printf("IP_DIEGO: %s \n",c_inicial->ip_diego);
-	printf("PUERTO_DIEGO: %s \n" ,c_inicial->puerto_diego);
-	printf("IP_FM9: %s \n",c_inicial->ip_fm9);
-	printf("PUERTO_FM9: %s \n" ,c_inicial->puerto_fm9);
-	printf("RETARDO %d \n", c_inicial->retardo);
-}
-
-void liberar_memoria_configuracion(config_inicial* c_inicial) {
-
-	free(c_inicial->ip_safa);
-	free(c_inicial->puerto_safa);
-	free(c_inicial->ip_diego);
-	free(c_inicial->puerto_diego);
-	free(c_inicial->ip_fm9);
-	free(c_inicial->puerto_fm9);
-	free(c_inicial);
-}
 
 void liberar_memoria_cpu() {
 	/* libero loggger de logging */
 	log_destroy(logger);
-	/* libero struct config_inicial  */
-	liberar_memoria_configuracion(c_inicial);
+}
+
+void terminar_exitosamente(int ret_val) {
+	exit(ret_val);
 }
