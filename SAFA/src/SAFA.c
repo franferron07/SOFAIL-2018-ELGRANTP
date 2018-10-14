@@ -228,7 +228,7 @@ void conexion_cpu(void* socket){
 
 	//inicializo struct cpu y lo pongo en list cpu
 	struct_cpu *cpu;
-	cpu = crear_struct_cpu( (int)*socket) ;
+	cpu = crear_struct_cpu((int)*socket);
 
 	//pongo struct cpu en la cola de cpus para esperar dtbs  a ejecutar
 	sem_wait( &sem_cpu_mutex );

@@ -14,7 +14,7 @@
 #include <commons/log.h>
 #include <commons/config.h> //Commons config archivo
 #include <commons/string.h> //Commons string
-#include <qcommons/socket.h> //Libreria Socket Cliente
+#include <qcommons/socket_viejo.h> //Libreria Socket Cliente
 #include <qcommons/socketServer.h> //Libreria Socket Servidor
 
 typedef struct {

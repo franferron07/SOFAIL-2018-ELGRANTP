@@ -1,48 +1,22 @@
-/*
- * socket.h
- *
- *  Created on: 15 abr. 2018
- *      Author: utnso
- */
+#ifndef SOCKETCOMMONS_H
+#define SOCKETCOMMONS_H
 
-/* Mini Libreria para el Manejo Feliz de Sockets */
-#ifndef SOCKETHEADER_H_
-#define SOCKETHEADER_H_
+#define PACKAGE_SIZE 1024
 
-#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>    //strlen
+#include <stdlib.h>    //strlen, malloc
+#include <netinet/in.h>
+#include <netdb.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netdb.h>
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
+#include <arpa/inet.h> //inet_addr
+#include <unistd.h>    //write
 
-typedef struct {
-	int socket;
-	struct addrinfo hints;
-	struct addrinfo *server_info;
-} Socket;
+int obtener_socket_cliente(int* socket_cliente, const char* direccion_ip,
+		const int puerto);
+int configurar_socket_servidor(int* socket_servdor, const char* direccion_ip,
+		const int puerto, const int cantidad_clientes);
+int aceptar_conexion(int socket_servidor);
 
-
-
-#endif /* SOCKETHEADER_H_ */
-
-/*Crea un socket devuelve una estructura feliz Socket
-que contiene toda la info necesaria para los demas funciones */
-Socket crear_socket(char* ip, char* port);
-
-/*Permite conectarse*/
-void conectar(Socket sock);
-
-/*Cierra socket*/
-void cerrar_socket(Socket sock);
-
-/** Lee Datos de tamaño Longitud de un socket (fd=Socket).
- * Devuelve el numero de bytes leidos o -1 si ha habido error */
-int Lee_Socket (int fd, char *Datos, int Longitud);
-
-/** Envia Datos de tamaño Longitud por el socket (fd=Socket).
- * Devuelve el número de bytes escritos o -1 si ha habido error. */
-int Escribe_Socket (int fd, char *Datos, int Longitud);
-
+#endif

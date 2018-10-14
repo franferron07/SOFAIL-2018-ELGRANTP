@@ -13,11 +13,11 @@
 #include <commons/config.h> //Commons config archivo
 #include <commons/string.h> //Commons string
 #include <commons/log.h> //Commons log
-#include <qcommons/socket.h> //Socket Cliente
 #include <qcommons/socketServer.h> //Socket Servidor
 #include <pthread.h> //hilos
 #include <readline/readline.h> //biblioteca del readline para consola
 #include<commons/collections/queue.h> //Colas
+#include <qcommons/socket_viejo.h> //Socket Cliente
 #include <semaphore.h> //Semaforos
 
 typedef struct {
