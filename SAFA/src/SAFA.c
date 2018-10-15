@@ -7,16 +7,27 @@ int main(int argc, char *argv[]) {
 	}
 
 	sem_init(&sem_cpus, 0, 0);
+	sem_init(&sem_nuevo_vacio, 0, 0);
+	sem_init(&sem_dtb_dummy_mutex, 0, 1);
+	sem_init(&sem_listo_mutex, 0, 1);
+	sem_init(&sem_listo_vacio, 0, 0);
+	sem_init(&sem_listo_max, 0, safa.multiprogramacion);
+	sem_init(&sem_cpu_mutex, 0, 1);
 	imprimir_config();
 
 	pthread_mutex_init(&mutex_consola, NULL);
 	pthread_mutex_init(&mutex_planificador, NULL);
 
+
 	pthread_create(&hilo_principal, NULL, (void*) iniciar_safa, NULL);
 	pthread_create(&hilo_consola, NULL, (void*) escuchar_consola, NULL);
 	pthread_create(&hilo_planificacion, NULL, (void*) ejecutar_planificacion,
 	NULL);
+	pthread_create(&hilo_plp, NULL, (void*) ejecutar_plp, NULL);
+	pthread_create(&hilo_pcp, NULL, (void*) ejecutar_pcp, NULL);
 
+	pthread_join(hilo_plp, NULL);
+	pthread_join(hilo_pcp, NULL);
 	pthread_join(hilo_consola, NULL);
 	pthread_cancel(hilo_principal);
 	pthread_cancel(hilo_planificacion);
@@ -37,6 +48,7 @@ int inicializar() {
 
 	inicializar_listas_dtb();
 
+	dtb_dummy.inicializado = 0;
 	set_quantum(safa.quantum);
 	set_algoritmo(safa.algoritmo);
 
@@ -172,6 +184,13 @@ void liberar_recursos(int tipo_salida) {
 	pthread_mutex_destroy(&mutex_planificador);
 
 	sem_destroy(&sem_cpus);
+	sem_destroy(&sem_nuevo_vacio);
+	sem_destroy(&sem_nuevo_mutex);
+	sem_destroy(&sem_dtb_dummy_mutex);
+	sem_destroy(&sem_listo_mutex);
+	sem_destroy(&sem_listo_vacio);
+	sem_destroy(&sem_listo_max);
+	sem_destroy(&sem_cpu_mutex);
 	liberar_recursos_dtb();
 	destruir_archivo_log(safa_log);
 	terminar_exitosamente(tipo_salida);
@@ -183,148 +202,72 @@ void terminar_exitosamente(int ret_val) {
 	exit(ret_val);
 }
 
-//int main(void) {
-//	dtb_dummy.inicializado = 0;
-//	//CREO COLA DE ESTADOS
-//	nuevos = queue_create();
-//	listos = queue_create();
-//	ejecucion = queue_create();
-//	bloqueados = queue_create();
-//	terminados = queue_create();
-//
-//	//inicio semaforos
-//	sem_init(&sem_nuevo_mutex, 0, 1);
-//	sem_init(&sem_nuevo_vacio, 0, 0);
-//	sem_init(&sem_dtb_dummy_mutex, 0, 1);
-//	sem_init(&sem_listo_mutex, 0, 1);
-//	sem_init(&sem_listo_vacio, 0, 0);
-//	sem_init(&sem_listo_max, 0, c_inicial->multiprogramacion);
-//	sem_init(&sem_cpu_mutex, 0, 1);
-//
-//	int buffer;
-//
-//	pthread_create(&hilo_consola, NULL, (void*) consolaSafa, NULL);
-//	pthread_create(&hilo_plp, NULL, (void*) plp, NULL);
-//	pthread_create(&hilo_pcp, NULL, (void*) pcp, NULL);
+void escuchar_dam() {
+	while (true) {
+		printf("conexion dam correcta");
 
+	}
+}
 
-//	pthread_join(hilo_plp, NULL);
-//	pthread_join(hilo_pcp, NULL);
-//	pthread_join(hilo_consola, NULL);
-//	//destruyo semaforos
-//	sem_destroy(&sem_nuevo_vacio);
-//	sem_destroy(&sem_nuevo_mutex);
-//	sem_destroy(&sem_dtb_dummy_mutex);
-//	sem_destroy(&sem_listo_mutex);
-//	sem_destroy(&sem_listo_vacio);
-//	sem_destroy(&sem_listo_max);
-//	sem_destroy(&sem_cpu_mutex);
-//
-//	return EXIT_SUCCESS;
-//}
-//
-////hilo de conexion con dam, debera quedarse a la espera
-//void conexion_dam(void* socket) {
-//
-//	while (1) {
-//
-//		printf("conexion dam correcta");
-//
-//	}
-//
-//}
-//
-//void conexion_cpu(void* socket) {
-//
-//	//inicializo struct cpu y lo pongo en list cpu
-//	struct_cpu *cpu;
-//	cpu = crear_struct_cpu((int) *socket);
-//
-//	//pongo struct cpu en la cola de cpus para esperar dtbs  a ejecutar
-//	sem_wait(&sem_cpu_mutex);
-//
-//	queue_push(cpus, cpu);
-//
-//	sem_post(&sem_cpu_mutex);
-//
-//	while (1) {
-//
-//		//espero que pcp haga un post para comenzar ejecucion
-//		sem_wait(&cpu->sem_mutex_ejecucion_cpu);
-//
-//		//aca va a comenzar a hablar con cpu real para pasarle los datos del dtb
-//		printf("conexion cpu correcta");
-//
-//		sem_post(&cpu->sem_mutex_ejecucion_cpu);
-//
-//	}
-//
-//	pthread_detach(pthread_self()); //libera recursos del hilo
-//	pthread_exit(NULL);
-//
-//}
-//
-//
-//void plp() {
-//
-//	struct_dtb *dtb;
-//
-//	while (1) {
-//
-//		//controlo lista no vacia
-//		sem_wait(&sem_nuevo_vacio);
-//
-//		//Tomo de nuevos dtb
-//		sem_wait(&sem_nuevo_mutex);
-//
-//		dtb = queue_pop(nuevos);
-//		sem_post(&sem_nuevo_mutex);
-//
-//		//tomo dtb dummy y lo inicializo
-//		sem_wait(&sem_dtb_dummy_mutex);
-//
-//		dtb_dummy.idDtb = dtb->idDtb;
-//		dtb_dummy.escriptorio = string_duplicate(dtb->escriptorio);
-//
-//		//agrego a cola de listos el dummy verificando multiprogramacion
-//		sem_wait(&sem_listo_max);
-//
-//		sem_wait(&sem_listo_mutex);
-//		queue_push(listos, &dtb_dummy);
-//		sem_post(&sem_listo_mutex);
-//
-//		sem_post(&sem_listo_vacio);
-//
-//	}
-//
-//}
-//
-//void pcp() {
-//
-//	struct_dtb *dtb = NULL;
-//	struct_cpu *cpu_libre = NULL;
-//
-//	while (1) {
-//
-//		sem_wait(&sem_listo_vacio);
-//
-//		//obtengo dtb segun algoritmo
-//		dtb = obtener_proximo_dtb(c_inicial->algoritmo);
-//
-//		//pasarlo a ejecucion de la cpu libre
-//		cpu_libre = obtener_cpu_libre();
-//		if (*cpu_libre != NULL) {
-//			cpu_libre->dtb_ejecutar(dtb);
-//			sem_post(&cpu_libre->sem_mutex_ejecucion_cpu); //aviso a hilo cpu que puede comenzar con la ejecucion del dtb
-//		}
-//
-//		//estas ejecuciones tendran que hacerlo los algoritmos
-//		sem_wait(&sem_listo_mutex);
-//		dtb = queue_pop(listos);
-//		sem_post(&sem_listo_mutex);
-//
-//		sem_post(&sem_listo_max);
-//
-//		//segun algoritmo
-//
-//	}
+void escuchar_cpu() {
+	cpu_struct *cpu;
+	cpus = list_create();
+	cpu = crear_cpu(0);
+	//pongo struct cpu en la cola de cpus para esperar dtbs  a ejecutar
+	sem_wait(&sem_cpu_mutex);
+	list_add(cpus, cpu);
+	sem_post(&sem_cpu_mutex);
+	while (true) {
+		//espero que pcp haga un post para comenzar ejecucion
+		sem_wait(&cpu->sem_mutex_ejecucion_cpu);
+		//aca va a comenzar a hablar con cpu real para pasarle los datos del dtb
+		printf("conexion cpu correcta");
+		sem_post(&cpu->sem_mutex_ejecucion_cpu);
+	}
+	pthread_detach(pthread_self()); //libera recursos del hilo
+	pthread_exit(NULL);
+}
+
+void ejecutar_plp() {
+	dtb_struct *dtb;
+	while (1) {
+		//controlo lista no vacia
+		sem_wait(&sem_nuevo_vacio);
+		//Tomo de nuevos dtb
+		sem_wait(&sem_nuevo_mutex);
+		dtb = queue_pop(dtb_nuevos);
+		sem_post(&sem_nuevo_mutex);
+		//tomo dtb dummy y lo inicializo
+		sem_wait(&sem_dtb_dummy_mutex);
+		dtb_dummy.id_dtb = dtb->id_dtb;
+		dtb_dummy.escriptorio = string_duplicate(dtb->escriptorio);
+		//agrego a cola de listos el dummy verificando multiprogramacion
+		sem_wait(&sem_listo_max);
+		sem_wait(&sem_listo_mutex);
+		list_add(dtb_listos, &dtb_dummy);
+		sem_post(&sem_listo_mutex);
+		sem_post(&sem_listo_vacio);
+	}
+}
+
+void ejecutar_pcp() {
+	dtb_struct *dtb = NULL;
+	cpu_struct *cpu_libre = NULL;
+	while (true) {
+		sem_wait(&sem_listo_vacio);
+		//obtengo dtb segun algoritmo
+		dtb = obtener_proximo_dtb(safa.algoritmo);
+		//pasarlo a ejecucion de la cpu libre
+		cpu_libre = obtener_cpu_libre();
+		if (cpu_libre != NULL) {
+			cpu_libre->dtb_ejecutar = dtb;
+			//aviso a hilo cpu que puede comenzar con la ejecucion del dtb
+			sem_post(&cpu_libre->sem_mutex_ejecucion_cpu);
+		}
+		//estas ejecuciones tendran que hacerlo los algoritmos
+		sem_wait(&sem_listo_mutex);
+		dtb = queue_pop(dtb_listos);
+		sem_post(&sem_listo_mutex);
+		sem_post(&sem_listo_max);
+	}
+}

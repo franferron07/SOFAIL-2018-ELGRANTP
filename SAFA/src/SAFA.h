@@ -19,7 +19,11 @@
 #define TAMANIO_CANT_CLIENTES 3
 
 int socket_safa;
+int id_dtb = 0;
 
+pthread_t hilo_dam;
+pthread_t hilo_plp;
+pthread_t hilo_pcp;
 pthread_t hilo_cliente;
 pthread_t hilo_consola;
 pthread_t hilo_principal;
@@ -36,22 +40,9 @@ int generar_id_dtb();
 void aplicar_algoritmo_planificacion();
 void liberar_recursos(int tipo_salida);
 void terminar_exitosamente(int valor_retornado);
-
-pthread_t hilo_dam;
-pthread_t hilo_plp;
-pthread_t hilo_pcp;
-
-int id_dtb = 0;
-
-//safa estado corrupto
-int conecto_cpu = 0;
-int conecto_dam = 0;
-
-//FUNCIONES
-void conexion_dam(void*); //hilo que maneja conexion con el dam.
-void conexion_cpu(void*); //hilo que maneja conexion con cpu
-
-void plp(); //Hilo Planificador largo plazo
-void pcp(); //Hilo Planificador corto plazo
+void escuchar_dam();
+void escuchar_cpu();
+void ejecutar_plp();
+void ejecutar_pcp();
 
 #endif /* SAFA_H_ */

@@ -18,7 +18,7 @@ cpu_struct* crear_cpu(int socket) {
 	return cpu_nueva;
 }
 
-dtb_struct crear_dtb(int id_dtb,char *path) {
+dtb_struct crear_dtb(int id_dtb, char *path) {
 
 	dtb_struct dtb_nuevo;
 	dtb_nuevo.id_dtb = id_dtb;
@@ -30,14 +30,21 @@ dtb_struct crear_dtb(int id_dtb,char *path) {
 	return dtb_nuevo;
 }
 
+dtb_struct *obtener_proximo_dtb(int algoritmo) {
+	return NULL;
+}
+cpu_struct *obtener_cpu_libre() {
+	return NULL;
+}
+
 void liberar_dtb(dtb_struct * dtb) {
 	free(dtb);
 }
 
 void liberar_recursos_dtb() {
-	list_destroy_and_destroy_elements(dtb_listos, (void*)liberar_dtb);
-	list_destroy_and_destroy_elements(dtb_bloqueados, (void*)liberar_dtb);
-	list_destroy_and_destroy_elements(dtb_terminados, (void*)liberar_dtb);
-	list_destroy_and_destroy_elements(dtbs, (void*)liberar_dtb);
-	list_destroy_and_destroy_elements(dtb_nuevos, (void*)liberar_dtb);
+	list_destroy_and_destroy_elements(dtb_listos, (void*) liberar_dtb);
+	list_destroy_and_destroy_elements(dtb_bloqueados, (void*) liberar_dtb);
+	list_destroy_and_destroy_elements(dtb_terminados, (void*) liberar_dtb);
+	list_destroy_and_destroy_elements(dtbs, (void*) liberar_dtb);
+	list_destroy_and_destroy_elements(dtb_nuevos, (void*) liberar_dtb);
 }
