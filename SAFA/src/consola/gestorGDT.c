@@ -1,8 +1,9 @@
-#include "consola.h"
+#include "gestorGDT.h"
 
-static t_comando_struct tabla_referencia_comandos[] = {
-		{ "dump", CONSOLA_COMANDO_DUMP }
-};
+static t_comando_struct tabla_referencia_comandos[] = { { "ejecutar",
+		CONSOLA_COMANDO_EJECUTAR }, { "status", CONSOLA_COMANDO_STATUS }, {
+		"finalizar", CONSOLA_COMANDO_FINALIZAR }, { "metricas",
+		CONSOLA_COMANDO_METRICAS } };
 
 int retorno = CONSOLA_CONTINUAR;
 
@@ -24,11 +25,20 @@ int consola_leer_comando() {
 	parametro = obtener_parametro(split_entrada);
 
 	switch (obtener_valor_por_clave(comando)) {
-	case CONSOLA_COMANDO_DUMP:
-		comando_dump(parametro);
+	case CONSOLA_COMANDO_EJECUTAR:
+		comando_ejecutar(parametro);
+		break;
+	case CONSOLA_COMANDO_STATUS:
+		comando_status(parametro);
+		break;
+	case CONSOLA_COMANDO_FINALIZAR:
+		comando_finalizar(parametro);
+		break;
+	case CONSOLA_COMANDO_METRICAS:
+		comando_metricas(parametro);
 		break;
 	case CONSOLA_COMANDO_DESCONOCIDO:
-		log_warning(fm9_log, "El comando ingresado no fue encontrado\n");
+		log_warning(safa_log, "El comando ingresado no fue encontrado\n");
 		break;
 	}
 
@@ -46,12 +56,44 @@ int consola_leer_comando() {
 	return retorno;
 }
 
-void comando_dump(char* id_dt_block) {
-	if (!_es_cadena_valida(id_dt_block)) {
-		log_info(fm9_log,
-				"Comando dump, no se ha ingresado parámetro!\n");
+void comando_ejecutar(char* ruta_sript) {
+	if (!_es_cadena_valida(ruta_sript)) {
+		log_info(safa_log,
+				"Comando ejecutar, el parámetro ingresado no es correcto!\n");
 	} else {
-		log_info(fm9_log, "Comando dump con id_dt_block: %s\n", id_dt_block);
+		log_info(safa_log, "Comando ejecutar con ruta_sript: %s\n", ruta_sript);
+		dtb_struct dtb_nuevo = crear_dtb(ruta_sript);
+		sem_wait(&sem_nuevo_mutex);
+		queue_push(cpu_nuevos, &dtb_nuevo);
+		sem_post(&sem_nuevo_vacio);
+		sem_post(&sem_nuevo_mutex);
+	}
+}
+
+void comando_status(char* id_dt_block) {
+	if (!_es_cadena_valida(id_dt_block)) {
+		log_info(safa_log, "Comando status SIN id_dt_block\n");
+	} else {
+		log_info(safa_log, "Comando status con id_dt_block: %s\n", id_dt_block);
+	}
+}
+
+void comando_finalizar(char* id_dt_block) {
+	if (!_es_cadena_valida(id_dt_block)) {
+		log_info(safa_log,
+				"Comando finalizar, el parámetro ingresado no es correcto!\n");
+	} else {
+		log_info(safa_log, "Comando finalizar con id_dt_block: %s\n",
+				id_dt_block);
+	}
+}
+
+void comando_metricas(char* id_dt_block) {
+	if (!_es_cadena_valida(id_dt_block)) {
+		log_info(safa_log, "Comando metricas SIN id_dt_block: %s\n");
+	} else {
+		log_info(safa_log, "Comando metricas con id_dt_block: %s\n",
+				id_dt_block);
 	}
 }
 

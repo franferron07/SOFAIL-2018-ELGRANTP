@@ -1,32 +1,17 @@
-/*
- ============================================================================
- Name        : CPU.c
- Author      : Quantum
- Version     :
- Copyright   : Sistemas Operativos 2018
- Description : Proceso CPU
- ============================================================================
- */
-
 #include "CPU.h"
 
 void signal_catch(int signal);
 int validar_parametros_consola(int cant_parametros);
 
-
 int main(int argc, char *argv[]) {
-	/*
 	if (validar_parametros_consola(argc) != 0) {
 		return EXIT_FAILURE;
-	}*/
+	}
 
-	if (inicializar("cpu_log") < 0) {
+	if (inicializar(argv[1]) < 0) {
 		liberar_recursos(EXIT_FAILURE);
 		return -1;
 	}
-
-
-
 
 	imprimir_config();
 /*
@@ -34,31 +19,9 @@ int main(int argc, char *argv[]) {
 	conectarse_con_diego();
 	conectarse_con_fm9();
 */
-/*
-	while(1){
-		char linea[50];
-		//				ejemplos de lineas:
-		// 				abrir /equipos/Racing.txt
-		//				concentrar
-		//				asignar /equipos/Racing.txt 9 GustavoBou
-		//				wait Conmebol
-		//				signal Conmebol
-		//				flush /equipos/Racing.txt
-		//				close /equipos/Racing.txt
-		//				crear /equipos/Racing.txt 11
-		//				borrar /equipos/Racing.txt
-
-
-		printf("Ingrese la sentencia: ");
-		scanf(" %[^\n]s ",linea);
-		ejecutar_linea(linea);
-	}
-*/
-
 	/**
 	 * ####Lectura de Escriptorio
 	 * */
-/*
 	FILE * archivo;
 	char * linea = NULL;
 	size_t longitud = 0;
@@ -77,7 +40,6 @@ int main(int argc, char *argv[]) {
 	if (linea)
 		free(linea);
 	/**################*/
-
 
 
 	liberar_recursos(EXIT_SUCCESS);
@@ -243,11 +205,8 @@ int inicializar(char* nombre_archivo_log) {
 }
 
 char* crear_nombre_file_log(char* nombre) {
-	char* log_file_name = malloc(sizeof(char*));
-	puts("entre perro1");
-	puts(nombre);
+	char* log_file_name = malloc(10);
 	strcpy(log_file_name, nombre);
-	puts("entre perro2");
 	strcat(log_file_name, EXTENSION_FILE_LOG_CPU);
 	return log_file_name;
 }

@@ -12,7 +12,7 @@
 
 #define FILE_CONFIG_FM9 "fm9.config"
 #define FM9 "FM9"
-#define TAMANIO_CANT_CLIENTES 3
+#define TAMANIO_CANT_CLIENTES 10
 
 int socket_fm9;
 
