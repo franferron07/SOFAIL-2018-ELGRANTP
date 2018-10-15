@@ -8,7 +8,7 @@
  ============================================================================
  */
 
-#include "damHeader.h"
+#include "DAM.h"
 
 pthread_t idHilo;
 
@@ -49,6 +49,7 @@ int inicializar() {
 }
 
 void liberar_recursos(int tipo_salida) {
+	liberar_recursos_configuracion();
 	print_footer(DAM, dam_log);
 	destruir_archivo_log(dam_log);
 	terminar_exitosamente(tipo_salida);
@@ -78,7 +79,7 @@ void aceptarConexiones() {
 		int socket_cliente = aceptar_conexion(socket_dam);
 		log_info(dam_log, "Se agrego una nueva conexión, socket: %d",
 				socket_cliente);
-		if (socket_cliente < 0) {
+		if (socket_cliente <= 0) {
 			log_error(dam_log, "Error al aceptar nueva conexión");
 		}
 		pthread_create(&idHilo, NULL, (void*) conexion_cpu, &socket_cliente);
@@ -86,10 +87,17 @@ void aceptarConexiones() {
 }
 
 void realizarConexiones() {
-	socket_safa = conectar_safa(dam);
-	socket_mdj = conectar_mdj(dam);
-	socket_fm9 = conectar_fm9(dam);
+	conectar_safa(dam);
+	conectar_mdj(dam);
+	conectar_fm9(dam);
+	if (socket_safa <= 0 || socket_mdj <= 0 || socket_fm9 <= 0) {
+		log_error(dam_log, "Error al conectarse a safa/mdj/fm9");
+		terminar_exitosamente(EXIT_FAILURE);
+	}
+	else
+	{
 	log_info(dam_log, "Realizada Conexiones safa/mdj/fm9");
+	}
 }
 
 
@@ -99,16 +107,16 @@ void conexion_cpu (void *parametro) {
     //cerrar_socket(*sock);
 }
 
-int conectar_safa(dam_config dam){
+void conectar_safa(dam_config dam){
 
-	return 0;
+	obtener_socket_cliente(&socket_safa,dam.ip_safa,dam.puerto_safa);
 }
 
-int conectar_mdj(dam_config dam){
+void conectar_mdj(dam_config dam){
 
-	return 0;
+	obtener_socket_cliente(&socket_mdj,dam.ip_mdj,dam.puerto_mdj);
 }
 
-int conectar_fm9(dam_config dam){
-	return 0;
+void conectar_fm9(dam_config dam){
+	obtener_socket_cliente(&socket_safa,dam.ip_fm9,dam.puerto_fm9);
 }

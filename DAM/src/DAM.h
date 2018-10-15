@@ -5,8 +5,8 @@
  *      Author: utnso
  */
 
-#ifndef DAMHEADER_H_
-#define DAMHEADER_H_
+#ifndef DAM_H_
+#define DAM_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,7 +20,7 @@
 #include "config/config.h"
 
 //CONSTANTES
-#define TAMANIO_CANT_CLIENTES 3
+#define TAMANIO_CANT_CLIENTES 10
 #define FILE_CONFIG_DAM "dam.cfg"
 #define DAM "DAM"
 
@@ -38,9 +38,9 @@ void servidorDAM();
 void aceptarConexiones();
 void realizarConexiones();
 
-int conectar_safa(dam_config);
-int conectar_mdj(dam_config);
-int conectar_fm9(dam_config);
+void conectar_safa(dam_config);
+void conectar_mdj(dam_config);
+void conectar_fm9(dam_config);
 
 void conexion_cpu (void *parametro);
 
@@ -48,4 +48,4 @@ void liberar_recursos(int tipo_salida);
 void terminar_exitosamente();
 
 
-#endif /* DAMHEADER_H_ */
+#endif /* DAM_H_ */

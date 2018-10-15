@@ -52,3 +52,9 @@ void imprimir_config() {
 	log_info(dam_log, "PUERTO MDJ: %d", dam.puerto_mdj);
 	log_info(dam_log, "TRANSFER SIZE: %d", dam.transfer_size);
 }
+
+void liberar_recursos_configuracion() {
+	free(dam.ip_safa);
+	free(dam.ip_mdj);
+	free(dam.ip_fm9);
+}
