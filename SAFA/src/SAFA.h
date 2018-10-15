@@ -12,6 +12,7 @@
 #include "consola/gestorGDT.h"
 #include "planificacion/planificacion.h"
 #include "commons/commons.h"
+#include "cpu/cpu.h"
 
 #define FILE_CONFIG_SAFA "safa.config"
 #define SAFA "SAFA"
@@ -32,6 +33,7 @@ void atender_conexiones();
 void *administrar_servidor(void *puntero_fd);
 void ejecutar_planificacion();
 int generar_id_dtb();
+void aplicar_algoritmo_planificacion();
 void liberar_recursos(int tipo_salida);
 void terminar_exitosamente(int valor_retornado);
 

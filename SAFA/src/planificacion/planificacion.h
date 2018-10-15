@@ -9,6 +9,8 @@
 #include "../config/config.h"
 #include "../cpu/cpu.h"
 
+void set_quantum(int p_quantum);
+void set_algoritmo(int p_algoritmo);
 void aplicarRR(bool es_virtual);
 void aplicarPropio();
 

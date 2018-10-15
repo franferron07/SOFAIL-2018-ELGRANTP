@@ -62,9 +62,9 @@ void comando_ejecutar(char* ruta_sript) {
 				"Comando ejecutar, el parámetro ingresado no es correcto!\n");
 	} else {
 		log_info(safa_log, "Comando ejecutar con ruta_sript: %s\n", ruta_sript);
-		dtb_struct dtb_nuevo = crear_dtb(ruta_sript);
+		dtb_struct dtb_nuevo = crear_dtb(0, ruta_sript);
 		sem_wait(&sem_nuevo_mutex);
-		queue_push(cpu_nuevos, &dtb_nuevo);
+		list_add(dtb_nuevos, &dtb_nuevo);
 		sem_post(&sem_nuevo_vacio);
 		sem_post(&sem_nuevo_mutex);
 	}

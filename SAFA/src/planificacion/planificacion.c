@@ -20,7 +20,7 @@ void aplicarRR(bool es_virtual) {
 
 	pthread_mutex_lock(&mutex_planificador);
 
-	if (list_size(cpu_listos) <= 0) {
+	if (list_size(dtb_listos) <= 0) {
 		log_info(safa_log,
 				"No se encontraron CPUs en estado listo para ejecutar");
 		pthread_mutex_unlock(&mutex_planificador);
@@ -28,12 +28,12 @@ void aplicarRR(bool es_virtual) {
 	}
 
 	if (!virtual) {
-		if (cpu_ejecutando == NULL) {
+		if (dtb_ejecutando == NULL) {
 
 		}
 	} else { //Es virtual
 
-		if (cpu_ejecutando == NULL) {
+		if (dtb_ejecutando == NULL) {
 
 		} else {
 
@@ -46,12 +46,12 @@ void aplicarRR(bool es_virtual) {
 void aplicarPropio() {
 	pthread_mutex_lock(&mutex_planificador);
 
-	if (list_size(cpu_listos) <= 0) {
+	if (list_size(dtb_listos) <= 0) {
 		pthread_mutex_unlock(&mutex_planificador);
 		return;
 	}
 
-	if (cpu_ejecutando == NULL) {
+	if (dtb_ejecutando == NULL) {
 
 	}
 

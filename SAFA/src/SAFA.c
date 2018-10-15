@@ -35,7 +35,7 @@ int inicializar() {
 		return -1;
 	}
 
-	inicializar_listas_cpu();
+	inicializar_listas_dtb();
 
 	set_quantum(safa.quantum);
 	set_algoritmo(safa.algoritmo);
@@ -125,13 +125,13 @@ void *administrar_servidor(void *puntero_fd) {
 	}
 
 	/*************************** SI EL HANDSHAKE LO HIZO UN CPU *********************************/
-	if (header_conexion->tipo_instancia == CPU) {
-		log_info(safa_log, "************* NUEVO CPU **************");
-
-		int id_dtb = generar_id_dtb();
-		dtb_struct * dtb= cread_dtb(id_dtb, cliente_socket);
-		agregar_nuevo_dtb(dtb);
-	}
+//	if (header_conexion->tipo_instancia == CPU) {
+//		log_info(safa_log, "************* NUEVO CPU **************");
+//
+//		int id_dtb = generar_id_dtb();
+//		dtb_struct * dtb= cread_dtb(id_dtb, cliente_socket);
+//		agregar_nuevo_dtb(dtb);
+//	}
 	free(buffer_header);
 	free(header_conexion);
 	free(buffer_reconocimiento);
@@ -172,7 +172,7 @@ void liberar_recursos(int tipo_salida) {
 	pthread_mutex_destroy(&mutex_planificador);
 
 	sem_destroy(&sem_cpus);
-	liberar_recursos_cpu();
+	liberar_recursos_dtb();
 	destruir_archivo_log(safa_log);
 	terminar_exitosamente(tipo_salida);
 }

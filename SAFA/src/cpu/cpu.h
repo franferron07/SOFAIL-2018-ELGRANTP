@@ -12,13 +12,13 @@ t_list *dtbs;
 
 dtb_struct *dtb_ejecutando;
 
-void inicializar_listas_cpu();
-dtb_struct crear_dtb(char *path);
+void inicializar_listas_dtb();
+dtb_struct crear_dtb(int id_dtb, char *path);
 cpu_struct* crear_cpu(int socket);
 dtb_struct *obtener_proximo_dtb(char *algoritmo);
 cpu_struct *obtener_cpu_libre();
-void liberar_cpu(cpu_struct * cpu);
-void liberar_recursos_cpu();
+void liberar_dtb(dtb_struct * dtb);
+void liberar_recursos_dtb();
 
 
 #endif /* CPU_CPU_H_ */

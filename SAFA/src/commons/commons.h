@@ -31,8 +31,8 @@ typedef struct {
 } cpu_struct;
 
 typedef enum {
-	CPU_LISTO, CPU_NUEVO, CPU_EJECUTANDO, CPU_BLOQUEADO, CPU_TERMINADO
-} cpu_status_enum;
+	DTB_LISTO, DTB_NUEVO, DTB_EJECUTANDO, DTB_BLOQUEADO, DTB_TERMINADO
+} dtb_status_enum;
 
 sem_t sem_nuevo_mutex; //mutex en cola de nuevos
 sem_t sem_nuevo_vacio; //control cola de nuevos vacia
