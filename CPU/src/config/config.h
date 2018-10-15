@@ -9,23 +9,22 @@
 
 
 typedef struct {
-	int ip_safa;
+	char* ip_safa;
 	int puerto_safa;
-	int ip_diego;
+	char* ip_diego;
 	int puerto_diego;
-	int ip_fm9;
+	char* ip_fm9;
 	int puerto_fm9;
 	int retardo;
 } cpu_config;
-
 
 cpu_config cpu;
 t_log *cpu_log;
 
 int cargar_archivo_config(char* path);
+int create_log(char* nombre);
 void imprimir_config();
 void liberar_recursos_configuracion();
-int crear_log();
 void destruir_archivo_log(t_log *cpu_log);
 
 

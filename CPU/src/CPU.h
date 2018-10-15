@@ -7,38 +7,32 @@
 #ifndef CPU_H_
 #define CPU_H_
 
-#include <qcommons/console.h>
-#include <stdbool.h>
 #include <commons/string.h> //Commons string
-#include <qcommons/socket_viejo.h> //Libreria Socket Cliente
-#include <qcommons/socketServer.h> //Libreria Socket Servidor
+#include <stdbool.h>
+#include <qcommons/console.h>
+#include <qcommons/serialize.h>
+#include <qcommons/socket.h> //Libreria Socket Cliente
+#include <signal.h>
 
 #include "config/config.h"
 
-#define FILE_CONFIG_CPU "cpu.cfg"
+#define FILE_CONFIG_CPU "cpu.config"
+#define EXTENSION_FILE_LOG_CPU ".log"
 #define CPU "CPU"
 
+int socket_safa, socket_diego, socket_fm9;
 
-//Variables Globales
-cpu_config *c_inicial = NULL;
-t_config *inicializador=NULL;
-t_log *logger= NULL;
 
-Socket socket_safa;
-Socket socket_dam;
-Socket socket_fm9;
-int quantum;
 
 //Funciones
-void liberar_memoria_cpu();
-int inicializar();
+void conectarse_con_safa();
+void conectarse_con_diego();
+void conectarse_con_fm9();
+int inicializar(char* nombre_archivo_log);
+char* crear_nombre_file_log();
 void liberar_recursos(int tipo_salida);
-void terminar_exitosamente();
+void exit_gracefully();
 
-
-Socket conectar_safa(cpu_config* c_inicial);
-Socket conectar_dam(cpu_config* c_inicial);
-Socket conectar_fm9(cpu_config* c_inicial);
 
 
 //Funciones de Parser
@@ -52,6 +46,7 @@ bool _esFlush(char* linea);
 bool _esClose(char* linea);
 bool _esCrearArchivo(char* linea);
 bool _esBorrarArchivo(char* linea);
+bool _esComentario(char* linea);
 /////////////////////////////////
 //otras
 void liberarListaDeStrings(char** operation);

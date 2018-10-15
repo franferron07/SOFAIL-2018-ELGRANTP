@@ -10,75 +10,81 @@
 
 #include "CPU.h"
 
+void signal_catch(int signal);
+int validar_parametros_consola(int cant_parametros);
+
+
 int main(int argc, char *argv[]) {
-	if (inicializar() < 0) {
+	if (validar_parametros_consola(argc) != 0) {
+		return EXIT_FAILURE;
+	}
+
+	if (inicializar(argv[1]) < 0) {
 		liberar_recursos(EXIT_FAILURE);
 		return -1;
 	}
 
+
+
 	imprimir_config();
-
-
-
 /*
-	socket_dam = conectar_dam(c_inicial);
-	socket_safa = conectar_safa(c_inicial);
-	socket_fm9 = conectar_fm9(c_inicial);
-	log_info(logger, "Realizada Conexiones dam/safa/fm9");
+	conectarse_con_safa();
+	conectarse_con_diego();
+	conectarse_con_fm9();
 */
-
-
+/*
 	while(1){
 		char linea[50];
-		/*ejemplos de lineas
-		 * 				"abrir /equipos/Racing.txt"
-						"concentrar"
-						"asignar /equipos/Racing.txt 9 GustavoBou"
-						"wait Conmebol"
-						"signal Conmebol"
-						"flush /equipos/Racing.txt"
-						"close /equipos/Racing.txt"
-						"crear /equipos/Racing.txt 11"
-						"borrar /equipos/Racing.txt"
-*/
+		//				ejemplos de lineas:
+		// 				abrir /equipos/Racing.txt
+		//				concentrar
+		//				asignar /equipos/Racing.txt 9 GustavoBou
+		//				wait Conmebol
+		//				signal Conmebol
+		//				flush /equipos/Racing.txt
+		//				close /equipos/Racing.txt
+		//				crear /equipos/Racing.txt 11
+		//				borrar /equipos/Racing.txt
+
 
 		printf("Ingrese la sentencia: ");
 		scanf(" %[^\n]s ",linea);
 		ejecutar_linea(linea);
-
-	}
-
-
-/*
-	int buffer_recv;
-
-	while(1){
-		Lee_Socket(socket_safa, (char*)buffer_recv,sizeof(int));
-
-		if(buffer_recv == 20)
-		{
-		    log_info(logger, "estoy recibiendo quantum");
-		    Lee_Socket(socket_safa, (char*)buffer_recv,sizeof(int));
-		    quantum = buffer_recv;
-
-		}
-		else
-		{
-		    log_error(logger, "No se Pudo Conectar a SAFA");
-		}
-
-
-
 	}
 */
 
+	/**
+	 * ####Lectura de Escriptorio
+	 * */
+/*
+	FILE * archivo;
+	char * linea = NULL;
+	size_t longitud = 0;
+	ssize_t leido;
+	archivo = fopen(argv[2], "r");
+	if (archivo == NULL) {
+		log_error(cpu_log, "No se puedo abrir el Escriptorio.");
+		liberar_recursos(EXIT_FAILURE);
+	}
+	while ((leido = getline(&linea, &longitud, archivo)) != -1) {
+		log_info(cpu_log, "%s", linea);
+		ejecutar_linea(linea);
+	}
 
-	/* libero loggger de logging */
-	liberar_memoria_cpu();
-	return EXIT_SUCCESS;
+	fclose(archivo);
+	if (linea)
+		free(linea);
+	/**################*/
+
+
+
+	liberar_recursos(EXIT_SUCCESS);
 }
 
 
+/***********************************************/
+/***************LOGICA PARSER*******************/
+/***********************************************/
 
 void ejecutar_linea(char linea[]){
 
@@ -150,6 +156,8 @@ void ejecutar_linea(char linea[]){
 
 
 		free(path);
+	}else if(_esComentario(linea)){
+		puts("Es Comentario");
 	}
 }
 
@@ -190,47 +198,24 @@ bool _esAbrirArchivo(char* linea){
 	return string_starts_with(linea, "abrir ");
 }
 
+bool _esComentario(char* linea){
+	return string_starts_with(linea, "#");
+}
+
 
 void liberarListaDeStrings(char** operation) {
 	string_iterate_lines(operation, (void*) free);
 	free(operation);
 }
 
+/***********************************************/
+/***********FIN LOGICA PARSER*******************/
+/***********************************************/
 
-Socket conectar_dam(cpu_config* c_inicial){
-	Socket socket;
-
-	socket = crear_socket((char *)c_inicial->ip_diego ,(char *)c_inicial->puerto_diego);
-	conectar(socket);
-
-	return socket;
-}
-
-Socket conectar_safa(cpu_config* c_inicial){
-	Socket socket;
-
-	int test = 0;
-
-	socket = crear_socket((char *)c_inicial->ip_safa , (char *)c_inicial->puerto_safa);
-	conectar(socket);
-
-	Escribe_Socket (socket.socket, (char *)&test , sizeof(int) );
-
-	return socket;
-}
-
-Socket conectar_fm9(cpu_config* c_inicial){
-	Socket socket;
-
-	socket = crear_socket((char *)c_inicial->ip_fm9 , (char *)c_inicial->puerto_fm9);
-	conectar(socket);
-
-	return socket;
-}
-
-int inicializar() {
-	if (crear_log() == EXIT_FAILURE)
-		terminar_exitosamente(EXIT_FAILURE);
+int inicializar(char* nombre_archivo_log) {
+	char* name = crear_nombre_file_log(nombre_archivo_log);
+	if (create_log(name) == EXIT_FAILURE)
+		exit_gracefully(EXIT_FAILURE);
 
 	print_header(CPU, cpu_log);
 
@@ -241,19 +226,34 @@ int inicializar() {
 	return 0;
 }
 
+char* crear_nombre_file_log(char* nombre) {
+	char* log_file_name = malloc(sizeof(char*));
+	strcpy(log_file_name, nombre);
+	strcat(log_file_name, EXTENSION_FILE_LOG_CPU);
+	return log_file_name;
+}
 
 void liberar_recursos(int tipo_salida) {
+	liberar_recursos_configuracion();
 	print_footer(CPU, cpu_log);
-	destruir_archivo_log(cpu_log);
-	terminar_exitosamente(tipo_salida);
+	log_destroy(cpu_log);
+	exit_gracefully(tipo_salida);
 }
 
-
-void liberar_memoria_cpu() {
-	/* libero loggger de logging */
-	log_destroy(logger);
+void signal_catch(int signal) {
+	printf("\nTratando seniales, senial: %d\n", signal);
+	switch (signal) {
+	case SIGINT:
+	case SIGKILL:
+	case SIGSTOP:
+	case SIGTSTP:
+		liberar_recursos(EXIT_SUCCESS);
+	}
 }
 
-void terminar_exitosamente(int ret_val) {
+void exit_gracefully(int ret_val) {
+	close(socket_safa);
+	close(socket_diego);
+	close(socket_fm9);
 	exit(ret_val);
 }
