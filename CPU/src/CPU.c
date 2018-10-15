@@ -15,14 +15,16 @@ int validar_parametros_consola(int cant_parametros);
 
 
 int main(int argc, char *argv[]) {
+	/*
 	if (validar_parametros_consola(argc) != 0) {
 		return EXIT_FAILURE;
-	}
+	}*/
 
-	if (inicializar(argv[1]) < 0) {
+	if (inicializar("cpu_log") < 0) {
 		liberar_recursos(EXIT_FAILURE);
 		return -1;
 	}
+
 
 
 
@@ -212,6 +214,20 @@ void liberarListaDeStrings(char** operation) {
 /***********FIN LOGICA PARSER*******************/
 /***********************************************/
 
+int validar_parametros_consola(int cant_parametros) {
+	if (cant_parametros < 2) {
+		printf("Ingrese un nombre para el archivo de log!\n");
+		return -1;
+	}
+
+	if (cant_parametros < 3) {
+		printf("Ingrese una ruta a un script Escriptorio!\n");
+		return -1;
+	}
+
+	return 0;
+}
+
 int inicializar(char* nombre_archivo_log) {
 	char* name = crear_nombre_file_log(nombre_archivo_log);
 	if (create_log(name) == EXIT_FAILURE)
@@ -228,7 +244,10 @@ int inicializar(char* nombre_archivo_log) {
 
 char* crear_nombre_file_log(char* nombre) {
 	char* log_file_name = malloc(sizeof(char*));
+	puts("entre perro1");
+	puts(nombre);
 	strcpy(log_file_name, nombre);
+	puts("entre perro2");
 	strcat(log_file_name, EXTENSION_FILE_LOG_CPU);
 	return log_file_name;
 }
