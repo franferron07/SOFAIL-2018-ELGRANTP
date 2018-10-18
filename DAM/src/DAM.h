@@ -16,13 +16,15 @@
 #include <commons/string.h> //Commons string
 #include <qcommons/socket.h> //Libreria Sockets
 #include <qcommons/console.h>
+#include <qcommons/serialize.h>
+#include <qcommons/protocolos.h>
 
 #include "config/config.h"
 
 //CONSTANTES
 #define TAMANIO_CANT_CLIENTES 10
 #define FILE_CONFIG_DAM "dam.cfg"
-#define DAM "DAM"
+#define DAM_LOG "DAM"
 
 //Variables Globales
 int socket_dam;

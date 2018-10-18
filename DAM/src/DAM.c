@@ -39,7 +39,7 @@ int inicializar() {
 	if (crear_log() == EXIT_FAILURE)
 		terminar_exitosamente(EXIT_FAILURE);
 
-	print_header(DAM, dam_log);
+	print_header(DAM_LOG, dam_log);
 
 	if (cargar_archivo_config(FILE_CONFIG_DAM) < 0) {
 		return -1;
@@ -50,7 +50,7 @@ int inicializar() {
 
 void liberar_recursos(int tipo_salida) {
 	liberar_recursos_configuracion();
-	print_footer(DAM, dam_log);
+	print_footer(DAM_LOG, dam_log);
 	destruir_archivo_log(dam_log);
 	terminar_exitosamente(tipo_salida);
 }
@@ -67,7 +67,7 @@ void servidorDAM() {
 	if (configurar_socket_servidor(&socket_dam, "127.0.0.1", dam.puerto_dam,
 			TAMANIO_CANT_CLIENTES) < 0) {
 		log_error(dam_log, "No se pudo iniciar el servidor");
-		terminar_exitosamente(EXIT_FAILURE);
+		liberar_recursos(EXIT_FAILURE);
 	}
 }
 
@@ -88,11 +88,11 @@ void aceptarConexiones() {
 
 void realizarConexiones() {
 	conectar_safa(dam);
-	conectar_mdj(dam);
+	//conectar_mdj(dam);
 	conectar_fm9(dam);
 	if (socket_safa <= 0 || socket_mdj <= 0 || socket_fm9 <= 0) {
 		log_error(dam_log, "Error al conectarse a safa/mdj/fm9");
-		terminar_exitosamente(EXIT_FAILURE);
+		liberar_recursos(EXIT_FAILURE);
 	}
 	else
 	{
@@ -110,13 +110,16 @@ void conexion_cpu (void *parametro) {
 void conectar_safa(dam_config dam){
 
 	obtener_socket_cliente(&socket_safa,dam.ip_safa,dam.puerto_safa);
+	ejecutar_handshake(socket_safa,"DAM",DAM,dam_log);
 }
 
 void conectar_mdj(dam_config dam){
 
 	obtener_socket_cliente(&socket_mdj,dam.ip_mdj,dam.puerto_mdj);
+	ejecutar_handshake(socket_mdj,"DAM",DAM,dam_log);
 }
 
 void conectar_fm9(dam_config dam){
-	obtener_socket_cliente(&socket_safa,dam.ip_fm9,dam.puerto_fm9);
+	obtener_socket_cliente(&socket_fm9,dam.ip_fm9,dam.puerto_fm9);
+	ejecutar_handshake(socket_fm9,"DAM",DAM,dam_log);
 }
