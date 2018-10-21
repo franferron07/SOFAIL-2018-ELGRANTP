@@ -15,6 +15,21 @@ void set_algoritmo(int p_algoritmo) {
 	algoritmo = p_algoritmo;
 }
 
+
+void aplicar_algoritmo_planificacion() {
+	switch (safa.algoritmo) {
+	case RR:
+		aplicarRR(false);
+		break;
+	case VRR:
+		aplicarRR(true);
+		break;
+	case PROPIO:
+		aplicarPropio();
+		break;
+	}
+}
+
 void aplicarRR(bool es_virtual) {
 	virtual = es_virtual;
 

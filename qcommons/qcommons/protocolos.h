@@ -18,7 +18,9 @@ typedef enum {
 	FLUSH = 6,
 	CLOSE = 7,
 	CREAR = 8,
-	BORRAR = 9
+	BORRAR = 9,
+	ENVIARDTB = 10,
+	CERRARCONEXION= 11
 } tipo_operacion_e;
 
 typedef struct {

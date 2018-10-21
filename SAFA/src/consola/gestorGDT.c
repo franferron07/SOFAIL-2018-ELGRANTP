@@ -6,11 +6,18 @@ static t_comando_struct tabla_referencia_comandos[] = { { "ejecutar",
 		CONSOLA_COMANDO_METRICAS } };
 
 int retorno = CONSOLA_CONTINUAR;
+int id_dtb = 0;
 
 void liberar_parametros(char** split);
 char** parsear_entrada_por_espacios(char *entrada);
 char* obtener_comando(char** split);
 char* obtener_parametro(char** split);
+
+
+int generar_id_dtb() {
+	return id_dtb++;
+}
+
 
 int consola_leer_comando() {
 	size_t tamanio = TAMANIO_ENTRADA_STDIN;
@@ -62,12 +69,19 @@ void comando_ejecutar(char* ruta_sript) {
 				"Comando ejecutar, el parámetro ingresado no es correcto!\n");
 	} else {
 		log_info(safa_log, "Comando ejecutar con ruta_sript: %s\n", ruta_sript);
-		dtb_struct dtb_nuevo = crear_dtb(0, ruta_sript);
-		sem_wait(&sem_nuevo_mutex);
-		list_add(dtb_nuevos, &dtb_nuevo);
-		sem_post(&sem_nuevo_vacio);
-		sem_post(&sem_nuevo_mutex);
+		generar_id_dtb();
+		dtb_struct dtb_nuevo = crear_dtb(id_dtb ,ruta_sript);
+		agregar_dtb_nuevo( dtb_nuevo );
 	}
+}
+
+void agregar_dtb_nuevo( dtb_struct dtb_nuevo ){
+
+	pthread_mutex_lock(&sem_nuevo_mutex);
+	list_add(dtb_nuevos, &dtb_nuevo);
+	sem_post(&sem_nuevo_vacio);
+	pthread_mutex_unlock(&sem_nuevo_mutex);
+	list_add( dtbs , &dtb_nuevo );
 }
 
 void comando_status(char* id_dt_block) {

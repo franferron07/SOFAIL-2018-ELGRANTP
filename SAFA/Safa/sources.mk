@@ -18,5 +18,6 @@ src/commons \
 src/config \
 src/consola \
 src/cpu \
+src/dtb \
 src/planificacion \
 

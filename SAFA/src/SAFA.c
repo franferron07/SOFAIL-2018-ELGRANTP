@@ -6,28 +6,18 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-	sem_init(&sem_cpus, 0, 0);
-	sem_init(&sem_nuevo_vacio, 0, 0);
-	sem_init(&sem_dtb_dummy_mutex, 0, 1);
-	sem_init(&sem_listo_mutex, 0, 1);
-	sem_init(&sem_listo_vacio, 0, 0);
-	sem_init(&sem_listo_max, 0, safa.multiprogramacion);
-	sem_init(&sem_cpu_mutex, 0, 1);
 	imprimir_config();
-
-	pthread_mutex_init(&mutex_consola, NULL);
-	pthread_mutex_init(&mutex_planificador, NULL);
 
 
 	pthread_create(&hilo_principal, NULL, (void*) iniciar_safa, NULL);
+
+	//verificar_estado();
+
 	pthread_create(&hilo_consola, NULL, (void*) escuchar_consola, NULL);
-	pthread_create(&hilo_planificacion, NULL, (void*) ejecutar_planificacion,
-	NULL);
+	pthread_create(&hilo_planificacion, NULL, (void*) ejecutar_planificacion,NULL);
 	pthread_create(&hilo_plp, NULL, (void*) ejecutar_plp, NULL);
-	pthread_create(&hilo_pcp, NULL, (void*) ejecutar_pcp, NULL);
 
 	pthread_join(hilo_plp, NULL);
-	pthread_join(hilo_pcp, NULL);
 	pthread_join(hilo_consola, NULL);
 	pthread_cancel(hilo_principal);
 	pthread_cancel(hilo_planificacion);
@@ -47,12 +37,29 @@ int inicializar() {
 	}
 
 	inicializar_listas_dtb();
+	inicializar_lista_cpus();
+	inicializar_semaforos();
+
 
 	dtb_dummy.inicializado = 0;
 	set_quantum(safa.quantum);
 	set_algoritmo(safa.algoritmo);
 
 	return 0;
+}
+
+
+void inicializar_semaforos(){
+
+	sem_init(&sem_nuevo_vacio, 0, 0);
+	sem_init(&sem_listo_vacio, 0, 0);
+	sem_init(&sem_listo_max, 0, safa.multiprogramacion);
+
+	pthread_mutex_init(&sem_dtb_dummy_mutex, NULL);
+	pthread_mutex_init(&sem_listo_mutex, NULL);
+	pthread_mutex_init(&sem_cpu_mutex, NULL);
+	pthread_mutex_init(&sem_nuevo_mutex, NULL);
+	pthread_mutex_init(&mutex_planificador, NULL);
 }
 
 void escuchar_consola() {
@@ -74,6 +81,25 @@ void iniciar_safa() {
 	pthread_exit(0);
 }
 
+
+void verificar_estado(){
+
+	while( status_safa == CORRUPTO ){
+
+		if( puede_iniciar_safa() == true ){
+			status_safa= INICIALIZADO;
+		}
+
+	}
+
+}
+
+bool puede_iniciar_safa(){
+
+	if( cpu_conectado ==true && dam_conectado == true ) return true;
+	return false;
+}
+
 void crear_servidor() {
 	if (configurar_socket_servidor(&socket_safa, "127.0.0.1", safa.puerto,
 	TAMANIO_CANT_CLIENTES) < 0) {
@@ -83,15 +109,12 @@ void crear_servidor() {
 }
 
 void atender_conexiones() {
-	int socket_cliente, *socket_nuevo;
+	int socket_cliente;
 	while ((socket_cliente = aceptar_conexion(socket_safa))) {
 		log_info(safa_log, "Se agrego una nueva conexión, socket: %d",
 				socket_cliente);
 
-		socket_nuevo = malloc(1);
-		*socket_nuevo = socket_cliente;
-		pthread_create(&hilo_cliente, NULL, administrar_servidor,
-				(void*) &socket_nuevo);
+		pthread_create(&hilo_cliente, NULL, administrar_servidor,(void*) &socket_cliente);
 	}
 	if (socket_cliente < 0) {
 		log_error(safa_log, "Error al aceptar nueva conexión");
@@ -106,11 +129,10 @@ void *administrar_servidor(void *puntero_fd) {
 	void *buffer_header = malloc(TAMANIO_HEADER_CONEXION);
 
 	/************ LEER EL HANDSHAKE ************/
-	int res = recv(cliente_socket, buffer_header, TAMANIO_HEADER_CONEXION,
-	MSG_WAITALL);
+	int res = recv(cliente_socket, buffer_header, TAMANIO_HEADER_CONEXION,MSG_WAITALL);
 
 	if (res <= 0) {
-		log_error(safa_log, "¡Error en el handshake con el cliente!");
+		log_error(safa_log, "¡Error en el handshake con el cliente! %d",res);
 		close(cliente_socket);
 		free(buffer_header);
 	}
@@ -136,61 +158,158 @@ void *administrar_servidor(void *puntero_fd) {
 				header_conexion->nombre_instancia);
 	}
 
-	/*************************** SI EL HANDSHAKE LO HIZO UN CPU *********************************/
-//	if (header_conexion->tipo_instancia == CPU) {
-//		log_info(safa_log, "************* NUEVO CPU **************");
-//
-//		int id_dtb = generar_id_dtb();
-//		dtb_struct * dtb= cread_dtb(id_dtb, cliente_socket);
-//		agregar_nuevo_dtb(dtb);
-//	}
+	/*************************** SI EL HANDSHAKE LO HIZO UN CPU  *********************************/
+	if (header_conexion->tipo_instancia == CPU) {
+		log_info(safa_log, "************* NUEVO CPU **************");
+
+		if(status_safa == CORRUPTO){
+			cpu_conectado=true;
+		}
+
+		atender_cliente_cpu( &cliente_socket );
+	}
+
+	/************************** SI EL HANDSHAKE LO HIZO DAM ***************************************/
+	if( header_conexion->tipo_instancia == DAM ){
+		log_info(safa_log, "************* NUEVO DAM **************");
+
+		if(status_safa == CORRUPTO){
+			dam_conectado=true;
+		}
+
+		atender_cliente_dam( &cliente_socket );
+	}
+
 	free(buffer_header);
 	free(header_conexion);
 	free(buffer_reconocimiento);
-	free(puntero_fd);
+	//free(puntero_fd);
 
 	return 0;
 }
 
+
+void atender_cliente_cpu( int *cliente_socket ){
+
+	request_operacion_type *header_operacion = NULL;
+	void *buffer_operacion = malloc(TAMANIO_REQUEST_OPERACION);
+	int res ;
+
+	cpu_struct cpu_nueva;
+
+	cpu_nueva = crear_cpu(*cliente_socket);
+	/* AGREGO CPU EN LISTA */
+	pthread_mutex_lock(&sem_cpu_mutex);
+		list_add(cpus, &cpu_nueva);
+	pthread_mutex_unlock(&sem_cpu_mutex);
+
+	res = recv(*cliente_socket, buffer_operacion, TAMANIO_REQUEST_OPERACION,MSG_WAITALL);
+
+	if (res <= 0) {
+		log_error(safa_log, "¡Error en el mensaje con CPU!");
+		close(*cliente_socket);
+		free(buffer_operacion);
+	}
+
+
+
+	while ( ( res = recv(*cliente_socket, buffer_operacion, TAMANIO_REQUEST_OPERACION,MSG_WAITALL) )  > 0) {
+
+		header_operacion = deserializar_request_operacion(buffer_operacion);
+		log_info(safa_log, "Se recibio operacion del CPU: %s",header_operacion->tipo_operacion);
+
+		switch (header_operacion->tipo_operacion ) {
+
+		case ABRIR:{
+
+		}
+		break;
+		case ENVIARDTB:{
+
+			/* espero hasta que cpu tenga un dtb para ejecutar.  */
+			while( cpu_nueva.dtb_ejecutar == NULL ){
+
+			}
+
+			/***** ENVIO A CPU DTB A EJECUTAR  ******/
+
+
+
+		}
+		break;
+
+		case CERRARCONEXION:{
+
+		}
+		break;
+
+		}
+
+
+		if (header_operacion->clave != NULL){
+			free(header_operacion->clave );
+		}
+
+	}
+
+
+	pthread_detach(pthread_self()); //libera recursos del hilo
+	pthread_exit(NULL);
+
+}
+
+
+void atender_cliente_dam( int *cliente_socket ){
+
+}
+
+
+
 void ejecutar_planificacion() {
+
+	cpu_struct *cpu_ejecutar= NULL;
+	dtb_struct *dtb_ejecutar = NULL;
+
 	while (true) {
-		sem_wait(&sem_cpus);
-		aplicar_algoritmo_planificacion();
+
+		cpu_ejecutar = obtener_cpu_libre();
+
+		/******* SI TENGO CPU DISPOSNIBLE *********/
+		if( cpu_ejecutar != NULL ){
+
+			log_info(safa_log, "Se encontro la CPU para ejecutar");
+			sem_wait( &sem_listo_vacio );
+			pthread_mutex_lock( &sem_listo_mutex );
+			/*aplicar_algoritmo_planificacion();*/
+			dtb_ejecutar = obtener_proximo_dtb( 0 );
+			log_info(safa_log, "Se encontro dtb a ejecutar: %s",dtb_ejecutar->id_dtb);
+			pthread_mutex_unlock( &sem_listo_mutex );
+
+			/***** INDICO A CPU EL DTB A EJECUTAR *****/
+
+			cpu_ejecutar->ocupada = true;
+			cpu_ejecutar->dtb_ejecutar = dtb_ejecutar;
+
+		}
+
+
 	}
 
 }
 
-int generar_id_dtb() {
-	return id_dtb++;
-}
-
-void aplicar_algoritmo_planificacion() {
-	switch (safa.algoritmo) {
-	case RR:
-		aplicarRR(false);
-		break;
-	case VRR:
-		aplicarRR(true);
-		break;
-	case PROPIO:
-		aplicarPropio();
-		break;
-	}
-}
 
 void liberar_recursos(int tipo_salida) {
 	print_footer(SAFA, safa_log);
-	pthread_mutex_destroy(&mutex_consola);
-	pthread_mutex_destroy(&mutex_planificador);
 
-	sem_destroy(&sem_cpus);
+	pthread_mutex_destroy(&sem_nuevo_mutex);
+	pthread_mutex_destroy(&sem_dtb_dummy_mutex);
+	pthread_mutex_destroy(&sem_listo_mutex);
+	pthread_mutex_destroy(&sem_cpu_mutex);
+	pthread_mutex_destroy(&mutex_planificador);
 	sem_destroy(&sem_nuevo_vacio);
-	sem_destroy(&sem_nuevo_mutex);
-	sem_destroy(&sem_dtb_dummy_mutex);
-	sem_destroy(&sem_listo_mutex);
 	sem_destroy(&sem_listo_vacio);
 	sem_destroy(&sem_listo_max);
-	sem_destroy(&sem_cpu_mutex);
+
 	liberar_recursos_dtb();
 	destruir_archivo_log(safa_log);
 	terminar_exitosamente(tipo_salida);
@@ -209,65 +328,36 @@ void escuchar_dam() {
 	}
 }
 
-void escuchar_cpu() {
-	cpu_struct *cpu;
-	cpus = list_create();
-	cpu = crear_cpu(0);
-	//pongo struct cpu en la cola de cpus para esperar dtbs  a ejecutar
-	sem_wait(&sem_cpu_mutex);
-	list_add(cpus, cpu);
-	sem_post(&sem_cpu_mutex);
-	while (true) {
-		//espero que pcp haga un post para comenzar ejecucion
-		sem_wait(&cpu->sem_mutex_ejecucion_cpu);
-		//aca va a comenzar a hablar con cpu real para pasarle los datos del dtb
-		printf("conexion cpu correcta");
-		sem_post(&cpu->sem_mutex_ejecucion_cpu);
-	}
-	pthread_detach(pthread_self()); //libera recursos del hilo
-	pthread_exit(NULL);
-}
+
 
 void ejecutar_plp() {
+
 	dtb_struct *dtb;
+
 	while (1) {
-		//controlo lista no vacia
+
+		////TOMO PRIMER DTB EN NUEVO
 		sem_wait(&sem_nuevo_vacio);
-		//Tomo de nuevos dtb
-		sem_wait(&sem_nuevo_mutex);
-		dtb = queue_pop(dtb_nuevos);
-		sem_post(&sem_nuevo_mutex);
+		pthread_mutex_lock(&sem_nuevo_mutex);
+		dtb = list_get(dtb_nuevos ,0);
+		pthread_mutex_unlock(&sem_nuevo_mutex);
+
 		//tomo dtb dummy y lo inicializo
-		sem_wait(&sem_dtb_dummy_mutex);
-		dtb_dummy.id_dtb = dtb->id_dtb;
-		dtb_dummy.escriptorio = string_duplicate(dtb->escriptorio);
+		pthread_mutex_lock(&sem_dtb_dummy_mutex);
+		inicializar_dummy(dtb);
 		//agrego a cola de listos el dummy verificando multiprogramacion
 		sem_wait(&sem_listo_max);
-		sem_wait(&sem_listo_mutex);
+		pthread_mutex_lock(&sem_listo_mutex);
 		list_add(dtb_listos, &dtb_dummy);
-		sem_post(&sem_listo_mutex);
+		pthread_mutex_unlock(&sem_listo_mutex);
 		sem_post(&sem_listo_vacio);
 	}
 }
 
-void ejecutar_pcp() {
-	dtb_struct *dtb = NULL;
-	cpu_struct *cpu_libre = NULL;
-	while (true) {
-		sem_wait(&sem_listo_vacio);
-		//obtengo dtb segun algoritmo
-		dtb = obtener_proximo_dtb(safa.algoritmo);
-		//pasarlo a ejecucion de la cpu libre
-		cpu_libre = obtener_cpu_libre();
-		if (cpu_libre != NULL) {
-			cpu_libre->dtb_ejecutar = dtb;
-			//aviso a hilo cpu que puede comenzar con la ejecucion del dtb
-			sem_post(&cpu_libre->sem_mutex_ejecucion_cpu);
-		}
-		//estas ejecuciones tendran que hacerlo los algoritmos
-		sem_wait(&sem_listo_mutex);
-		dtb = queue_pop(dtb_listos);
-		sem_post(&sem_listo_mutex);
-		sem_post(&sem_listo_max);
-	}
+void inicializar_dummy(dtb_struct* dtb) {
+
+	dtb_dummy.id_dtb = dtb->id_dtb;
+	dtb_dummy.escriptorio = string_duplicate(dtb->escriptorio);
 }
+
+

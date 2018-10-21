@@ -10,6 +10,8 @@
 #include <qcommons/utilitaria.h>
 #include "../config/config.h"
 #include "../cpu/cpu.h"
+#include "../dtb/dtb.h"
+
 
 #define CONSOLA_TERMINAR -1
 #define CONSOLA_CONTINUAR 0
@@ -29,6 +31,18 @@ typedef struct {
 int consola_leer_comando();
 int obtener_valor_por_clave(char *clave);
 static const int TAMANIO_ENTRADA_STDIN = 50;
+
+
+int generar_id_dtb();
+
+
+/*
+ * parametro: el dtb nuevo a agregar
+ *
+ * agregar el dtb inicializado en la lista de nuevos y en la lista de dtbs.
+ * Se agrega para que el plp lo administre en algun momento
+ */
+void agregar_dtb_nuevo( dtb_struct dtb_nuevo );
 
 /**
  * parametro
