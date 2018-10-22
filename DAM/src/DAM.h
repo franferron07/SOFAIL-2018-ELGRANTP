@@ -45,6 +45,8 @@ void conectar_mdj(dam_config);
 void conectar_fm9(dam_config);
 
 void conexion_cpu (void *parametro);
+void realizarHandshakeCpu(int cliente_socket);
+void atender_operacion_cpu(int cliente_socket);
 
 void liberar_recursos(int tipo_salida);
 void terminar_exitosamente();
