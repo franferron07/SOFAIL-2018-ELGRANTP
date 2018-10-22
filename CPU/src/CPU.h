@@ -1,26 +1,23 @@
-/*
- * CPU.h
- *
- *  Created on: 8 sep. 2018
- *      Author: cypher
- */
 #ifndef CPU_H_
 #define CPU_H_
 
 #include <commons/string.h> //Commons string
-#include <stdbool.h>
 #include <qcommons/console.h>
 #include <qcommons/serialize.h>
 #include <qcommons/socket.h> //Libreria Socket Cliente
 #include <signal.h>
 
-#include "config/config.h"
+#include "config/config.h"//Llamadas para leer y mostrar el archivo config
+#include "parser/parser.h"//parser del Lenguaje EscripTorio
+
 
 #define FILE_CONFIG_CPU "cpu.config"
 #define EXTENSION_FILE_LOG_CPU ".log"
 #define CPU "CPU"
 
 int socket_safa, socket_diego, socket_fm9;
+struct_instruccion instruccion;
+
 
 
 
@@ -33,22 +30,23 @@ char* crear_nombre_file_log();
 void liberar_recursos(int tipo_salida);
 void exit_gracefully();
 
+void ejecutar_instruccion(struct_instruccion instruccion);
+void liberar_instruccion(struct_instruccion instruccion);
 
 
-//Funciones de Parser
-void ejecutar_linea(char[]);
-bool _esAbrirArchivo(char* linea);
-bool _esConcentrar(char* linea);
-bool _esAsignarLinea(char* linea);
-bool _esWait(char* linea);
-bool _esSignal(char* linea);
-bool _esFlush(char* linea);
-bool _esClose(char* linea);
-bool _esCrearArchivo(char* linea);
-bool _esBorrarArchivo(char* linea);
-bool _esComentario(char* linea);
-/////////////////////////////////
-//otras
-void liberarListaDeStrings(char** operation);
+//////EJECUCION DE OPERACIONES//////
+void escriptorio_abrir(char** parametros);
+void escriptorio_concentrar(char** parametros);
+void escriptorio_asignar(char** parametros);
+void escriptorio_wait(char** parametros);
+void escriptorio_signal(char** parametros);
+void escriptorio_flush(char** parametros);
+void escriptorio_close(char** parametros);
+void escriptorio_crear(char** parametros);
+void escriptorio_borrar(char** parametros);
+void escriptorio_comentario(char** parametros);
+///////////////////////////////////
+
+
 
 #endif /* CPU_H_ */

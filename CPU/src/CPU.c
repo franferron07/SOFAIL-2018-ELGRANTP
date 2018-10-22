@@ -32,8 +32,9 @@ int main(int argc, char *argv[]) {
 		liberar_recursos(EXIT_FAILURE);
 	}
 	while ((leido = getline(&linea, &longitud, archivo)) != -1) {
-		log_info(cpu_log, "%s", linea);
-		ejecutar_linea(linea);
+		//log_info(cpu_log, "%s", linea);
+		instruccion = parsear_linea(linea);
+		ejecutar_instruccion(instruccion);
 	}
 
 	fclose(archivo);
@@ -45,136 +46,34 @@ int main(int argc, char *argv[]) {
 	liberar_recursos(EXIT_SUCCESS);
 }
 
+void ejecutar_instruccion(struct_instruccion instruccion){
+	/*TODO: recibo la instruccion y lista de parametros
+	 *necesito ejecutar la instruccion tomando como referencia el nombre de la funcion y los distintos parametros
+	 *funcion por parametro
+	 *puedo reescribir la funcion tipo o crear _ejecutar_instruccion
+	 *whatever buenas noches
+	 *ejm ejecutar(*(void)operacion, argumentos);
+	 */
 
-/***********************************************/
-/***************LOGICA PARSER*******************/
-/***********************************************/
-
-void ejecutar_linea(char linea[]){
-
-	if( _esAbrirArchivo(linea) ){
-		puts("Es abrir archivo");
-		char * path = (char *) malloc(30);
-		strcpy(path,linea + strlen("abrir "));
-		printf("Path encontrado: %s\n",path);
-
-
-		free(path);
-	}else if(_esConcentrar(linea)){
-		printf("Instruccion Concentrar.\n");
-
-	}else if(_esAsignarLinea(linea)){
-		//"asignar /equipos/Racing.txt 9 GustavoBou"
-		printf("Es asignar linea.\n");
-		char **operation = string_split(linea + strlen("asignar "), " ");
-		string_iterate_lines(operation, (void*)puts);
-
-
-		liberarListaDeStrings(operation);
-	}else if(_esWait(linea)){
-		printf("Es operacion Wait.\n");
-		char * recurso = (char *) malloc(30);
-		strcpy(recurso,linea + strlen("wait "));
-		printf("Recurso a la espera: %s\n",recurso);
-
-
-		free(recurso);
-	}else if(_esSignal(linea)){
-		printf("Es operacion Signal.\n");
-		char * recurso = (char *) malloc(30);
-		strcpy(recurso,linea + strlen("signal "));
-		printf("Recurso a liberar: %s\n",recurso);
-
-		free(recurso);
-	}else if(_esFlush(linea)){
-		//Recibe como parámetro el path del archivo a guardar en MDJ.
-		puts("Es Flush archivo");
-		char * path = (char *) malloc(30);
-		strcpy(path,linea + strlen("flush "));
-		printf("Archivo a Flushear: %s\n",path);
-
-
-		free(path);
-	}else if(_esClose(linea)){
-		puts("Es Cerrar archivo");
-		char * path = (char *) malloc(30);
-		strcpy(path,linea + strlen("flush "));
-		printf("Archivo a cerrar: %s\n",path);
-
-
-		free(path);
-	}else if(_esCrearArchivo(linea)){
-		//Recibe como parámetro el path y la cantidad de líneas que tendrá el archivo.
-		//crear /equipos/Racing.txt 11
-		puts("Es Crear archivo");
-		char **operation = string_split(linea + strlen("crear "), " ");
-		string_iterate_lines(operation, (void*)puts);
-
-
-		liberarListaDeStrings(operation);
-	}else if(_esBorrarArchivo(linea)){
-		puts("Es Borrar archivo");
-		char * path = (char *) malloc(30);
-		strcpy(path,linea + strlen("borrar "));
-		printf("Archivo a Borrar: %s\n",path);
-
-
-		free(path);
-	}else if(_esComentario(linea)){
-		puts("Es Comentario");
-	}
+	liberar_instruccion(instruccion);
 }
 
+/*
+ * TODO: en estas funciones va a estar la logica del anexo 1
+ * */
+void escriptorio_abrir(char** parametros){}
+void escriptorio_concentrar(char** parametros){}
+void escriptorio_asignar(char** parametros){}
+void escriptorio_wait(char** parametros){}
+void escriptorio_signal(char** parametros){}
+void escriptorio_flush(char** parametros){}
+void escriptorio_close(char** parametros){}
+void escriptorio_crear(char** parametros){}
+void escriptorio_borrar(char** parametros){}
+void escriptorio_comentario(char** parametros){}
 
-bool _esBorrarArchivo(char* linea){
-	return string_starts_with(linea, "borrar ");
-}
+void liberar_instruccion(struct_instruccion instruccion){}
 
-bool _esCrearArchivo(char* linea){
-	return string_starts_with(linea, "crear ");
-}
-
-bool _esClose(char* linea){
-	return string_starts_with(linea, "close ");
-}
-
-bool _esFlush(char* linea){
-	return string_starts_with(linea, "flush ");
-}
-
-bool _esSignal(char* linea){
-	return string_starts_with(linea, "signal ");
-}
-
-bool _esWait(char* linea){
-	return string_starts_with(linea, "wait ");
-}
-
-bool _esAsignarLinea(char* linea){
-	return string_starts_with(linea, "asignar ");
-}
-
-bool _esConcentrar(char* linea){
-	return string_starts_with(linea, "concentrar");
-}
-
-bool _esAbrirArchivo(char* linea){
-	return string_starts_with(linea, "abrir ");
-}
-
-bool _esComentario(char* linea){
-	return string_starts_with(linea, "#");
-}
-
-
-void liberarListaDeStrings(char** operation) {
-	string_iterate_lines(operation, (void*) free);
-	free(operation);
-}
-
-/***********************************************/
-/***********FIN LOGICA PARSER*******************/
-/***********************************************/
 
 int validar_parametros_consola(int cant_parametros) {
 	if (cant_parametros < 2) {
