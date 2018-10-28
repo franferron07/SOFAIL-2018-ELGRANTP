@@ -7,7 +7,9 @@
 #include <pthread.h>
 #include <commons/collections/list.h>
 #include <stdint.h>
+#include <qcommons/protocolos.h>
 
+/*
 typedef struct {
 	char *path;
 	char *direccion;
@@ -21,6 +23,7 @@ typedef struct {
 	uint8_t quantum;
 	//char** direcciones;
 } dtb_struct;
+*/
 
 dtb_struct dtb_dummy;
 
