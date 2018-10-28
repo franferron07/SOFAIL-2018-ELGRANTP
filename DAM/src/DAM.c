@@ -164,6 +164,26 @@ void realizarHandshakeCpu(int cliente_socket) {
 	free(buffer_reconocimiento);
 }
 
+typedef struct
+{
+	char* ruta_archivo;
+	int pid;
+} operacion_archivo;
+
+typedef struct
+{
+	char* ruta_archivo;
+	int pid;
+	int cant_lineas;
+} operacion_crear;
+
+typedef struct
+{
+	char* ruta_archivo;
+	int pid;
+	/*ahi que definir parametros necesarios para obtener de fm9 pendiente*/
+} operacion_flush;
+
 void atender_operacion_cpu(int cliente_socket) {
 
 	request_operacion_type *header_operacion = NULL;
@@ -175,8 +195,96 @@ void atender_operacion_cpu(int cliente_socket) {
 
 			log_info(dam_log, "Se recibio operacion del CPU: %s",header_operacion->tipo_operacion);
 
-			/*Hay que hacer un gran switch con el tipo de operacion que puede pedir cpu
-			  van a intervendor todos los modulos intercambiando mensajes indudablemente*/
+
+			switch (header_operacion->tipo_operacion ) {
+
+			/*solicitud a El Diego para que traiga desde el MDJ el archivo requerido*/
+			case ABRIR:{
+				operacion_archivo abrir;
+				void *buffer_abrir = malloc(sizeof(operacion_archivo));
+				//abrir = deserializar_request_archivo();
+
+				log_info(dam_log, "Se recibio operacion ABRIR del CPU, archivo: %s, pid: %d",abrir.ruta_archivo,abrir.pid);
+
+
+				//envio solicitud de abrir al querido mdj
+				request_operacion_type header_operacion;
+
+				header_operacion.tipo_operacion = ABRIR;
+
+				void *buffer_mdj_abrir = serializar_request_operacion_(header_operacion);
+
+				send(socket_mdj,buffer_mdj_abrir,TAMANIO_REQUEST_OPERACION);
+
+				void* buffer_bytes=malloc(sizeof(int));
+
+				recv(socket_mdj,buffer_bytes,sizeof(int));
+
+				//falta contemplar casos de errores, bytes leer es bloque*tam_bloque
+				int cant_bytes_leer = (int *) buffer_bytes;
+
+				int cant_bytes_leidos;
+
+
+				//los pedacitos que recibo bytes lo debo convertir en lineas y enviarlo al fm9
+				while (cant_bytes_leidos < cant_bytes_leer)
+				{
+						char* lineas = malloc(sizeof(dam.transfer_size));
+						void* buffer_bytes;
+						void* buffer_lineas
+						//sizeof tamanio bloque
+						cant_bytes_leidos = recv(socket_mdj,buffer_bytes,sizeof(1));
+
+						//tengo que deserializar el bloque? y convertilo en linea para mandarselo al fm9 MUY IMPORTANTE
+						//tengo que serializar la linea para mandarlo al fm9
+						//DIOS SE APIADE DE NOSOTROS
+						send(socket_fm9,buffer_lineas,sizeof(dam.transfer_size));
+
+				}
+
+
+
+			}
+			break;
+
+			/*solicitud a El Diego indicando que se requiere hacer un Flush del archivo, necesito parametros*/
+			case FLUSH:{
+
+				operacion_flush flush;
+				void *buffer_flush = malloc(sizeof(operacion_flush)); //no del todo seguro, struct flush variable?
+				//abrir = deserializar_request_archivo();
+
+				log_info(dam_log, "Se recibio operacion FLUSH del CPU, archivo: %s, pid: %d",flush.ruta_archivo,flush.pid);
+
+
+			}
+			break;
+			/*Tengo que enviar mensaje de crear archivo a mdj con un determinado path y cantidad de lineas necesarias*/
+			case CREAR:{
+
+				operacion_crear crear;
+				void *buffer_crear = malloc(sizeof(operacion_crear));
+				//abrir = deserializar_request_archivo();
+
+				log_info(dam_log, "Se recibio operacion CREAR del CPU, archivo: %s, pid: %d, lineas: %d",crear.ruta_archivo,crear.pid,crear.cant_lineas);
+
+
+
+			}
+			break;
+			/*debo enviar a mdj borrar determinado archivo*/
+			case BORRAR:{
+
+				operacion_archivo abrir;
+						void *buffer_abrir = malloc(sizeof(operacion_archivo));
+						//abrir = deserializar_request_archivo();
+
+						log_info(dam_log, "Se recibio operacion BORRAR del CPU, archivo: %s, pid: %d",abrir.ruta_archivo,abrir.pid);
+
+			}
+			break;
+
+			}
 
 		}
 
