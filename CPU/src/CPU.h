@@ -3,8 +3,8 @@
 
 #include <commons/string.h> //Commons string
 #include <qcommons/console.h>
-#include <qcommons/serialize.h>
 #include <qcommons/socket.h> //Libreria Socket Cliente
+#include <qcommons/protocolos.h>
 #include <signal.h>
 
 #include "config/config.h"//Llamadas para leer y mostrar el archivo config

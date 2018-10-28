@@ -66,7 +66,7 @@ struct_instruccion parsear_linea(char linea[]){
 
 	}else if(_esComentario(linea)){
 		strcpy(instruccion.nombre_instruccion,"escriptorio_comentario");
-		**instruccion.parametros=NULL;
+		*instruccion.parametros=NULL;
 		printf("Comentario Encontrado: %s\n",linea);
 
 	}
@@ -120,10 +120,10 @@ void liberarListaDeStrings(char** operation) {
 	free(operation);
 }
 
-
+/*
 void printCharArray(char *arr[]){
     for (int i=0; arr[i] != NULL; i++) {
         printf("Array item: [%s]",arr[i]);
     }
-
 }
+*/

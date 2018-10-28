@@ -6,6 +6,7 @@
 #include <semaphore.h>
 #include <pthread.h>
 #include <commons/collections/list.h>
+#include <stdint.h>
 
 typedef struct {
 	char *path;
@@ -13,12 +14,12 @@ typedef struct {
 } direccion_struct;
 
 typedef struct {
-	int id_dtb;
+	uint8_t id_dtb;
 	char *escriptorio;
-	int pc;
-	int inicializado;
-	int quantum;
-	direccion_struct** direcciones;
+	uint8_t program_counter;
+	uint8_t inicializado;
+	uint8_t quantum;
+	//char** direcciones;
 } dtb_struct;
 
 dtb_struct dtb_dummy;
@@ -28,6 +29,8 @@ typedef struct {
 	bool ocupada;
 	dtb_struct* dtb_ejecutar;
 } cpu_struct;
+
+
 
 typedef enum {
 	DTB_LISTO, DTB_NUEVO, DTB_EJECUTANDO, DTB_BLOQUEADO, DTB_TERMINADO

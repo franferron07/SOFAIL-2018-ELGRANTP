@@ -76,17 +76,84 @@ void* serializar_header_conexion(header_conexion_type *header) {
 	return buffer;
 }
 
+
+//////////////////////////////////////////
+///////INTENTO DE SERIALIZO DE DTB/////////
+//////////////////////////////////////////
+
+void* serializar_dtb(dtb_struct *dtb){
+	uint8_t tamanio_ruta_escriptorio = strlen(dtb->escriptorio) + 1;
+
+	int tamanio = 	sizeof(dtb->id_dtb) +
+					sizeof(tamanio_ruta_escriptorio) +
+					tamanio_ruta_escriptorio +
+					sizeof(dtb->program_counter) +
+					sizeof(dtb->inicializado) +
+					sizeof(dtb->quantum);
+	//todo: serializar tabla de porquerias
+	//sizeof(dtb_a_enviar->direcciones)/sizeof(char *) +
+
+
+	void* buffer = (dtb_struct *)malloc(tamanio);
+	printf("longitud: %d\n",tamanio);
+
+	int lastIndex = 0;
+
+
+	serialize_data(&(dtb->id_dtb),sizeof(dtb->id_dtb), &buffer, &lastIndex);
+	serialize_data(&(tamanio_ruta_escriptorio),sizeof(tamanio_ruta_escriptorio), &buffer, &lastIndex);
+	serialize_data(&(dtb->escriptorio),tamanio_ruta_escriptorio, &buffer, &lastIndex);
+	serialize_data(&(dtb->program_counter),sizeof(dtb->program_counter), &buffer, &lastIndex);
+	serialize_data(&(dtb->inicializado),sizeof(dtb->inicializado), &buffer, &lastIndex);
+	serialize_data(&(dtb->quantum),sizeof(dtb->quantum), &buffer, &lastIndex);
+
+
+
+	return buffer;
+}
+
+dtb_struct* deserializar_dtb(void *buffer){
+	dtb_struct* dtb = (dtb_struct *)malloc(sizeof(dtb_struct));
+	//dtb = (dtb_struct *)realloc(dtb,sizeof(dtb_struct));
+	int lastIndex = 0;
+
+	deserialize_data(&(dtb->id_dtb),sizeof(dtb->id_dtb), buffer, &lastIndex);
+
+	uint8_t tamanio_ruta_escriptorio;
+	deserialize_data(&(tamanio_ruta_escriptorio),sizeof(tamanio_ruta_escriptorio), buffer, &lastIndex);
+
+	dtb->escriptorio = malloc(tamanio_ruta_escriptorio);
+	printf("tamanio ruta deserializada: %d\n",tamanio_ruta_escriptorio);
+
+	deserialize_data(&(dtb->escriptorio),tamanio_ruta_escriptorio, buffer, &lastIndex);
+	(dtb->escriptorio)[42]='\0';
+	deserialize_data(&(dtb->program_counter),sizeof(dtb->program_counter), buffer, &lastIndex);
+	deserialize_data(&(dtb->inicializado),sizeof(dtb->inicializado), buffer, &lastIndex);
+	deserialize_data(&(dtb->quantum),sizeof(dtb->quantum), buffer, &lastIndex);
+
+	return dtb;
+}
+
+//////////////////////////////////////////
+///////INTENTO DE SERIALIZO DE DTB/////////
+//////////////////////////////////////////
+
+
+
+
+
 header_conexion_type* deserializar_header_conexion(void *buffer) {
 	header_conexion_type* header = malloc(sizeof(header_conexion_type));
 	int lastIndex = 0;
 	int tipo_instancia = 0;
 
-	deserialize_data(&tipo_instancia, 4, buffer, &lastIndex);
-	header->tipo_instancia = tipo_instancia;
+	deserialize_data(&(header->tipo_instancia), 4, buffer, &lastIndex);
 	deserialize_data(&(header->nombre_instancia), 31, buffer, &lastIndex);
 
 	return header;
 }
+
+
 
 void* serializar_mensaje_reconocimiento(mensaje_reconocimiento_type *mensaje_reconocimiento) {
 	void* buffer = malloc(TAMANIO_MENSAJE_RECONOCIMIENTO);

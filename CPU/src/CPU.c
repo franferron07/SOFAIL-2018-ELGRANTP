@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
 */
 	/**
 	 * ####Lectura de Escriptorio
-	 * */
+	 *
 	FILE * archivo;
 	char * linea = NULL;
 	size_t longitud = 0;
@@ -42,6 +42,37 @@ int main(int argc, char *argv[]) {
 		free(linea);
 	/**################*/
 
+	puts("");
+	dtb_struct *dtb_a_enviar = malloc(sizeof(dtb_struct));
+	dtb_a_enviar->id_dtb = 15;
+	dtb_a_enviar->escriptorio=strdup("/direccion/verga/123/ahreloco/putoelquelee");
+	dtb_a_enviar->program_counter = 7;
+	dtb_a_enviar->inicializado = 1;
+	dtb_a_enviar->quantum = 4;
+	//dtb_a_enviar.direcciones = NULL;
+
+
+
+	printf("id_dtb: %d\n",dtb_a_enviar->id_dtb);
+	printf("longitud escriptorio: %d\n",strlen(dtb_a_enviar->escriptorio));
+	printf("escriptorio: %s\n",dtb_a_enviar->escriptorio);
+	printf("program_counter: %d\n",dtb_a_enviar->program_counter);
+	printf("inicializado: %d\n",dtb_a_enviar->inicializado);
+	printf("quantum: %d\n",dtb_a_enviar->quantum);
+
+
+	void * dtb_serializado = serializar_envio_dtb(dtb_a_enviar);
+
+
+	dtb_struct * dtb_deserializado = deserializar_envio_dtb(dtb_serializado);
+
+	puts("//////DTB DESERIALIZADO//////");
+	printf("id_dtb: %d\n",dtb_deserializado->id_dtb);
+	printf("escriptorio: %s\n",dtb_deserializado->escriptorio);
+	printf("program_counter: %d\n",dtb_deserializado->program_counter);
+	printf("inicializado: %d\n",dtb_deserializado->inicializado);
+	printf("quantum: %d\n",dtb_deserializado->quantum);
+	puts("///FIN DTB DESERIALIZADO/////");
 
 	liberar_recursos(EXIT_SUCCESS);
 }

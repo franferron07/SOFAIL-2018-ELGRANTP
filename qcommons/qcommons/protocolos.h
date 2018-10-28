@@ -44,6 +44,24 @@ typedef struct {
 
 static const int TAMANIO_REQUEST_OPERACION = 4 + 41 + 4;
 
+
+typedef struct {
+	char *path;
+	char *direccion;
+} direccion_struct;
+
+
+typedef struct {
+	uint8_t id_dtb;
+	char *escriptorio;
+	uint8_t program_counter;
+	uint8_t inicializado;
+	uint8_t quantum;
+	//char** direcciones;
+} dtb_struct;
+
+
+
 int enviar_header_conexion(int socket_server, char* nombre_instancia,
 		tipo_instancia_e tipo_instancia, t_log *logger);
 
@@ -64,5 +82,10 @@ mensaje_reconocimiento_type* deserializar_mensaje_reconocimiento(void* buffer);
 void* serializar_request_operacion_(request_operacion_type *request);
 
 request_operacion_type* deserializar_request_operacion(void *buffer);
+
+
+void* serializar_envio_dtb(dtb_struct *dtb_a_enviar);
+
+
 
 #endif /* PROTOCOLOS_H_ */
