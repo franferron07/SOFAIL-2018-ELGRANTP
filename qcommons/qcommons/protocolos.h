@@ -84,8 +84,8 @@ void* serializar_request_operacion_(request_operacion_type *request);
 request_operacion_type* deserializar_request_operacion(void *buffer);
 
 
-void* serializar_envio_dtb(dtb_struct *dtb_a_enviar);
-
+void* serializar_dtb(dtb_struct *dtb_a_enviar);
+dtb_struct* deserializar_dtb(void *buffer);
 
 
 #endif /* PROTOCOLOS_H_ */
