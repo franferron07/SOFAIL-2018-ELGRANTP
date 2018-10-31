@@ -5,12 +5,7 @@
 #include "../config/config.h"
 
 
-t_list *dtb_nuevos;
-t_list *dtb_listos;
-t_list *dtb_ejecutando;
-t_list *dtb_bloqueados;
-t_list *dtb_terminados;
-t_list *dtbs;
+
 
 void inicializar_listas_dtb();
 dtb_struct crear_dtb(int id_dtb, char *path);

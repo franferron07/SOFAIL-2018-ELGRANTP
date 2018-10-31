@@ -112,6 +112,22 @@ void* serializar_dtb(dtb_struct *dtb){
 	return buffer;
 }
 
+
+int tamanio_dtb( dtb_struct *dtb ){
+
+	uint8_t tamanio_ruta_escriptorio = strlen(dtb->escriptorio);
+
+	int tamanio =	sizeof(dtb->id_dtb) +
+					sizeof(tamanio_ruta_escriptorio) +
+					tamanio_ruta_escriptorio +
+					sizeof(dtb->program_counter) +
+					sizeof(dtb->inicializado) +
+					sizeof(dtb->quantum);
+
+	return tamanio;
+
+}
+
 dtb_struct* deserializar_dtb(void *buffer){
 	dtb_struct* dtb = (dtb_struct *) malloc(sizeof(dtb_struct));
 	//dtb = (dtb_struct *)realloc(dtb,sizeof(dtb_struct));

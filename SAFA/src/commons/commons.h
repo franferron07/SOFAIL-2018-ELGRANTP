@@ -40,6 +40,16 @@ typedef enum {
 } dtb_status_enum;
 
 
+t_list *cpus;
+
+t_list *dtb_nuevos;
+t_list *dtb_listos;
+t_list *dtb_ejecutando;
+t_list *dtb_bloqueados;
+t_list *dtb_terminados;
+t_list *dtbs;
+
+
 sem_t sem_nuevo_vacio; //control cola de nuevos vacia
 sem_t sem_listo_vacio; //controla cola de listos vacia
 sem_t sem_listo_max; //controlar multiprogramacion

@@ -212,7 +212,7 @@ void atender_cliente_cpu( int *cliente_socket ){
 	}
 
 
-
+	/****** ESPERANDO MENSAJES DE CPU *******/
 	while ( ( res = recv(*cliente_socket, buffer_operacion, TAMANIO_REQUEST_OPERACION,MSG_WAITALL) )  > 0) {
 
 		header_operacion = deserializar_request_operacion(buffer_operacion);
@@ -220,10 +220,6 @@ void atender_cliente_cpu( int *cliente_socket ){
 
 		switch (header_operacion->tipo_operacion ) {
 
-		case ABRIR:{
-
-		}
-		break;
 		case ENVIARDTB:{
 
 			/* espero hasta que cpu tenga un dtb para ejecutar.  */
@@ -232,13 +228,38 @@ void atender_cliente_cpu( int *cliente_socket ){
 			}
 
 			/***** ENVIO A CPU DTB A EJECUTAR  ******/
-
-
-
+			void *buffer = serializar_dtb( cpu_nueva.dtb_ejecutar );
+			send(cpu_nueva.socket, buffer, tamanio_dtb( cpu_nueva.dtb_ejecutar ) , 0);
+			log_info(safa_log, "Envio a ejecutar en cpu el dtb: %d",cpu_nueva.dtb_ejecutar->id_dtb);
 		}
 		break;
 
 		case CERRARCONEXION:{
+
+		}
+		break;
+
+		case BLOQUEARDTB:{
+
+		}
+		break;
+
+		case TERMINARDTB:{
+
+		}
+		break;
+
+		case FINDEQUANTUM:{
+
+		}
+		break;
+
+		case PEDIRRECURSO:{
+
+		}
+		break;
+
+		case LIBERARRECURSO:{
 
 		}
 		break;
