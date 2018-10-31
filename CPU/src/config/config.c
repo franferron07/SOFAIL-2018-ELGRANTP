@@ -14,9 +14,9 @@ int cargar_archivo_config(char* path) {
 
 	log_info(cpu_log, ".:: Cargando configuracion ::.");
 
-	cpu.ip_safa = malloc(sizeof(char*));
-	cpu.ip_diego = malloc(sizeof(char*));
-	cpu.ip_fm9 = malloc(sizeof(char*));
+	cpu.ip_safa = malloc(10 * sizeof(char));
+	cpu.ip_diego = malloc(10 * sizeof(char));
+	cpu.ip_fm9 = malloc(10 * sizeof(char));
 
 	strcpy(cpu.ip_safa, config_get_string_value(config, "IP_SAFA"));
 	cpu.puerto_safa = config_get_int_value(config, "PUERTO_SAFA");

@@ -82,7 +82,7 @@ void* serializar_header_conexion(header_conexion_type *header) {
 //////////////////////////////////////////
 
 void* serializar_dtb(dtb_struct *dtb){
-	uint8_t tamanio_ruta_escriptorio = strlen(dtb->escriptorio);
+	int tamanio_ruta_escriptorio = strlen(dtb->escriptorio);
 
 	int tamanio = 	sizeof(dtb->id_dtb) +
 					sizeof(tamanio_ruta_escriptorio) +
@@ -93,8 +93,7 @@ void* serializar_dtb(dtb_struct *dtb){
 	//todo: serializar tabla de porquerias
 	//sizeof(dtb_a_enviar->direcciones)/sizeof(char *) +
 
-
-	void* buffer = (dtb_struct *) malloc(tamanio);
+	void* buffer = (void *) malloc(tamanio);
 	printf("longitud: %d\n",tamanio);
 
 	int lastIndex = 0;
@@ -113,20 +112,22 @@ void* serializar_dtb(dtb_struct *dtb){
 }
 
 dtb_struct* deserializar_dtb(void *buffer){
-	dtb_struct* dtb = (dtb_struct *) malloc(sizeof(dtb_struct));
+	dtb_struct* dtb = (dtb_struct *)malloc(sizeof(dtb_struct));
 	//dtb = (dtb_struct *)realloc(dtb,sizeof(dtb_struct));
 	int lastIndex = 0;
 
 	deserialize_data(&(dtb->id_dtb),sizeof(dtb->id_dtb), buffer, &lastIndex);
 
-	uint8_t tamanio_ruta_escriptorio;
+	int tamanio_ruta_escriptorio;
 	deserialize_data(&(tamanio_ruta_escriptorio),sizeof(tamanio_ruta_escriptorio), buffer, &lastIndex);
 
-	dtb->escriptorio = malloc(tamanio_ruta_escriptorio+1);
+	dtb->escriptorio = (char *)malloc((tamanio_ruta_escriptorio + 1) * sizeof(char));
+	printf("direccion de memoria %p\n",dtb->escriptorio);
+	printf("direccion de memoria %p\n",&(dtb->escriptorio));
 	printf("tamanio ruta deserializada: %d\n",tamanio_ruta_escriptorio);
 
 	deserialize_data(&(dtb->escriptorio),tamanio_ruta_escriptorio, buffer, &lastIndex);
-	*(dtb->escriptorio+tamanio_ruta_escriptorio)='\0';
+	*(dtb->escriptorio + tamanio_ruta_escriptorio)='\0';
 
 	deserialize_data(&(dtb->program_counter),sizeof(dtb->program_counter), buffer, &lastIndex);
 	deserialize_data(&(dtb->inicializado),sizeof(dtb->inicializado), buffer, &lastIndex);

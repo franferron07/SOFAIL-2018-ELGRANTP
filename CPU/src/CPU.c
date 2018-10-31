@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 	puts("");
 	dtb_struct dtb_a_enviar;
 	dtb_a_enviar.id_dtb = 15;
-	dtb_a_enviar.escriptorio=strdup("/direccion/verga/123/ahreloco/putoelquelee");
+	dtb_a_enviar.escriptorio=strdup("/direccion/putoelquele");
 	dtb_a_enviar.program_counter = 7;
 	dtb_a_enviar.inicializado = 1;
 	dtb_a_enviar.quantum = 4;
@@ -128,6 +128,7 @@ int inicializar(char* nombre_archivo_log) {
 		exit_gracefully(EXIT_FAILURE);
 
 	print_header(CPU, cpu_log);
+	free(name);
 
 	if (cargar_archivo_config(FILE_CONFIG_CPU) < 0) {
 		return -1;
