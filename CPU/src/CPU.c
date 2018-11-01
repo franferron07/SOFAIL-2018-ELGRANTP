@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 	puts("");
 	dtb_struct dtb_a_enviar;
 	dtb_a_enviar.id_dtb = 15;
-	dtb_a_enviar.escriptorio=strdup("/direccion/putoelquele");
+	dtb_a_enviar.escriptorio=strdup("/direccion/putoelquele/aguanteallboys/ahreloco/gato/policia");
 	dtb_a_enviar.program_counter = 7;
 	dtb_a_enviar.inicializado = 1;
 	dtb_a_enviar.quantum = 4;
@@ -64,12 +64,11 @@ int main(int argc, char *argv[]) {
 	void * dtb_serializado = serializar_dtb(&dtb_a_enviar);
 
 
-	dtb_struct* dtb_deserializado = NULL;
-
-	dtb_deserializado = deserializar_dtb(dtb_serializado);
+	dtb_struct* dtb_deserializado = deserializar_dtb(dtb_serializado);
 
 	puts("//////DTB DESERIALIZADO//////");
 	printf("id_dtb: %d\n",dtb_deserializado->id_dtb);
+	printf("longitud escriptorio: %d\n",strlen(dtb_deserializado->escriptorio));
 	printf("escriptorio: %s\n",dtb_deserializado->escriptorio);
 	printf("program_counter: %d\n",dtb_deserializado->program_counter);
 	printf("inicializado: %d\n",dtb_deserializado->inicializado);
