@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
 */
 	/**
 	 * ####Lectura de Escriptorio
-	 *
+	 **/
 	FILE * archivo;
 	char * linea = NULL;
 	size_t longitud = 0;
@@ -40,9 +40,10 @@ int main(int argc, char *argv[]) {
 	fclose(archivo);
 	if (linea)
 		free(linea);
-	################*/
+
 
 	puts("");
+	/*
 	dtb_struct dtb_a_enviar;
 	dtb_a_enviar.id_dtb = 15;
 	dtb_a_enviar.escriptorio=strdup("/direccion/putoelquele/aguanteallboys/ahreloco/gato/policia");
@@ -74,35 +75,80 @@ int main(int argc, char *argv[]) {
 	printf("inicializado: %d\n",dtb_deserializado->inicializado);
 	printf("quantum: %d\n",dtb_deserializado->quantum);
 	puts("///FIN DTB DESERIALIZADO/////");
+	*/
 
 	liberar_recursos(EXIT_SUCCESS);
 }
 
 void ejecutar_instruccion(struct_instruccion instruccion){
-	/*TODO: recibo la instruccion y lista de parametros
-	 *necesito ejecutar la instruccion tomando como referencia el nombre de la funcion y los distintos parametros
-	 *funcion por parametro
-	 *puedo reescribir la funcion tipo o crear _ejecutar_instruccion
-	 *whatever buenas noches
-	 *ejm ejecutar(*(void)operacion, argumentos);
-	 */
-
+	switch (instruccion.nombre_instruccion) {
+		case ESCRIPTORIO_ABRIR:
+			escriptorio_abrir(instruccion.parametros);
+			break;
+		case ESCRIPTORIO_CONCENTRAR:
+			escriptorio_concentrar(instruccion.parametros);
+			break;
+		case ESCRIPTORIO_ASIGNAR:
+			escriptorio_asignar(instruccion.parametros);
+			break;
+		case ESCRIPTORIO_WAIT:
+			escriptorio_wait(instruccion.parametros);
+			break;
+		case ESCRIPTORIO_SIGNAL:
+			escriptorio_signal(instruccion.parametros);
+			break;
+		case ESCRIPTORIO_FLUSH:
+			escriptorio_flush(instruccion.parametros);
+			break;
+		case ESCRIPTORIO_CLOSE:
+			escriptorio_close(instruccion.parametros);
+			break;
+		case ESCRIPTORIO_CREAR:
+			escriptorio_crear(instruccion.parametros);
+			break;
+		case ESCRIPTORIO_BORRAR:
+			escriptorio_borrar(instruccion.parametros);
+			break;
+		case ESCRIPTORIO_COMENTARIO:
+			escriptorio_comentario(instruccion.parametros);
+			break;
+		default:
+			break;
+	}
 	liberar_instruccion(instruccion);
 }
 
 /*
  * TODO: en estas funciones va a estar la logica del anexo 1
  * */
-void escriptorio_abrir(char** parametros){}
-void escriptorio_concentrar(char** parametros){}
-void escriptorio_asignar(char** parametros){}
-void escriptorio_wait(char** parametros){}
-void escriptorio_signal(char** parametros){}
-void escriptorio_flush(char** parametros){}
-void escriptorio_close(char** parametros){}
-void escriptorio_crear(char** parametros){}
-void escriptorio_borrar(char** parametros){}
-void escriptorio_comentario(char** parametros){}
+unsigned escriptorio_abrir(char** parametros){
+	char * path = parametros[0];
+	if(se_encuentra_archivo_en_gdt(path)){
+		printf("el path que encontre perro es %s",path);
+
+		//INFO:SDA
+		return 0;
+	}
+	return 0;
+}
+
+bool se_encuentra_archivo_en_gdt(path){
+	return true;
+}
+
+
+
+
+
+unsigned escriptorio_concentrar(char** parametros){return 0;}
+unsigned escriptorio_asignar(char** parametros){return 0;}
+unsigned escriptorio_wait(char** parametros){return 0;}
+unsigned escriptorio_signal(char** parametros){return 0;}
+unsigned escriptorio_flush(char** parametros){return 0;}
+unsigned escriptorio_close(char** parametros){return 0;}
+unsigned escriptorio_crear(char** parametros){return 0;}
+unsigned escriptorio_borrar(char** parametros){return 0;}
+unsigned escriptorio_comentario(char** parametros){return 0;}
 
 void liberar_instruccion(struct_instruccion instruccion){}
 

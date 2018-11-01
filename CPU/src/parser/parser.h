@@ -8,8 +8,22 @@
 #include "../config/config.h"
 
 
+typedef enum {
+	ESCRIPTORIO_ABRIR = 1,
+	ESCRIPTORIO_CONCENTRAR = 2,
+	ESCRIPTORIO_ASIGNAR = 3,
+	ESCRIPTORIO_WAIT = 4,
+	ESCRIPTORIO_SIGNAL = 5,
+	ESCRIPTORIO_FLUSH = 6,
+	ESCRIPTORIO_CLOSE = 7,
+	ESCRIPTORIO_CREAR = 8,
+	ESCRIPTORIO_BORRAR = 9,
+	ESCRIPTORIO_COMENTARIO = 10,
+} escriptorio_instruccion;
+
+
 typedef struct {
-	char* nombre_instruccion;
+	escriptorio_instruccion nombre_instruccion;
 	char** parametros;
 } struct_instruccion;
 

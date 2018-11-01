@@ -1,11 +1,13 @@
 #ifndef CPU_H_
 #define CPU_H_
 
+
 #include <commons/string.h> //Commons string
 #include <qcommons/console.h>
 #include <qcommons/socket.h> //Libreria Socket Cliente
 #include <qcommons/protocolos.h>
 #include <signal.h>
+#include <stdbool.h>
 
 #include "config/config.h"//Llamadas para leer y mostrar el archivo config
 #include "parser/parser.h"//parser del Lenguaje EscripTorio
@@ -35,17 +37,21 @@ void liberar_instruccion(struct_instruccion instruccion);
 
 
 //////EJECUCION DE OPERACIONES//////
-void escriptorio_abrir(char** parametros);
-void escriptorio_concentrar(char** parametros);
-void escriptorio_asignar(char** parametros);
-void escriptorio_wait(char** parametros);
-void escriptorio_signal(char** parametros);
-void escriptorio_flush(char** parametros);
-void escriptorio_close(char** parametros);
-void escriptorio_crear(char** parametros);
-void escriptorio_borrar(char** parametros);
-void escriptorio_comentario(char** parametros);
+unsigned escriptorio_abrir(char** parametros);
+unsigned escriptorio_concentrar(char** parametros);
+unsigned escriptorio_asignar(char** parametros);
+unsigned escriptorio_wait(char** parametros);
+unsigned escriptorio_signal(char** parametros);
+unsigned escriptorio_flush(char** parametros);
+unsigned escriptorio_close(char** parametros);
+unsigned escriptorio_crear(char** parametros);
+unsigned escriptorio_borrar(char** parametros);
+unsigned escriptorio_comentario(char** parametros);
 ///////////////////////////////////
+
+bool se_encuentra_archivo_en_gdt(path);
+
+
 
 
 
