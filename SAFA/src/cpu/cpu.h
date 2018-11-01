@@ -5,7 +5,7 @@
 #include "../config/config.h"
 #include <stdbool.h>
 
-t_list *cpus;
+
 
 
 cpu_struct crear_cpu(int socket);

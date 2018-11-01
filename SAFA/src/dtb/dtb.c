@@ -20,6 +20,10 @@ dtb_struct crear_dtb(int id_dtb, char *path) {
 	strcpy(dtb_nuevo.escriptorio, path);
 	dtb_nuevo.inicializado = 1;
 	dtb_nuevo.quantum = safa.quantum;
+	dtb_nuevo.sentencias_espera=0;
+	dtb_nuevo.sentencias_dam=0;
+	dtb_nuevo.sentencias_totales=0;
+
 	//dtb_nuevo.direcciones = NULL;
 
 	return dtb_nuevo;

@@ -20,7 +20,12 @@ typedef enum {
 	CREAR = 8,
 	BORRAR = 9,
 	ENVIARDTB = 10,
-	CERRARCONEXION= 11
+	CERRARCONEXION= 11,
+	BLOQUEARDTB=12 ,
+	TERMINARDTB=13,
+	FINDEQUANTUM=14,
+	PEDIRRECURSO=15,
+	LIBERARRECURSO=16
 } tipo_operacion_e;
 
 typedef struct {
@@ -53,6 +58,9 @@ typedef struct {
 
 typedef struct {
 	uint8_t id_dtb;
+	uint8_t sentencias_espera;
+	uint8_t sentencias_dam;
+	uint8_t sentencias_totales;
 	char *escriptorio;
 	uint8_t program_counter;
 	uint8_t inicializado;
@@ -87,5 +95,6 @@ request_operacion_type* deserializar_request_operacion(void *buffer);
 void* serializar_dtb(dtb_struct *dtb_a_enviar);
 dtb_struct* deserializar_dtb(void *buffer);
 
+int tamanio_dtb( dtb_struct *dtb );
 
 #endif /* PROTOCOLOS_H_ */

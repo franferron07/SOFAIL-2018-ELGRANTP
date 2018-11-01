@@ -15,3 +15,24 @@
 [INFO] 20:35:42:224 El-Gran-TP-DAM/(8724:8724): Realizada Conexiones safa/mdj/fm9
 [INFO] 20:35:42:224 El-Gran-TP-DAM/(8724:8724): Servidor con Hilos
 [INFO] 20:35:42:224 El-Gran-TP-DAM/(8724:8724): Esperando por conexiones entrantes...
+[INFO] 18:23:12:830 El-Gran-TP-DAM/(14401:14401): 
+	[31;1m===========================================[0m
+	.::	Bievenido a El Gran TP - DAM	::.
+	[31;1m===========================================[0m
+[INFO] 18:23:12:831 El-Gran-TP-DAM/(14401:14401): .:: Cargando configuracion ::.
+[INFO] 18:23:12:832 El-Gran-TP-DAM/(14401:14401): .:: Imprimiendo configuracion ::.
+[INFO] 18:23:12:832 El-Gran-TP-DAM/(14401:14401): PUERTO: 8001
+[INFO] 18:23:12:832 El-Gran-TP-DAM/(14401:14401): IP SAFA: 127.0.0.1
+[INFO] 18:23:12:832 El-Gran-TP-DAM/(14401:14401): PUERTO SAFA: 8000
+[INFO] 18:23:12:832 El-Gran-TP-DAM/(14401:14401): IP FM9: 127.0.0.1
+[INFO] 18:23:12:832 El-Gran-TP-DAM/(14401:14401): PUERTO FM9: 8003
+[INFO] 18:23:12:832 El-Gran-TP-DAM/(14401:14401): IP MDJ: 127.0.0.1
+[INFO] 18:23:12:832 El-Gran-TP-DAM/(14401:14401): PUERTO MDJ: 8002
+[INFO] 18:23:12:832 El-Gran-TP-DAM/(14401:14401): TRANSFER SIZE: 16
+[TRACE] 18:23:12:835 El-Gran-TP-DAM/(14401:14401): Enviando mensaje de header de conexión...
+[TRACE] 18:23:12:836 El-Gran-TP-DAM/(14401:14401): Enviando mensaje de header de conexión...
+[ERROR] 18:23:12:836 El-Gran-TP-DAM/(14401:14401): Error al conectarse a safa/mdj/fm9
+[INFO] 18:23:12:836 El-Gran-TP-DAM/(14401:14401): 
+	[31;1m============================================================[0m
+	.::	Gracias por utilizar El Gran TP, DAM terminada.	::.
+	[31;1m============================================================[0m
