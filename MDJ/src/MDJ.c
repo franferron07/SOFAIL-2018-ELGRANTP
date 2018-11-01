@@ -10,10 +10,9 @@
 
 
 #include "mdj.h"
-#include <string.h>
+
 #include <readline/readline.h>
 #include <readline/history.h>
-#define  MAX_INPUT_BUFFER 1000
 int i;
 // char buffer[MAX_INPUT_BUFFER];							/* Buffer para leer de los socket */
  char *buffer=NULL;				/* Buffer para leer de los socket */
@@ -35,15 +34,14 @@ int main(void) {
 
 //		pthread_create(&hilo_consola_fifa,NULL,consola_fifa(),NULL);
 
-			pthread_create(&hilo_escucha, NULL, escuchar_mensajes_entrantes(), NULL);
+			pthread_create(&hilo_escucha, NULL,escuchar_mensajes_entrantes, NULL);
 
 
 			pthread_join(&hilo_escucha, NULL);
 //			pthread_join(&hilo_consola_fifa,NULL);
 
 	 	mdj_finish_and_free();
-	 	exit(EXIT_SUCCESS);
-
+	 	return 0;
 	 }
 void consola_fifa(){
 	puts("press \"exit\" para salir de consola ");
@@ -59,10 +57,9 @@ void consola_fifa(){
 void  ejecutar_linea_entrante(){
 	printf("ingreso \"%s\"  con %d letras \n", buffer_input_keyboard,strlen(buffer_input_keyboard));
 	system(buffer_input_keyboard);
-
 }
 void mdj_finish_and_free(){
-	 config_destroy_mdj(mdj);
+	 config_destroy_mdj(&mdj);
 	 mostrar_y_guardar_log("MDJ terminando..");
 	 log_info(logger, "Finish.cfg");
 	 log_destroy(logger);
@@ -75,7 +72,6 @@ void mostrar_y_guardar_log(char * s, ...){
 	printf(leyenda_temporal);
 	log_info(logger,leyenda_temporal);
 	va_end(resto);
-//	free(s);
 }
 void guardar_log(char* s ){
 	log_info(logger,s);
@@ -93,7 +89,7 @@ void guardar_log_v2(char * s, ...){
 
 
 void inicializando_socket(){
-	mdj_socket=crear_socket(mdj->ip,mdj->puerto);
+	mdj_socket=crear_socket(mdj.ip,mdj.puerto);
 		 puts("conectando socket");
 		 socketServidor = mdj_socket.socket;
 		 	//Asocio el servidor a un puerto
@@ -180,20 +176,19 @@ void mdj_init(){
 	logger = log_create("MDJ.log", "MDJ",false, LOG_LEVEL_INFO);
 	guardar_log("INICIO MDJ");
 
-	mdj=malloc(sizeof(MDJ));
+//	mdj=malloc(sizeof(mdj));
 	t_config *configuracion_cfg_temporal=cargar_en_memoria_cfg("mdj.cfg");
-	montar_configuracion(configuracion_cfg_temporal,mdj);
+	montar_configuracion(configuracion_cfg_temporal,&mdj);
 	config_destroy(configuracion_cfg_temporal);
-
 	buffer=malloc(MAX_INPUT_BUFFER);
 }
 
 
 t_config* cargar_en_memoria_cfg(char* dir){
-	t_config* aux = malloc(sizeof(MDJ));
+	t_config* aux = malloc(sizeof(MDJ_CONFIG));
 	aux=config_create(dir);
 	if(aux==NULL){
-		free(mdj);
+//		free(mdj);
 		mostrar_y_guardar_log("No se encuentra archivo MDJ.cfg");
 		log_error(logger, leyenda_temporal);
 	}
@@ -201,7 +196,7 @@ t_config* cargar_en_memoria_cfg(char* dir){
 	return aux;
 }
 
-void montar_configuracion(t_config*  temporal,MDJ* configuracion){
+void montar_configuracion(t_config*  temporal,MDJ_CONFIG* configuracion){
 	//tomo las key para inicializar duplicando el string devuelvo para luego hacer los free
 	configuracion->puerto=string_duplicate(config_get_string_value(temporal,"PUERTO"));
 	configuracion->punto_de_montaje=string_duplicate(config_get_string_value(temporal,"PUNTO_MONTAJE"));
@@ -210,18 +205,18 @@ void montar_configuracion(t_config*  temporal,MDJ* configuracion){
 
 }
 
-void config_destroy_mdj(MDJ* mdj_configuracion_){
+void config_destroy_mdj(MDJ_CONFIG* mdj_configuracion_){
 	free(mdj_configuracion_->puerto);
 	free(mdj_configuracion_->punto_de_montaje);
 	free(mdj_configuracion_->ip);
-	free(mdj_configuracion_);
+//	free(mdj_configuracion_);
 
 }
 void mostrar_configuracion(){
 	printf("iniciando lectura de configuracion...\n");
-	printf("PUNTO_DE_MONTAJE = %s \n",mdj->punto_de_montaje);
-	printf("RETARDO = %d \n",mdj->retardo);
-	printf("PUERTO MDJ = %s \n",mdj->puerto);
-	printf("IP MDJ = %s \n",mdj->ip);
+	printf("PUNTO_DE_MONTAJE = %s \n",mdj.punto_de_montaje);
+	printf("RETARDO = %d \n",mdj.retardo);
+	printf("PUERTO MDJ = %s \n",mdj.puerto);
+	printf("IP MDJ = %s \n",mdj.ip);
 	printf("---fin lectura de configuracion --- .. \n\n");
 }
