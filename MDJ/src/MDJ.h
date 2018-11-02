@@ -20,18 +20,28 @@
 #include <pthread.h>
 #include <qcommons/socket_viejo.h> //Libreria Socket Cliente
 
-
 #include <string.h>
 
+
+#include <readline/readline.h>
+#include <readline/history.h>
+
 #define  MAX_INPUT_BUFFER 1000
+
+ char leyenda_temporal[MAX_INPUT_BUFFER];
+ void mdj_finish_and_free();
 //----------------------------
 typedef struct{
 	char* puerto;
 	int retardo;
 	char* punto_de_montaje;
 	char * ip;
+
 }MDJ_CONFIG;
 //----------------------------
+
+MDJ_CONFIG mdj;
+Socket mdj_socket;//socket mdj
 
 
 t_log *logger= NULL;
@@ -41,12 +51,10 @@ int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
 int numeroClientes;			/* Número clientes conectados */
 int socketServidor;				/* Descriptor del socket servidor */
 
-Socket mdj_socket; //socket MDJ
+//Socket mdj_socket; //socket MDJ
 
 //variables globales
-MDJ_CONFIG mdj;
 
-Socket mdj_socket;//socket mdj
 
 //funciones
 void liberar_memoria_de_configuracion(MDJ_CONFIG* configuracion_inicial);
@@ -61,8 +69,12 @@ void mdj_inicializar();
 
 void mostrar_y_guardar_log(char * s, ...); //imprime como printf y guarda en log
 void guardar_log(char * ); // solo guarda log
+void guardar_log_v2(char * s, ...);
+
 
 
 void escuchar_mensajes_entrantes();
+
+void mdj_init();
 
 #endif /* MDJ_H_ */

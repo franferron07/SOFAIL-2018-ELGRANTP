@@ -9,15 +9,17 @@
  */
 
 
-#include "mdj.h"
+#include "MDJ.h"
 
 #include <readline/readline.h>
 #include <readline/history.h>
+
+
+
 int i;
 // char buffer[MAX_INPUT_BUFFER];							/* Buffer para leer de los socket */
  char *buffer=NULL;				/* Buffer para leer de los socket */
  numeroClientes = 0;
- char leyenda_temporal[MAX_INPUT_BUFFER];
  char* buffer_input_keyboard=NULL; //linea de entrada de teclado
 
  char* path_seleccionado[MAX_INPUT_BUFFER];
@@ -29,16 +31,16 @@ int main(void) {
 		mdj_init();
 		mostrar_configuracion();
 
-
 		puts("MDJ escuchando .."); /* prints MDJ */
 
-//		pthread_create(&hilo_consola_fifa,NULL,consola_fifa(),NULL);
+		pthread_create(&hilo_consola_fifa,NULL,consola_fifa(),NULL);
 
-			pthread_create(&hilo_escucha, NULL,escuchar_mensajes_entrantes, NULL);
+//			pthread_create(&hilo_escucha, NULL,escuchar_mensajes_entrantes, NULL);
 
 
-			pthread_join(&hilo_escucha, NULL);
-//			pthread_join(&hilo_consola_fifa,NULL);
+//			pthread_join(&hilo_escucha, NULL);
+			pthread_join(&hilo_consola_fifa,NULL);
+
 
 	 	mdj_finish_and_free();
 	 	return 0;
