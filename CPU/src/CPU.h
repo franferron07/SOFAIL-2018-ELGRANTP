@@ -15,11 +15,10 @@
 
 #define FILE_CONFIG_CPU "cpu.config"
 #define EXTENSION_FILE_LOG_CPU ".log"
-#define CPU "CPU"
+#define CPU_NAME "CPU"
 
 int socket_safa, socket_diego, socket_fm9;
 struct_instruccion instruccion;
-
 
 
 

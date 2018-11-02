@@ -201,6 +201,7 @@ void atender_cliente_cpu( int *cliente_socket ){
 		list_add(cpus, &cpu_nueva);
 	pthread_mutex_unlock(&sem_cpu_mutex);
 
+	/*
 	res = recv(*cliente_socket, buffer_operacion, TAMANIO_REQUEST_OPERACION,MSG_WAITALL);
 
 	if (res <= 0) {
@@ -212,7 +213,7 @@ void atender_cliente_cpu( int *cliente_socket ){
 
 	/****** ESPERANDO MENSAJES DE CPU *******/
 	while ( ( res = recv(*cliente_socket, buffer_operacion, TAMANIO_REQUEST_OPERACION,MSG_WAITALL) )  > 0) {
-
+		puts("entreeee perrroooooohhh");
 		header_operacion = deserializar_request_operacion(buffer_operacion);
 		log_info(safa_log, "Se recibio operacion del CPU: %s",header_operacion->tipo_operacion);
 
@@ -226,7 +227,8 @@ void atender_cliente_cpu( int *cliente_socket ){
 			}
 
 			/***** ENVIO A CPU DTB A EJECUTAR  ******/
-			void *buffer = serializar_dtb( cpu_nueva.dtb_ejecutar );
+			int tamanio_buffer=0;
+			void *buffer = serializar_dtb( cpu_nueva.dtb_ejecutar , &tamanio_buffer);
 			send(cpu_nueva.socket, buffer, tamanio_dtb( cpu_nueva.dtb_ejecutar ) , 0);
 			log_info(safa_log, "Envio a ejecutar en cpu el dtb: %d",cpu_nueva.dtb_ejecutar->id_dtb);
 		}
@@ -263,6 +265,8 @@ void atender_cliente_cpu( int *cliente_socket ){
 		break;
 
 		default:
+			puts("que miras gato");
+
 		break;
 
 		}

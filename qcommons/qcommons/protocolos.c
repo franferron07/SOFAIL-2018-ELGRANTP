@@ -81,7 +81,7 @@ void* serializar_header_conexion(header_conexion_type *header) {
 ///////INTENTO DE SERIALIZO DE DTB/////////
 //////////////////////////////////////////
 
-void* serializar_dtb(dtb_struct *dtb){
+void* serializar_dtb(dtb_struct *dtb, int * tamanio_buffer){
 	uint8_t tamanio_ruta_escriptorio = strlen(dtb->escriptorio);
 
 	int tamanio = 	sizeof(dtb->id_dtb) +
@@ -106,7 +106,7 @@ void* serializar_dtb(dtb_struct *dtb){
 	serialize_data(&(dtb->inicializado),sizeof(dtb->inicializado), &buffer, &lastIndex);
 	serialize_data(&(dtb->quantum),sizeof(dtb->quantum), &buffer, &lastIndex);
 
-
+	*tamanio_buffer = lastIndex;
 
 	return buffer;
 }

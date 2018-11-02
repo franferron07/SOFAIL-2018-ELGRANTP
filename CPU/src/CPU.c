@@ -14,8 +14,9 @@ int main(int argc, char *argv[]) {
 	}
 
 	imprimir_config();
-/*
+
 	conectarse_con_safa();
+/*
 	conectarse_con_diego();
 	conectarse_con_fm9();
 */
@@ -43,7 +44,7 @@ int main(int argc, char *argv[]) {
 
 
 	puts("");
-	/*
+
 	dtb_struct dtb_a_enviar;
 	dtb_a_enviar.id_dtb = 15;
 	dtb_a_enviar.escriptorio=strdup("/direccion/putoelquele/aguanteallboys/ahreloco/gato/policia");
@@ -61,10 +62,14 @@ int main(int argc, char *argv[]) {
 	printf("inicializado: %d\n",dtb_a_enviar.inicializado);
 	printf("quantum: %d\n",dtb_a_enviar.quantum);
 
+	int tamanio_buffer;
+	void * dtb_serializado = serializar_dtb(&dtb_a_enviar, &tamanio_buffer);
+	printf("DTB tamanio %d\n",tamanio_dtb(&dtb_a_enviar));
 
-	void * dtb_serializado = serializar_dtb(&dtb_a_enviar);
+	int result = send(socket_safa, dtb_serializado, tamanio_buffer, 0);
+	printf("result:  %d",result);
 
-
+/*
 	dtb_struct* dtb_deserializado = deserializar_dtb(dtb_serializado);
 
 	puts("//////DTB DESERIALIZADO//////");
@@ -79,6 +84,15 @@ int main(int argc, char *argv[]) {
 
 	liberar_recursos(EXIT_SUCCESS);
 }
+
+void  conectarse_con_safa(){
+	log_info(cpu_log, "Conectandome a SAFA.");
+	obtener_socket_cliente(&socket_safa,cpu.ip_safa,cpu.puerto_safa);
+	ejecutar_handshake(socket_safa,"CPU",CPU,cpu_log);
+}
+
+
+
 
 void ejecutar_instruccion(struct_instruccion instruccion){
 	switch (instruccion.nombre_instruccion) {
@@ -172,7 +186,7 @@ int inicializar(char* nombre_archivo_log) {
 	if (create_log(name) == EXIT_FAILURE)
 		exit_gracefully(EXIT_FAILURE);
 
-	print_header(CPU, cpu_log);
+	print_header(CPU_NAME, cpu_log);
 	free(name);
 
 	if (cargar_archivo_config(FILE_CONFIG_CPU) < 0) {
@@ -191,7 +205,7 @@ char* crear_nombre_file_log(char* nombre) {
 
 void liberar_recursos(int tipo_salida) {
 	liberar_recursos_configuracion();
-	print_footer(CPU, cpu_log);
+	print_footer(CPU_NAME, cpu_log);
 	log_destroy(cpu_log);
 	exit_gracefully(tipo_salida);
 }
