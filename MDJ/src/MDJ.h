@@ -26,8 +26,12 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define  MAX_INPUT_BUFFER 1000
+#include <commons/txt.h>
+#include <commons/bitarray.h>
+#include <commons/collections/list.h>
 
+#define  MAX_INPUT_BUFFER 1000
+#define loop while(1)
  char leyenda_temporal[MAX_INPUT_BUFFER];
  void mdj_finish_and_free();
 //----------------------------
@@ -43,6 +47,13 @@ typedef struct{
 MDJ_CONFIG mdj;
 Socket mdj_socket;//socket mdj
 
+
+
+struct METADATA{
+	int tamanio_bloques;
+	int cantidad_bloques;
+	char* MAGIC_NUMBER;//es fifa , puede ser un charArray, charlable
+}metadata;
 
 t_log *logger= NULL;
 fd_set descriptoresLectura;	/* Descriptores de interes para select() */

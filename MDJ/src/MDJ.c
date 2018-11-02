@@ -28,22 +28,30 @@ pthread_attr_t hilo_consola_fifa;
 //pthread_mutex_t mutex_recibo_mensaje;
 
 int main(void) {
-		mdj_init();
-		mostrar_configuracion();
+//		mdj_init();
+//		mostrar_configuracion();
+//		puts("MDJ escuchando .."); /* prints MDJ */
+//		pthread_create(&hilo_consola_fifa,NULL,consola_fifa(),NULL);
+////			pthread_create(&hilo_escucha, NULL,escuchar_mensajes_entrantes, NULL);
+////			pthread_join(&hilo_escucha, NULL);
+//			pthread_join(&hilo_consola_fifa,NULL);
+//	 	mdj_finish_and_free();
+//	 	return 0;
+	t_list* lista = list_create();
 
-		puts("MDJ escuchando .."); /* prints MDJ */
+	 	char* aux=malloc(1000);
+	 		int cantidad_de_bloques=10;
+	 		for(int i =0;i<cantidad_de_bloques;i++){
+	 			sprintf(aux,"bloque%d.bin\n",i);
+//	 			FILE* escritura = txt_open_for_append("bloque");
+	 			list_add(lista,aux);
+	 		}
+	 		for(int i=0;i<cantidad_de_bloques;i++){
 
-		pthread_create(&hilo_consola_fifa,NULL,consola_fifa(),NULL);
+	 		}
 
-//			pthread_create(&hilo_escucha, NULL,escuchar_mensajes_entrantes, NULL);
-
-
-//			pthread_join(&hilo_escucha, NULL);
-			pthread_join(&hilo_consola_fifa,NULL);
-
-
-	 	mdj_finish_and_free();
-	 	return 0;
+	 		free(aux);
+	 		return 0;
 	 }
 void consola_fifa(){
 	puts("press \"exit\" para salir de consola ");
@@ -56,9 +64,17 @@ void consola_fifa(){
 		 free(buffer_input_keyboard);
 	}
 }
+
 void  ejecutar_linea_entrante(){
 	printf("ingreso \"%s\"  con %d letras \n", buffer_input_keyboard,strlen(buffer_input_keyboard));
-	system(buffer_input_keyboard);
+//	system(buffer_input_keyboard);
+
+
+}
+
+void cargar_metadata(){//hardcodeada, completar con config.h
+	(&metadata)->cantidad_bloques=64;
+	(&metadata)->tamanio_bloques=50;
 }
 void mdj_finish_and_free(){
 	 config_destroy_mdj(&mdj);
