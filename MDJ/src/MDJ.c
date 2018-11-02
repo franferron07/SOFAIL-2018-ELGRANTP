@@ -36,61 +36,62 @@ int main(void) {
 //			pthread_join(&hilo_consola_fifa,NULL);
 //	 	mdj_finish_and_free();
 //	 	return 0;
-//	consola_fifa();
-	cargar_metadata();
-	mostrar_configuracion_metadata();
-	while(1){
-		buffer_input_keyboard=readline("-> ");
-
-		ejecutar_linea_entrante();
-	}
 	consola_fifa();
+
 	 return 0;
-	 }
+}
 void consola_fifa(){
-	puts("press \"exit\" para salir de consola ");
-	loop{
-		 buffer_input_keyboard = readline("fifa@mdj=> ");
-//		 if(buffer_input_keyboard) add_history(buffer_input_keyboard);//agrega al historial , como la terminal
-		 loggear_info("fifa@mdj=> %s",buffer_input_keyboard);
-		 if(!strncmp(buffer_input_keyboard, "exit", 4)) break; //pthread_exit(EXIT_FAILURE);//si hay algun hilo usando esta funcion sale , por "exit"{
-		 ejecutar_linea_entrante();
-		 free(buffer_input_keyboard);
-	}
+	cargar_metadata();
+		mostrar_configuracion_metadata();
+		loop{
+			puts("press \"exit\" para salir de consola ");
+			buffer_input_keyboard=readline("fifa@mdj=>  ");
+			if(!strncmp(buffer_input_keyboard, "exit", 4)) break;
+			ejecutar_linea_entrante();
+			free(buffer_input_keyboard);
+		}
 }
 
 void  ejecutar_linea_entrante(){
 	printf("ingreso \"%s\"  con %d letras \n", buffer_input_keyboard,strlen(buffer_input_keyboard));
 //	system(buffer_input_keyboard);
 	aMapearAlBloque=malloc(metadata.tamanio_de_bloque);
-	memcpy(aMapearAlBloque,buffer_input_keyboard,metadata.tamanio_de_bloque);
+	memmove(aMapearAlBloque,buffer_input_keyboard,metadata.tamanio_de_bloque);
 ////	FILE* file=txt_open_for_append("bloque1.bin");
 	FILE* file=txt_open_for_append("1.bin");
 	mapearBloque(file,aMapearAlBloque);
 	puts(aMapearAlBloque);
 	free(aMapearAlBloque);
-	for(FILE* unBloque=getBloqueLibre();terminoDeMapearlaLinea();unBloque=getBloqueLibre()){
-		mapearBloque(unBloque,aMapearAlBloque);
-	}
+//	for(FILE* unBloque=getBloqueLibre();terminoDeMapearlaLinea();unBloque=getBloqueLibre()){
+//		mapearBloque(unBloque,aMapearAlBloque);
+//	}
 }
 void  mapearBloque(FILE* bloque, char * contenido){
-	if(estaOcupado(bloque)){
-		puts("bloque ocupado");
-		return ;
-	}
+//	if(estaOcupado(bloque)){
+//		puts("bloque ocupado");
+//		return ;
+//	}
 	txt_write_in_file(bloque,contenido);
 	txt_close_file(bloque);
 }
+//FILE* getBloqueLibre(){
+//	return
+//}
 bool estaOcupado(FILE* bloque){///debe usarse con Bitmap.bin
-	return cantidadDeBytesEnFile(bloque)>=metadata.tamanio_de_bloque?1:false;
+	return cantidadDeBytesEnFile(bloque)>=metadata.tamanio_de_bloque?true:false;
 }
+//bool estaOcupado(char* path){ //debe usarse con Bitmap.bin
+//	return true;
+//}
+
+
 bool terminoDemapearLaLinea(){
 	return true;
 }
 
 int cantidadDeBytesEnFile(char *pathFile){
 	  FILE *fich;
-	  long ftam=-1;
+	  int ftam=-1;
 	  fich=fopen(pathFile, "r");
 	  if (fich)
 	    {

@@ -33,6 +33,9 @@
 #include <sys/types.h>//para posicionarme en directorios o carpetas
 #include <dirent.h>
 
+//#include "archivos/util.h"//cuantos archivos hay etc
+#include <qcommons/utilitaria.h>
+
 
 #define  MAX_INPUT_BUFFER 1000
 #define loop while(1)
@@ -92,5 +95,12 @@ void escuchar_mensajes_entrantes();
 
 void  ejecutar_linea_entrante();
 void mdj_init();
+void cargar_metadata();//hardcodeada, completar con config.h
+void mostrar_configuracion_metadata();
+bool estaOcupado(FILE* bloque);///debe usarse con Bitmap.bin
+bool estaOcupaco(char* path);
+
+void consola_fifa();
+
 
 #endif /* MDJ_H_ */
