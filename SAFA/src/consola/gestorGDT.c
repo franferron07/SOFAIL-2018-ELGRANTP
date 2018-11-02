@@ -79,7 +79,6 @@ void agregar_dtb_nuevo( dtb_struct dtb_nuevo ){
 
 	pthread_mutex_lock(&sem_nuevo_mutex);
 	list_add(dtb_nuevos, &dtb_nuevo);
-	sem_post(&sem_nuevo_vacio);
 	pthread_mutex_unlock(&sem_nuevo_mutex);
 	list_add( dtbs , &dtb_nuevo );
 }

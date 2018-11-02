@@ -11,11 +11,11 @@ int main(int argc, char *argv[]) {
 
 	pthread_create(&hilo_principal, NULL, (void*) iniciar_safa, NULL);
 
-	//verificar_estado();
+	verificar_estado();
 
 	pthread_create(&hilo_consola, NULL, (void*) escuchar_consola, NULL);
 	pthread_create(&hilo_planificacion, NULL, (void*) ejecutar_planificacion,NULL);
-	pthread_create(&hilo_plp, NULL, (void*) ejecutar_plp, NULL);
+	pthread_create(&hilo_plp, NULL, (void*) ejecutar_planificacion_largo_plazo, NULL);
 
 	pthread_join(hilo_plp, NULL);
 	pthread_join(hilo_consola, NULL);
@@ -51,7 +51,6 @@ int inicializar() {
 
 void inicializar_semaforos(){
 
-	sem_init(&sem_nuevo_vacio, 0, 0);
 	sem_init(&sem_listo_vacio, 0, 0);
 	sem_init(&sem_listo_max, 0, safa.multiprogramacion);
 
@@ -59,7 +58,6 @@ void inicializar_semaforos(){
 	pthread_mutex_init(&sem_listo_mutex, NULL);
 	pthread_mutex_init(&sem_cpu_mutex, NULL);
 	pthread_mutex_init(&sem_nuevo_mutex, NULL);
-	pthread_mutex_init(&mutex_planificador, NULL);
 }
 
 void escuchar_consola() {
@@ -264,7 +262,11 @@ void atender_cliente_cpu( int *cliente_socket ){
 		}
 		break;
 
+		default:
+		break;
+
 		}
+
 
 
 		if (header_operacion->clave != NULL){
@@ -286,39 +288,6 @@ void atender_cliente_dam( int *cliente_socket ){
 
 
 
-void ejecutar_planificacion() {
-
-	cpu_struct *cpu_ejecutar= NULL;
-	dtb_struct *dtb_ejecutar = NULL;
-
-	while (true) {
-
-		cpu_ejecutar = obtener_cpu_libre();
-
-		/******* SI TENGO CPU DISPOSNIBLE *********/
-		if( cpu_ejecutar != NULL ){
-
-			log_info(safa_log, "Se encontro la CPU para ejecutar");
-			sem_wait( &sem_listo_vacio );
-			pthread_mutex_lock( &sem_listo_mutex );
-			/*aplicar_algoritmo_planificacion();*/
-			dtb_ejecutar = obtener_proximo_dtb( 0 );
-			log_info(safa_log, "Se encontro dtb a ejecutar: %s",dtb_ejecutar->id_dtb);
-			pthread_mutex_unlock( &sem_listo_mutex );
-
-			/***** INDICO A CPU EL DTB A EJECUTAR *****/
-
-			cpu_ejecutar->ocupada = true;
-			cpu_ejecutar->dtb_ejecutar = dtb_ejecutar;
-
-		}
-
-
-	}
-
-}
-
-
 void liberar_recursos(int tipo_salida) {
 	print_footer(SAFA, safa_log);
 
@@ -326,8 +295,6 @@ void liberar_recursos(int tipo_salida) {
 	pthread_mutex_destroy(&sem_dtb_dummy_mutex);
 	pthread_mutex_destroy(&sem_listo_mutex);
 	pthread_mutex_destroy(&sem_cpu_mutex);
-	pthread_mutex_destroy(&mutex_planificador);
-	sem_destroy(&sem_nuevo_vacio);
 	sem_destroy(&sem_listo_vacio);
 	sem_destroy(&sem_listo_max);
 
@@ -351,34 +318,8 @@ void escuchar_dam() {
 
 
 
-void ejecutar_plp() {
 
-	dtb_struct *dtb;
 
-	while (1) {
 
-		////TOMO PRIMER DTB EN NUEVO
-		sem_wait(&sem_nuevo_vacio);
-		pthread_mutex_lock(&sem_nuevo_mutex);
-		dtb = list_get(dtb_nuevos ,0);
-		pthread_mutex_unlock(&sem_nuevo_mutex);
-
-		//tomo dtb dummy y lo inicializo
-		pthread_mutex_lock(&sem_dtb_dummy_mutex);
-		inicializar_dummy(dtb);
-		//agrego a cola de listos el dummy verificando multiprogramacion
-		sem_wait(&sem_listo_max);
-		pthread_mutex_lock(&sem_listo_mutex);
-		list_add(dtb_listos, &dtb_dummy);
-		pthread_mutex_unlock(&sem_listo_mutex);
-		sem_post(&sem_listo_vacio);
-	}
-}
-
-void inicializar_dummy(dtb_struct* dtb) {
-
-	dtb_dummy.id_dtb = dtb->id_dtb;
-	dtb_dummy.escriptorio = string_duplicate(dtb->escriptorio);
-}
 
 

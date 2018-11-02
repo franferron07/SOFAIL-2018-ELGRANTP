@@ -15,14 +15,6 @@ typedef struct {
 	char *direccion;
 } direccion_struct;
 
-typedef struct {
-	uint8_t id_dtb;
-	char *escriptorio;
-	uint8_t program_counter;
-	uint8_t inicializado;
-	uint8_t quantum;
-	//char** direcciones;
-} dtb_struct;
 */
 
 dtb_struct dtb_dummy;
@@ -49,8 +41,9 @@ t_list *dtb_bloqueados;
 t_list *dtb_terminados;
 t_list *dtbs;
 
+t_list *dtb_listos_mayor_prioridad;
 
-sem_t sem_nuevo_vacio; //control cola de nuevos vacia
+
 sem_t sem_listo_vacio; //controla cola de listos vacia
 sem_t sem_listo_max; //controlar multiprogramacion
 
@@ -59,6 +52,6 @@ pthread_mutex_t sem_dtb_dummy_mutex; //mutex para dummy
 pthread_mutex_t sem_listo_mutex; //mutex para lista de listos
 pthread_mutex_t sem_cpu_mutex; //mutex para lista de cpus . SE PODRIA QUITAR
 pthread_mutex_t mutex_consola;
-pthread_mutex_t mutex_planificador;
+
 
 #endif /* SRC_COMMONS_COMMONS_H_ */

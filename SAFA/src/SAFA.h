@@ -52,13 +52,9 @@ void atender_conexiones();
 void *administrar_servidor(void *puntero_fd);
 void atender_cliente_cpu( int *socket_cliente );
 void atender_cliente_dam( int *socket_cliente );
-void ejecutar_planificacion();
-void aplicar_algoritmo_planificacion();
 void liberar_recursos(int tipo_salida);
 void terminar_exitosamente(int valor_retornado);
 void escuchar_dam();
-void ejecutar_plp();
-void ejecutar_pcp();
 
 
 #endif /* SAFA_H_ */

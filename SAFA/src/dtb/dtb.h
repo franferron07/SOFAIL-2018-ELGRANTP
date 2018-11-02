@@ -9,7 +9,6 @@
 
 void inicializar_listas_dtb();
 dtb_struct crear_dtb(int id_dtb, char *path);
-dtb_struct *obtener_proximo_dtb(int algoritmo);
 void liberar_dtb(dtb_struct * dtb);
 void liberar_recursos_dtb();
 
