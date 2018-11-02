@@ -25,6 +25,7 @@ pthread_attr_t hilo_consola_fifa;
 
 char* aMapearAlBloque=NULL;
 
+
 int main(void) {
 //		mdj_init();
 //		mostrar_configuracion();
@@ -48,7 +49,7 @@ int main(void) {
 	 }
 void consola_fifa(){
 	puts("press \"exit\" para salir de consola ");
-	while(1){
+	loop{
 		 buffer_input_keyboard = readline("fifa@mdj=> ");
 //		 if(buffer_input_keyboard) add_history(buffer_input_keyboard);//agrega al historial , como la terminal
 		 loggear_info("fifa@mdj=> %s",buffer_input_keyboard);
@@ -65,12 +66,42 @@ void  ejecutar_linea_entrante(){
 	memcpy(aMapearAlBloque,buffer_input_keyboard,metadata.tamanio_de_bloque);
 ////	FILE* file=txt_open_for_append("bloque1.bin");
 	FILE* file=txt_open_for_append("1.bin");
-	txt_write_in_file(file,aMapearAlBloque);
-	fclose(file);
+	mapearBloque(file,aMapearAlBloque);
 	puts(aMapearAlBloque);
 	free(aMapearAlBloque);
+	for(FILE* unBloque=getBloqueLibre();terminoDeMapearlaLinea();unBloque=getBloqueLibre()){
+		mapearBloque(unBloque,aMapearAlBloque);
+	}
+}
+void  mapearBloque(FILE* bloque, char * contenido){
+	if(estaOcupado(bloque)){
+		puts("bloque ocupado");
+		return ;
+	}
+	txt_write_in_file(bloque,contenido);
+	txt_close_file(bloque);
+}
+bool estaOcupado(FILE* bloque){///debe usarse con Bitmap.bin
+	return cantidadDeBytesEnFile(bloque)>=metadata.tamanio_de_bloque?1:false;
+}
+bool terminoDemapearLaLinea(){
+	return true;
 }
 
+int cantidadDeBytesEnFile(char *pathFile){
+	  FILE *fich;
+	  long ftam=-1;
+	  fich=fopen(pathFile, "r");
+	  if (fich)
+	    {
+	      fseek(fich, 0L, SEEK_END);
+	      ftam=ftell(fich);
+	      fclose(fich);
+	    }
+	  else
+	    printf("error al saber santidad de bytes de archivo , ERRNO: %d - %s\n", errno, strerror(errno));
+	  return ftam;
+	}
 void cargar_metadata(){//hardcodeada, completar con config.h
 	(&metadata)->cantidad_bloques=64;
 	(&metadata)->tamanio_de_bloque=50;

@@ -30,6 +30,10 @@
 #include <commons/bitarray.h>
 #include <commons/collections/list.h>
 
+#include <sys/types.h>//para posicionarme en directorios o carpetas
+#include <dirent.h>
+
+
 #define  MAX_INPUT_BUFFER 1000
 #define loop while(1)
  char leyenda_temporal[MAX_INPUT_BUFFER];
