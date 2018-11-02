@@ -15,14 +15,14 @@ int main(int argc, char *argv[]) {
 
 	imprimir_config();
 
-	conectarse_con_safa();
+//	conectarse_con_safa();
 /*
 	conectarse_con_diego();
 	conectarse_con_fm9();
 */
 	/**
 	 * ####Lectura de Escriptorio
-	 **/
+	 *
 	FILE * archivo;
 	char * linea = NULL;
 	size_t longitud = 0;
@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
 	fclose(archivo);
 	if (linea)
 		free(linea);
-
+*/
 
 	puts("");
 
@@ -51,8 +51,10 @@ int main(int argc, char *argv[]) {
 	dtb_a_enviar.program_counter = 7;
 	dtb_a_enviar.inicializado = 1;
 	dtb_a_enviar.quantum = 4;
-	//dtb_a_enviar.direcciones = NULL;
-
+	dtb_a_enviar.direcciones = list_create();
+	list_add(dtb_a_enviar.direcciones, strdup("/videos/porno/tu_vieja/"));
+	list_add(dtb_a_enviar.direcciones, strdup("/videos/porno/tu_hermana/"));
+	list_add(dtb_a_enviar.direcciones, strdup("/videos/porno/tu_prima/"));
 
 
 	printf("id_dtb: %d\n",dtb_a_enviar.id_dtb);
@@ -61,15 +63,19 @@ int main(int argc, char *argv[]) {
 	printf("program_counter: %d\n",dtb_a_enviar.program_counter);
 	printf("inicializado: %d\n",dtb_a_enviar.inicializado);
 	printf("quantum: %d\n",dtb_a_enviar.quantum);
+	puts("Direcciones: ");
+	list_iterate(dtb_a_enviar.direcciones, (void *)puts);
+
+
 
 	int tamanio_buffer;
 	void * dtb_serializado = serializar_dtb(&dtb_a_enviar, &tamanio_buffer);
-	printf("DTB tamanio %d\n",tamanio_dtb(&dtb_a_enviar));
+	printf("DTB tamanio %d\n",tamanio_buffer);
 
-	int result = send(socket_safa, dtb_serializado, tamanio_buffer, 0);
-	printf("result:  %d",result);
+	//int result = send(socket_safa, dtb_serializado, tamanio_buffer, 0);
+	//printf("result:  %d",result);
+	return 0;
 
-/*
 	dtb_struct* dtb_deserializado = deserializar_dtb(dtb_serializado);
 
 	puts("//////DTB DESERIALIZADO//////");
@@ -80,7 +86,7 @@ int main(int argc, char *argv[]) {
 	printf("inicializado: %d\n",dtb_deserializado->inicializado);
 	printf("quantum: %d\n",dtb_deserializado->quantum);
 	puts("///FIN DTB DESERIALIZADO/////");
-	*/
+
 
 	liberar_recursos(EXIT_SUCCESS);
 }

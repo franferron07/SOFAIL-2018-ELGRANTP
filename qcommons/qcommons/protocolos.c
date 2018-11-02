@@ -81,6 +81,23 @@ void* serializar_header_conexion(header_conexion_type *header) {
 ///////INTENTO DE SERIALIZO DE DTB/////////
 //////////////////////////////////////////
 
+
+int tamanio_lista_para_buffer(t_list *direcciones){
+	int tamanio = 	sizeof((uint8_t)direcciones->elements_count);
+	uint8_t tamanio_ruta = 0;
+
+	t_link_element *element = direcciones->head;
+		t_link_element *aux = NULL;
+		while (element != NULL) {
+			aux = element->next;
+			tamanio_ruta = strlen(element->data);
+			tamanio += (sizeof(tamanio_ruta) + tamanio_ruta);
+			element = aux;
+		}
+	return tamanio;
+}
+
+
 void* serializar_dtb(dtb_struct *dtb, int * tamanio_buffer){
 	uint8_t tamanio_ruta_escriptorio = strlen(dtb->escriptorio);
 
@@ -89,22 +106,41 @@ void* serializar_dtb(dtb_struct *dtb, int * tamanio_buffer){
 					tamanio_ruta_escriptorio +
 					sizeof(dtb->program_counter) +
 					sizeof(dtb->inicializado) +
-					sizeof(dtb->quantum);
+					sizeof(dtb->quantum) +
+					tamanio_lista_para_buffer(dtb->direcciones);
+
+
 	//todo: serializar tabla de porquerias
 	//sizeof(dtb_a_enviar->direcciones)/sizeof(char *) +
 
 	void* buffer = (void *) malloc(tamanio);
 	printf("longitud: %d\n",tamanio);
 
+
 	int lastIndex = 0;
-
-
 	serialize_data(&(dtb->id_dtb),sizeof(dtb->id_dtb), &buffer, &lastIndex);
 	serialize_data(&(tamanio_ruta_escriptorio),sizeof(tamanio_ruta_escriptorio), &buffer, &lastIndex);
 	serialize_data(&(dtb->escriptorio),tamanio_ruta_escriptorio, &buffer, &lastIndex);
 	serialize_data(&(dtb->program_counter),sizeof(dtb->program_counter), &buffer, &lastIndex);
 	serialize_data(&(dtb->inicializado),sizeof(dtb->inicializado), &buffer, &lastIndex);
 	serialize_data(&(dtb->quantum),sizeof(dtb->quantum), &buffer, &lastIndex);
+	//serializo la cantidad de elementos
+	uint8_t cantidad_elementos = dtb->direcciones->elements_count;
+	serialize_data(&(cantidad_elementos),sizeof(cantidad_elementos), &buffer, &lastIndex);
+
+	//serializo los elementos de la forma [tamanio -> elemento]
+	uint8_t tamanio_ruta = 0;
+	t_link_element *element = dtb->direcciones->head;
+	t_link_element *aux = NULL;
+	while (element != NULL) {
+		aux = element->next;
+
+		tamanio_ruta = strlen(element->data);
+		serialize_data(&(tamanio_ruta),sizeof(tamanio_ruta), &buffer, &lastIndex);
+		serialize_data(&(element->data),tamanio_ruta, &buffer, &lastIndex);
+
+		element = aux;
+	}
 
 	*tamanio_buffer = lastIndex;
 
@@ -128,6 +164,8 @@ int tamanio_dtb( dtb_struct *dtb ){
 }
 
 dtb_struct* deserializar_dtb(void *buffer){
+	//TODO: actualizar la deserializacion de DTB con nuevos paths dinamicos
+
 	dtb_struct* dtb = malloc(sizeof(dtb_struct));
 	int lastIndex = 0;
 
@@ -156,7 +194,6 @@ dtb_struct* deserializar_dtb(void *buffer){
 header_conexion_type* deserializar_header_conexion(void *buffer) {
 	header_conexion_type* header = malloc(sizeof(header_conexion_type));
 	int lastIndex = 0;
-	int tipo_instancia = 0;
 
 	deserialize_data(&(header->tipo_instancia), 4, buffer, &lastIndex);
 	deserialize_data(&(header->nombre_instancia), 31, buffer, &lastIndex);

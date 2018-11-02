@@ -4,6 +4,7 @@
 #include "serialize.h"
 #include "socket.h"
 #include <commons/log.h>
+#include <commons/collections/list.h>
 
 typedef enum {
 	CPU = 1, DAM = 2, SAFA = 3, FM9 = 4, MDJ = 5
@@ -71,7 +72,7 @@ typedef struct {
 	//uint8_t sentencias_totales;
 
 
-	//char** direcciones;
+	t_list *direcciones;
 } dtb_struct;
 
 
