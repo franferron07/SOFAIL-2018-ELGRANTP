@@ -50,7 +50,7 @@ Socket mdj_socket;//socket mdj
 
 
 struct METADATA{
-	int tamanio_bloques;
+	int tamanio_de_bloque;//en bytes, ni dice eso el enunciado
 	int cantidad_bloques;
 	char* MAGIC_NUMBER;//es fifa , puede ser un charArray, charlable
 }metadata;
@@ -80,12 +80,13 @@ void mdj_inicializar();
 
 void mostrar_y_guardar_log(char * s, ...); //imprime como printf y guarda en log
 void guardar_log(char * ); // solo guarda log
-void guardar_log_v2(char * s, ...);
+void loggear_info(char * s, ...);
 
 
 
 void escuchar_mensajes_entrantes();
 
+void  ejecutar_linea_entrante();
 void mdj_init();
 
 #endif /* MDJ_H_ */

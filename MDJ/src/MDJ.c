@@ -11,10 +11,6 @@
 
 #include "MDJ.h"
 
-#include <readline/readline.h>
-#include <readline/history.h>
-
-
 
 int i;
 // char buffer[MAX_INPUT_BUFFER];							/* Buffer para leer de los socket */
@@ -27,38 +23,35 @@ pthread_attr_t hilo_escucha;
 pthread_attr_t hilo_consola_fifa;
 //pthread_mutex_t mutex_recibo_mensaje;
 
+char* aMapearAlBloque=NULL;
+
 int main(void) {
 //		mdj_init();
 //		mostrar_configuracion();
 //		puts("MDJ escuchando .."); /* prints MDJ */
 //		pthread_create(&hilo_consola_fifa,NULL,consola_fifa(),NULL);
-////			pthread_create(&hilo_escucha, NULL,escuchar_mensajes_entrantes, NULL);
+//			pthread_create(&hilo_escucha, NULL,escuchar_mensajes_entrantes, NULL);
 ////			pthread_join(&hilo_escucha, NULL);
 //			pthread_join(&hilo_consola_fifa,NULL);
 //	 	mdj_finish_and_free();
 //	 	return 0;
-	t_list* lista = list_create();
+//	consola_fifa();
+	cargar_metadata();
+	mostrar_configuracion_metadata();
+	while(1){
+		buffer_input_keyboard=readline("-> ");
 
-	 	char* aux=malloc(1000);
-	 		int cantidad_de_bloques=10;
-	 		for(int i =0;i<cantidad_de_bloques;i++){
-	 			sprintf(aux,"bloque%d.bin\n",i);
-//	 			FILE* escritura = txt_open_for_append("bloque");
-	 			list_add(lista,aux);
-	 		}
-	 		for(int i=0;i<cantidad_de_bloques;i++){
-
-	 		}
-
-	 		free(aux);
-	 		return 0;
+		ejecutar_linea_entrante();
+	}
+	consola_fifa();
+	 return 0;
 	 }
 void consola_fifa(){
 	puts("press \"exit\" para salir de consola ");
 	while(1){
 		 buffer_input_keyboard = readline("fifa@mdj=> ");
 //		 if(buffer_input_keyboard) add_history(buffer_input_keyboard);//agrega al historial , como la terminal
-		 guardar_log_v2("fifa@mdj=> %s",buffer_input_keyboard);
+		 loggear_info("fifa@mdj=> %s",buffer_input_keyboard);
 		 if(!strncmp(buffer_input_keyboard, "exit", 4)) break; //pthread_exit(EXIT_FAILURE);//si hay algun hilo usando esta funcion sale , por "exit"{
 		 ejecutar_linea_entrante();
 		 free(buffer_input_keyboard);
@@ -68,13 +61,26 @@ void consola_fifa(){
 void  ejecutar_linea_entrante(){
 	printf("ingreso \"%s\"  con %d letras \n", buffer_input_keyboard,strlen(buffer_input_keyboard));
 //	system(buffer_input_keyboard);
-
-
+	aMapearAlBloque=malloc(metadata.tamanio_de_bloque);
+	memcpy(aMapearAlBloque,buffer_input_keyboard,metadata.tamanio_de_bloque);
+////	FILE* file=txt_open_for_append("bloque1.bin");
+	FILE* file=txt_open_for_append("1.bin");
+	txt_write_in_file(file,aMapearAlBloque);
+	fclose(file);
+	puts(aMapearAlBloque);
+	free(aMapearAlBloque);
 }
 
 void cargar_metadata(){//hardcodeada, completar con config.h
 	(&metadata)->cantidad_bloques=64;
-	(&metadata)->tamanio_bloques=50;
+	(&metadata)->tamanio_de_bloque=50;
+}
+void mostrar_configuracion_metadata(){
+	puts("leyendo metadata");
+	printf("tamanio bloque %d \n", metadata.tamanio_de_bloque);
+	printf("cantidad_bloques %d \n", metadata.cantidad_bloques);
+	puts("fin lectura ");
+
 }
 void mdj_finish_and_free(){
 	 config_destroy_mdj(&mdj);
@@ -95,7 +101,7 @@ void guardar_log(char* s ){
 	log_info(logger,s);
 }
 
-void guardar_log_v2(char * s, ...){
+void loggear_info(char * s, ...){
 	va_list resto;
 	va_start(resto,s);
 	vsprintf(leyenda_temporal,s, resto );
@@ -169,7 +175,7 @@ void escuchar_mensajes_entrantes(){
 		 						/* Se indica que el cliente ha cerrado la conexión y se
 		 						 * marca con -1 el descriptor para que compactaClaves() lo
 		 						 * elimine */
-		 						guardar_log_v2("Cliente %d ha cerrado la conexión \n", i+1);
+		 						loggear_info("Cliente %d ha cerrado la conexión \n", i+1);
 //		 						perror(leyenda_temporal);
 		 						 goto salto2;
 		 						socketCliente[i] = -1;
