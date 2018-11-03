@@ -23,24 +23,30 @@ void ejecutar_planificacion() {
 
 	while (true) {
 
+
+
 		cpu_ejecutar = obtener_cpu_libre();
 
-		/******* SI TENGO CPU DISPOSNIBLE *********/
+		/************ SI TENGO CPU DISPOSNIBLE *****************/
 		if( cpu_ejecutar != NULL ){
 
 			log_info(safa_log, "Se encontro CPU para ejecutar");
-			sem_wait( &sem_listo_vacio );
+
+			/* SI LISTA DE LISTOS VACIA NO HAGO NADA */
+			while( list_size(dtb_listos) <= 0  ){
+
+			}
+
+			/******** BUSCO DTB A EJECUTAR ********/
 			pthread_mutex_lock( &sem_listo_mutex );
 			dtb_ejecutar = aplicar_algoritmo_planificacion();
 			log_info(safa_log, "Se encontro dtb a ejecutar: %s",dtb_ejecutar->id_dtb);
 			pthread_mutex_unlock( &sem_listo_mutex );
 
-
-			/* TODO agregar a lista de ejecucion el dtb. Y SACAR DE LA LISTA LOS DTBS */
-
-			/***** INDICO A CPU EL DTB A EJECUTAR *****/
+			/******** INDICO A CPU EL DTB A EJECUTAR *******/
 			cpu_ejecutar->ocupada = true;
 			cpu_ejecutar->dtb_ejecutar = dtb_ejecutar;
+			log_info(safa_log, "Indico a cpu el dtb a ejecutar");
 
 		}
 
@@ -57,23 +63,36 @@ void ejecutar_planificacion_largo_plazo() {
 
 	while (1) {
 
-		////TOMO PRIMER DTB EN NUEVO
+		/**********  SI HAY DTB NUEVOS ************/
 		if( !list_is_empty( dtb_nuevos )  )
 		{
-			pthread_mutex_lock(&sem_nuevo_mutex);
-			dtb = list_get(dtb_nuevos ,0);
-			pthread_mutex_unlock(&sem_nuevo_mutex);
 
-			//INICIALIZO DUMMY
+			log_info(safa_log, "DTBS en lista de nuevos");
+
+			/*pthread_mutex_lock(&sem_nuevo_mutex);
+
+			dtb = (dtb_struct*) list_get(dtb_nuevos, 0);
+
+			pthread_mutex_unlock(&sem_nuevo_mutex);*/
+
+			/**********INICIO EL PROCESO DUMMY **************/
 			pthread_mutex_lock(&sem_dtb_dummy_mutex);
+
+			dtb = (dtb_struct*) list_get(dtb_nuevos, 0);
+			log_info(safa_log, "Se toma DTB para inicializar procesos dummy: %d",dtb->id_dtb);
+
 			inicializar_dummy(dtb);
 			log_info(safa_log, "DTB dummy inicializado");
+
+			/**************** AGREGO DUMMY A LISTOS SI MULTIPROGRAMACION LO PERMITE **************************/
 			sem_wait(&sem_listo_max);
-			//AGREGO DUMMY A LISTOS SI MULTIPROGRAMACION LO PERMITE
 			pthread_mutex_lock(&sem_listo_mutex);
+
 			list_add(dtb_listos, &dtb_dummy);
+			log_info(safa_log, "DUMMY pasado a listos");
+
 			pthread_mutex_unlock(&sem_listo_mutex);
-			sem_post(&sem_listo_vacio);
+
 		}
 
 	}
@@ -105,50 +124,64 @@ dtb_struct* aplicar_algoritmo_planificacion() {
 
 dtb_struct* aplicarRR() {
 
+	dtb_struct* dtbAEjecutar = (dtb_struct*) list_remove(dtb_listos, 0);
+	list_add(dtb_ejecutando , dtbAEjecutar);
 
-	if (list_size(dtb_listos) <= 0) {
-		log_info(safa_log,
-				"No se encontraron DTBS en estado listo para ejecutar");
-
-		return NULL;
-	}
-
-	return list_get(dtb_listos , 0);
-
+	return dtbAEjecutar;
 
 }
 
 
 dtb_struct* aplicarVRR() {
 
-
-	if (list_size(dtb_listos) <= 0) {
-		log_info(safa_log,
-				"No se encontraron DTBS en estado listo para ejecutar");
-
-		return NULL;
-	}
+	dtb_struct* dtbAEjecutar = NULL;
 
 	/* VERIFICO LISTA DE MAYOR PRIORIDAD  */
 	if(list_size(dtb_listos_mayor_prioridad) <= 0){
 
-		return list_get(dtb_listos , 0);
+		dtbAEjecutar = (dtb_struct*) list_remove(dtb_listos_mayor_prioridad, 0);
+		list_add(dtb_ejecutando , dtbAEjecutar);
+	}
+	else{
+
+		dtbAEjecutar = (dtb_struct*) list_remove(dtb_listos, 0);
+		list_add(dtb_ejecutando , dtbAEjecutar);
 	}
 
-	return list_get( dtb_listos_mayor_prioridad , 0 );
+	return dtbAEjecutar;
 }
 
 
 dtb_struct* aplicarPropio() {
 
+	dtb_struct* dtbAEjecutar = NULL;
 
-	if (list_size(dtb_listos) <= 0) {
-
-		return NULL;
-	}
-
-	if (dtb_ejecutando == NULL) {
-
-	}
+	return dtbAEjecutar;
 
 }
+
+
+recurso_struct* buscar_recurso( char*nombre_recurso ){
+
+	recurso_struct *recurso = NULL;
+
+	return recurso;
+}
+
+recurso_struct*  crear_recurso( char*nombre_recurso ){
+
+	recurso_struct *recurso = NULL;
+
+	return recurso;
+}
+
+void asignar_recurso( recurso_struct *recurso ){
+
+}
+
+void liberar_recurso( recurso_struct *recurso ){
+
+}
+
+
+

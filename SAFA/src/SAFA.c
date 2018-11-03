@@ -51,7 +51,6 @@ int inicializar() {
 
 void inicializar_semaforos(){
 
-	sem_init(&sem_listo_vacio, 0, 0);
 	sem_init(&sem_listo_max, 0, safa.multiprogramacion);
 
 	pthread_mutex_init(&sem_dtb_dummy_mutex, NULL);
@@ -208,12 +207,12 @@ void atender_cliente_cpu( int *cliente_socket ){
 		log_error(safa_log, "¡Error en el mensaje con CPU!");
 		close(*cliente_socket);
 		free(buffer_operacion);
-	}
+	}*/
 
 
 	/****** ESPERANDO MENSAJES DE CPU *******/
 	while ( ( res = recv(*cliente_socket, buffer_operacion, TAMANIO_REQUEST_OPERACION,MSG_WAITALL) )  > 0) {
-		puts("entreeee perrroooooohhh");
+
 		header_operacion = deserializar_request_operacion(buffer_operacion);
 		log_info(safa_log, "Se recibio operacion del CPU: %s",header_operacion->tipo_operacion);
 
@@ -256,16 +255,41 @@ void atender_cliente_cpu( int *cliente_socket ){
 
 		case PEDIRRECURSO:{
 
+			recurso_struct *recurso =NULL;
+
+			recurso = buscar_recurso( "nombre_recurso" );
+			if( recurso == NULL ){
+
+				recurso = crear_recurso( "nombre_recurso" );
+			}
+
+			asignar_recurso( recurso );
+
 		}
 		break;
 
 		case LIBERARRECURSO:{
 
+			recurso_struct *recurso =NULL;
+
+			recurso = buscar_recurso( "nombre_recurso" );
+			if( recurso == NULL ){
+
+				recurso = crear_recurso( "nombre_recurso" );
+			}
+
+			liberar_recurso( recurso );
+
+		}
+		break;
+
+		case QUANTUMEJECUTADO:{
+
+
 		}
 		break;
 
 		default:
-			puts("que miras gato");
 
 		break;
 
@@ -299,7 +323,6 @@ void liberar_recursos(int tipo_salida) {
 	pthread_mutex_destroy(&sem_dtb_dummy_mutex);
 	pthread_mutex_destroy(&sem_listo_mutex);
 	pthread_mutex_destroy(&sem_cpu_mutex);
-	sem_destroy(&sem_listo_vacio);
 	sem_destroy(&sem_listo_max);
 
 	liberar_recursos_dtb();

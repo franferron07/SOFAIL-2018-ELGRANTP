@@ -13,6 +13,8 @@ void inicializar_listas_dtb() {
 
 	dtb_listos_mayor_prioridad= list_create();
 
+	recursos = list_create();
+
 }
 
 

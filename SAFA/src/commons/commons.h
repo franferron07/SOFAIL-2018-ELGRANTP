@@ -17,6 +17,7 @@ typedef struct {
 
 */
 
+
 dtb_struct dtb_dummy;
 
 typedef struct {
@@ -26,6 +27,11 @@ typedef struct {
 } cpu_struct;
 
 
+typedef struct {
+	char* nombre;
+	int cantidad_recursos;
+} recurso_struct;
+
 
 typedef enum {
 	DTB_LISTO, DTB_NUEVO, DTB_EJECUTANDO, DTB_BLOQUEADO, DTB_TERMINADO
@@ -33,6 +39,7 @@ typedef enum {
 
 
 t_list *cpus;
+t_list *recursos;
 
 t_list *dtb_nuevos;
 t_list *dtb_listos;
@@ -44,7 +51,6 @@ t_list *dtbs;
 t_list *dtb_listos_mayor_prioridad;
 
 
-sem_t sem_listo_vacio; //controla cola de listos vacia
 sem_t sem_listo_max; //controlar multiprogramacion
 
 pthread_mutex_t sem_nuevo_mutex; //mutex en lista de nuevos

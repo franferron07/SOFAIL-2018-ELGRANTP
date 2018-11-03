@@ -26,7 +26,8 @@ typedef enum {
 	TERMINARDTB=13,
 	FINDEQUANTUM=14,
 	PEDIRRECURSO=15,
-	LIBERARRECURSO=16
+	LIBERARRECURSO=16,
+	QUANTUMEJECUTADO=17,
 } tipo_operacion_e;
 
 typedef struct {

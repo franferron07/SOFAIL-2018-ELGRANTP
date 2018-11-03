@@ -20,4 +20,9 @@ dtb_struct* aplicarRR();
 dtb_struct* aplicarVRR();
 dtb_struct* aplicarPropio();
 
+recurso_struct* buscar_recurso( char*nombre_recurso );
+recurso_struct*  crear_recurso( char*nombre_recurso );
+void asignar_recurso( recurso_struct *recurso );
+void liberar_recurso( recurso_struct *recurso );
+
 #endif /* PLANIFICACION_PLANIFICACION_H_ */

@@ -20,6 +20,10 @@
 #define TAMANIO_CANT_CLIENTES 3
 
 
+
+
+
+
 typedef enum {
 	CORRUPTO , INICIALIZADO
 } safa_status_enum;
