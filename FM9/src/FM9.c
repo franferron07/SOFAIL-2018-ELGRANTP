@@ -1,11 +1,19 @@
 #include "FM9.h"
 
+/**
+ * El proceso memoria cumplira la funcion de disponibilizar
+ * los datos requeridos para la ejecución de cualquier G.DT.
+ * Cada vez que un G.DT requiera consultar o actualizar información
+ * siempre deberá existir previamente en la Memoria.
+ * */
+
 int main(int argc, char *argv[]) {
 	if (inicializar() < 0) {
 		liberar_recursos(EXIT_FAILURE);
 		return -1;
 	}
 
+	iniciar_administracion_memoria();
 	imprimir_config();
 
 	pthread_create(&hilo_principal, NULL, (void*) iniciar_fm9, NULL);
@@ -80,7 +88,6 @@ void *administrar_servidor(void *puntero_fd) {
 	void *buffer_reconocimiento;
 	void *buffer_header = malloc(TAMANIO_HEADER_CONEXION);
 
-	/************ LEER EL HANDSHAKE ************/
 	int res = recv(cliente_socket, buffer_header, TAMANIO_HEADER_CONEXION,
 	MSG_WAITALL);
 
@@ -95,7 +102,6 @@ void *administrar_servidor(void *puntero_fd) {
 	log_info(fm9_log, "Se realizo handshake del cliente: %s",
 			header_conexion->nombre_instancia);
 
-	/************ RESPONDER AL HANDSHAKE ************/
 	strcpy(mensaje_reconocimiento.nombre_instancia, FM9);
 
 	buffer_reconocimiento = serializar_mensaje_reconocimiento(
@@ -117,6 +123,21 @@ void *administrar_servidor(void *puntero_fd) {
 	free(puntero_fd);
 
 	return 0;
+}
+
+void iniciar_administracion_memoria() {
+	inicializar_memoria();
+	switch (fm9.modo) {
+	case SEG:
+		iniciar_segmentacion_pura(fm9.tamanio);
+		break;
+	case SPA:
+		iniciar_segmentacion_paginada(fm9.tamanio);
+		break;
+	case TPI:
+		iniciar_paginas_invertidas(fm9.tamanio);
+		break;
+	}
 }
 
 void liberar_recursos(int tipo_salida) {

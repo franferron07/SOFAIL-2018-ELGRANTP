@@ -8,11 +8,11 @@
 #include <commons/log.h>
 
 #define SEG_STRING "SEG"
-#define TPI_STRING "TPI"
 #define SPA_STRING "SPA"
+#define TPI_STRING "TPI"
 
 typedef enum {
-	SEG, TPI, SPA
+	SEG, SPA, TPI
 } modo_type;
 
 typedef struct {

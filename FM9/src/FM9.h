@@ -9,6 +9,7 @@
 
 #include "config/config.h"
 #include "consola/consola.h"
+#include "storage/storage.h"
 
 #define FILE_CONFIG_FM9 "fm9.config"
 #define FM9 "FM9"
@@ -26,6 +27,7 @@ void iniciar_fm9();
 void crear_servidor();
 void atender_conexiones();
 void *administrar_servidor(void *puntero_fd);
+void iniciar_administracion_memoria();
 void liberar_recursos(int tipo_salida);
 void terminar_exitosamente();
 
