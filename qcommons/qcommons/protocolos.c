@@ -109,10 +109,6 @@ void* serializar_dtb(dtb_struct *dtb, int * tamanio_buffer){
 					sizeof(dtb->quantum) +
 					tamanio_lista_para_buffer(dtb->direcciones);
 
-
-	//todo: serializar tabla de porquerias
-	//sizeof(dtb_a_enviar->direcciones)/sizeof(char *) +
-
 	void* buffer = (void *) malloc(tamanio);
 	printf("longitud: %d\n",tamanio);
 
@@ -164,8 +160,6 @@ int tamanio_dtb( dtb_struct *dtb ){
 }
 
 dtb_struct* deserializar_dtb(void *buffer){
-	//TODO: actualizar la deserializacion de DTB con nuevos paths dinamicos
-
 	dtb_struct* dtb = malloc(sizeof(dtb_struct));
 	int lastIndex = 0;
 
@@ -178,6 +172,45 @@ dtb_struct* deserializar_dtb(void *buffer){
 	deserialize_data(&(dtb->program_counter),sizeof(dtb->program_counter), buffer, &lastIndex);
 	deserialize_data(&(dtb->inicializado),sizeof(dtb->inicializado), buffer, &lastIndex);
 	deserialize_data(&(dtb->quantum),sizeof(dtb->quantum), buffer, &lastIndex);
+
+
+	dtb->direcciones = list_create();
+
+	uint8_t cantidad_de_direcciones = 0;
+	deserialize_data(&cantidad_de_direcciones,sizeof(cantidad_de_direcciones), buffer, &lastIndex);
+	printf("Cantidad de direcciones a deserializar: %d\n", cantidad_de_direcciones);
+
+
+	uint8_t tamanio_direccion = 0;
+	char * direccion;
+	int var;
+	for (var = 0; var < cantidad_de_direcciones; ++var) {
+
+		deserialize_data(&(tamanio_direccion),sizeof(uint8_t), buffer, &lastIndex);
+		printf("sizeof(tamanio_direccion): %d\n",sizeof(tamanio_direccion));
+		printf("tamanio_direccion: %d\n",tamanio_direccion);
+		direccion = malloc((tamanio_direccion + 1) * sizeof(char));
+
+
+		deserialize_data(&(direccion),tamanio_direccion, buffer, &lastIndex);
+		direccion[tamanio_direccion] = '\0';
+
+
+
+		//char * aux = strdup(direccion);
+		printf("direccion: %s\n",direccion);
+
+		list_add(dtb->direcciones,strdup(direccion));
+
+		tamanio_direccion = 0;
+		free(direccion);
+
+	}
+	//TODO: corregir (stack smashing error)
+	puts("///////////////////////");
+	puts("Direcciones: ");
+	list_iterate(dtb->direcciones, (void *)puts);
+	puts("///////////////////////");
 
 	return dtb;
 

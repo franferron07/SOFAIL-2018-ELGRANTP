@@ -57,20 +57,19 @@ typedef struct {
 } direccion_struct;
 
 
+//TODO: discutir si estas estructuras pertenecen o no al DTB para la muestra de las metricas
+//analizar alternativas
+//comentado pq rompe la serializacion, falta serializar la struct o no se vemos
+//uint8_t sentencias_espera;
+//uint8_t sentencias_dam;
+//uint8_t sentencias_totales;
+
 typedef struct {
 	uint8_t id_dtb;
 	char *escriptorio;
 	uint8_t program_counter;
 	uint8_t inicializado;
 	uint8_t quantum;
-
-	//TODO: discutir si estas estructuras pertenecen o no al DTB para la muestra de las metricas
-	//analizar alternativas
-	//comentado pq rompe la serializacion, falta serializar la struct o no se vemos
-	//uint8_t sentencias_espera;
-	//uint8_t sentencias_dam;
-	//uint8_t sentencias_totales;
-
 
 	t_list *direcciones;
 } dtb_struct;

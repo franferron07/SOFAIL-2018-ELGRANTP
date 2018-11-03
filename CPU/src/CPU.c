@@ -47,14 +47,14 @@ int main(int argc, char *argv[]) {
 
 	dtb_struct dtb_a_enviar;
 	dtb_a_enviar.id_dtb = 15;
-	dtb_a_enviar.escriptorio=strdup("/direccion/putoelquele/aguanteallboys/ahreloco/gato/policia");
+	dtb_a_enviar.escriptorio=strdup("/direccion/memoria/carpeta/escriptorios/");
 	dtb_a_enviar.program_counter = 7;
 	dtb_a_enviar.inicializado = 1;
 	dtb_a_enviar.quantum = 4;
 	dtb_a_enviar.direcciones = list_create();
-	list_add(dtb_a_enviar.direcciones, strdup("/videos/porno/tu_vieja/"));
-	list_add(dtb_a_enviar.direcciones, strdup("/videos/porno/tu_hermana/"));
-	list_add(dtb_a_enviar.direcciones, strdup("/videos/porno/tu_prima/"));
+	list_add(dtb_a_enviar.direcciones, strdup("/sistemas/algoritmos/khg74jk/"));
+	list_add(dtb_a_enviar.direcciones, strdup("/sistemas/paradigmas/piu39gh/"));
+	list_add(dtb_a_enviar.direcciones, strdup("/sistemas/operativos/mry58lq/"));
 
 
 	printf("id_dtb: %d\n",dtb_a_enviar.id_dtb);
@@ -74,9 +74,8 @@ int main(int argc, char *argv[]) {
 
 	//int result = send(socket_safa, dtb_serializado, tamanio_buffer, 0);
 	//printf("result:  %d",result);
-	return 0;
-
 	dtb_struct* dtb_deserializado = deserializar_dtb(dtb_serializado);
+
 
 	puts("//////DTB DESERIALIZADO//////");
 	printf("id_dtb: %d\n",dtb_deserializado->id_dtb);
@@ -85,6 +84,8 @@ int main(int argc, char *argv[]) {
 	printf("program_counter: %d\n",dtb_deserializado->program_counter);
 	printf("inicializado: %d\n",dtb_deserializado->inicializado);
 	printf("quantum: %d\n",dtb_deserializado->quantum);
+	puts("Direcciones: ");
+	list_iterate(dtb_deserializado->direcciones, (void *)puts);
 	puts("///FIN DTB DESERIALIZADO/////");
 
 
