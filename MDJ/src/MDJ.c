@@ -98,8 +98,6 @@ bool esta_lLeno(FILE* bloque){///debe usarse con Bitmap.bin
 //bool estaOcupado(char* path){ //debe usarse con Bitmap.bin
 //	return true;
 //}
-
-
 bool terminoDeMapearlaLinea(){
 	bool estaOcupado=bitmap_bloque_esta_ocupado(bloqueActual_path);
 	return estaOcupado;
