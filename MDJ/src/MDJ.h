@@ -40,7 +40,7 @@
 #define  MAX_INPUT_BUFFER 1000
 #define loop while(1)
  char leyenda_temporal[MAX_INPUT_BUFFER];
- void mdj_finish_and_free();
+
 //----------------------------
 typedef struct{
 	char* puerto;
@@ -62,7 +62,7 @@ struct METADATA{
 	char* MAGIC_NUMBER;//es fifa , puede ser un charArray, charlable
 }metadata;
 
-t_log *logger= NULL;
+t_log *mdj_log= NULL;
 fd_set descriptoresLectura;	/* Descriptores de interes para select() */
 int maximo;							/* Número de descriptor más grande */
 int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
@@ -85,22 +85,21 @@ void config_destroy_mdj(MDJ_CONFIG* );
 void mdj_inicializar();
 
 
-void mostrar_y_guardar_log(char * s, ...); //imprime como printf y guarda en log
-void guardar_log(char * ); // solo guarda log
-void loggear_info(char * s, ...);
+void loggear_y_guardar_info(char * s, ...); //imprime como printf y guarda en log
+void loggear_info(char * s, ...);// solo guarda log
 
 
 
 void escuchar_mensajes_entrantes();
-
+void mdj_liberar_recursos();
 void  ejecutar_linea_entrante();
-void mdj_init();
-void cargar_metadata();//hardcodeada, completar con config.h
+void cargar_configuracion_mdj();
+void cargar_configuracion_mdj();//hardcodeada, completar con config.h
 void mostrar_configuracion_metadata();
-bool estaOcupado(FILE* bloque);///debe usarse con Bitmap.bin
+bool esta_lLeno(FILE* bloque);///debe usarse con Bitmap.bin
 bool estaOcupaco(char* path);
-
+bool terminoDeMapearlaLinea();
 void consola_fifa();
-
+bool bitmap_bloque_esta_ocupado(char* path_del_bloque);
 
 #endif /* MDJ_H_ */

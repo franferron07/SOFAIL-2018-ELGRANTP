@@ -10,8 +10,6 @@
 
 
 #include "MDJ.h"
-
-
 int i;
 // char buffer[MAX_INPUT_BUFFER];							/* Buffer para leer de los socket */
  char *buffer=NULL;				/* Buffer para leer de los socket */
@@ -24,11 +22,14 @@ pthread_attr_t hilo_consola_fifa;
 //pthread_mutex_t mutex_recibo_mensaje;
 
 char* aMapearAlBloque=NULL;
-
-
+FILE* bloqueActual_file=NULL;
+//char* bloqueActual_nombre=NULL;
+char bloqueActual_path[200]; //direccion del bloque actual
+t_bitarray* bitarray;
 int main(void) {
-//		mdj_init();
+//		cargar_configuracion_mdj();
 //		mostrar_configuracion();
+
 //		puts("MDJ escuchando .."); /* prints MDJ */
 //		pthread_create(&hilo_consola_fifa,NULL,consola_fifa(),NULL);
 //			pthread_create(&hilo_escucha, NULL,escuchar_mensajes_entrantes, NULL);
@@ -36,17 +37,20 @@ int main(void) {
 //			pthread_join(&hilo_consola_fifa,NULL);
 //	 	mdj_finish_and_free();
 //	 	return 0;
+	bitarray=bitarray_create("bitmap.bin",metadata.cantidad_bloques);
 	consola_fifa();
-
-	 return 0;
+	mdj_liberar_recursos();
+	return 0;
 }
 void consola_fifa(){
-	cargar_metadata();
-		mostrar_configuracion_metadata();
+	cargar_configuracion_metadata();
+	mostrar_configuracion_metadata();
+	puts("press \"exit\" para salir de consola ");
 		loop{
-			puts("press \"exit\" para salir de consola ");
 			buffer_input_keyboard=readline("fifa@mdj=>  ");
 			if(!strncmp(buffer_input_keyboard, "exit", 4)) break;
+			realloc(buffer_input_keyboard,sizeof(buffer_input_keyboard)+1);
+
 			ejecutar_linea_entrante();
 			free(buffer_input_keyboard);
 		}
@@ -56,15 +60,26 @@ void  ejecutar_linea_entrante(){
 	printf("ingreso \"%s\"  con %d letras \n", buffer_input_keyboard,strlen(buffer_input_keyboard));
 //	system(buffer_input_keyboard);
 	aMapearAlBloque=malloc(metadata.tamanio_de_bloque);
-	memmove(aMapearAlBloque,buffer_input_keyboard,metadata.tamanio_de_bloque);
+	memmove(aMapearAlBloque,buffer_input_keyboard,espacioRestanteAlBloque());
 ////	FILE* file=txt_open_for_append("bloque1.bin");
 	FILE* file=txt_open_for_append("1.bin");
 	mapearBloque(file,aMapearAlBloque);
 	puts(aMapearAlBloque);
+	for(FILE* unBloque=getBloqueLibre();terminoDeMapearlaLinea();unBloque=getBloqueLibre()){
+		mapearBloque(unBloque,aMapearAlBloque);
+	}
 	free(aMapearAlBloque);
-//	for(FILE* unBloque=getBloqueLibre();terminoDeMapearlaLinea();unBloque=getBloqueLibre()){
-//		mapearBloque(unBloque,aMapearAlBloque);
-//	}
+}
+unsigned espacioRestanteAlBloque(char * path){
+	int espacio_restante=(metadata.tamanio_de_bloque - cantidadDeBytesEnFile(path));
+	if(espacio_restante<0){
+		setBloqueLleno(path);
+		return 0;
+	}
+	return espacio_restante;
+}
+void setBloqueLleno(char* path){//agregar un 1 al bitmap.bin
+
 }
 void  mapearBloque(FILE* bloque, char * contenido){
 //	if(estaOcupado(bloque)){
@@ -77,18 +92,22 @@ void  mapearBloque(FILE* bloque, char * contenido){
 //FILE* getBloqueLibre(){
 //	return
 //}
-bool estaOcupado(FILE* bloque){///debe usarse con Bitmap.bin
-	return cantidadDeBytesEnFile(bloque)>=metadata.tamanio_de_bloque?true:false;
+bool esta_lLeno(FILE* bloque){///debe usarse con Bitmap.bin
+	return cantidadDeBytesEnFile(bloque)>=metadata.tamanio_de_bloque;
 }
 //bool estaOcupado(char* path){ //debe usarse con Bitmap.bin
 //	return true;
 //}
 
 
-bool terminoDemapearLaLinea(){
-	return true;
+bool terminoDeMapearlaLinea(){
+	bool estaOcupado=bitmap_bloque_esta_ocupado(bloqueActual_path);
+	return estaOcupado;
 }
-
+bool bitmap_bloque_esta_ocupado(char* path_del_bloque){
+	int n = bitmap_posicion_del_bloque(path_del_bloque);
+	return bitarray_test_bit(bitarray,n);
+}
 int cantidadDeBytesEnFile(char *pathFile){
 	  FILE *fich;
 	  int ftam=-1;
@@ -103,7 +122,7 @@ int cantidadDeBytesEnFile(char *pathFile){
 	    printf("error al saber santidad de bytes de archivo , ERRNO: %d - %s\n", errno, strerror(errno));
 	  return ftam;
 	}
-void cargar_metadata(){//hardcodeada, completar con config.h
+void cargar_configuracion_metadata(){//hardcodeada, completar con config.h y  Metadata.bin
 	(&metadata)->cantidad_bloques=64;
 	(&metadata)->tamanio_de_bloque=50;
 }
@@ -114,23 +133,20 @@ void mostrar_configuracion_metadata(){
 	puts("fin lectura ");
 
 }
-void mdj_finish_and_free(){
+void mdj_liberar_recursos(){
 	 config_destroy_mdj(&mdj);
-	 mostrar_y_guardar_log("MDJ terminando..");
-	 log_info(logger, "Finish.cfg");
-	 log_destroy(logger);
+	 loggear_y_guardar_info("MDJ terminando..");
+	 log_info(mdj_log, "Finish.cfg");
+	 log_destroy(mdj_log);
 	 free(buffer);
 }
-void mostrar_y_guardar_log(char * s, ...){
+void loggear_y_guardar_info(char * s, ...){
 	va_list resto;
 	va_start(resto,s);
 	vsprintf(leyenda_temporal,s, resto );
 	printf(leyenda_temporal);
-	log_info(logger,leyenda_temporal);
+	log_info(mdj_log,leyenda_temporal);
 	va_end(resto);
-}
-void guardar_log(char* s ){
-	log_info(logger,s);
 }
 
 void loggear_info(char * s, ...){
@@ -138,9 +154,9 @@ void loggear_info(char * s, ...){
 	va_start(resto,s);
 	vsprintf(leyenda_temporal,s, resto );
 //	printf(leyenda_temporal);
-	log_info(logger,leyenda_temporal);
+	log_info(mdj_log,leyenda_temporal);
 	va_end(resto);
-//	free(s);
+
 }
 
 
@@ -197,8 +213,8 @@ void escuchar_mensajes_entrantes(){
 		 					int recibi_caracteres= Lee_Socket(  socketCliente[i],buffer, MAX_INPUT_BUFFER);
 		 					int cant_caracteres_recibidos=strlen(buffer);
 		 					if (recibi_caracteres){
-		 						mostrar_y_guardar_log("Cliente %d envía %s \n", i+1, buffer);
-		 						mostrar_y_guardar_log("cant letras recibidos => %d \n ",cant_caracteres_recibidos);
+		 						loggear_y_guardar_info("Cliente %d envía %s \n", i+1, buffer);
+		 						loggear_y_guardar_info("cant letras recibidos => %d \n ",cant_caracteres_recibidos);
 //		 						mostrar_y_guardar_log("cant caracteres recibidos => %d \n ",cant_caracteres_recibidos);
 
 		 					}
@@ -228,11 +244,9 @@ void escuchar_mensajes_entrantes(){
 }
 
 
-void mdj_init(){
-	logger = log_create("MDJ.log", "MDJ",false, LOG_LEVEL_INFO);
-	guardar_log("INICIO MDJ");
-
-//	mdj=malloc(sizeof(mdj));
+void cargar_configuracion_mdj(){
+	mdj_log = log_create("MDJ.log", "MDJ",false, LOG_LEVEL_INFO);
+	loggear_info("INICIO MDJ");
 	t_config *configuracion_cfg_temporal=cargar_en_memoria_cfg("mdj.cfg");
 	montar_configuracion(configuracion_cfg_temporal,&mdj);
 	config_destroy(configuracion_cfg_temporal);
@@ -241,23 +255,21 @@ void mdj_init(){
 
 
 t_config* cargar_en_memoria_cfg(char* dir){
-	t_config* aux = malloc(sizeof(MDJ_CONFIG));
-	aux=config_create(dir);
+	t_config*aux=config_create(dir);
 	if(aux==NULL){
 //		free(mdj);
-		mostrar_y_guardar_log("No se encuentra archivo MDJ.cfg");
-		log_error(logger, leyenda_temporal);
+		loggear_y_guardar_info("No se encuentra archivo MDJ.cfg");
+		log_error(mdj_log, leyenda_temporal);
 	}
-	//config_create() carga en memoria el archivo .cfg ,en memoria se lo encuentra con &configuracion_temporal
 	return aux;
 }
 
 void montar_configuracion(t_config*  temporal,MDJ_CONFIG* configuracion){
 	//tomo las key para inicializar duplicando el string devuelvo para luego hacer los free
-	configuracion->puerto=string_duplicate(config_get_string_value(temporal,"PUERTO"));
-	configuracion->punto_de_montaje=string_duplicate(config_get_string_value(temporal,"PUNTO_MONTAJE"));
+	strcpy(configuracion->puerto,string_duplicate(config_get_string_value(temporal,"PUERTO")));
+	strcpy(configuracion->punto_de_montaje,string_duplicate(config_get_string_value(temporal,"PUNTO_MONTAJE")));
 	configuracion->retardo=config_get_int_value(temporal,"RETARDO");
-	configuracion->ip=string_duplicate(config_get_string_value(temporal,"IP"));
+	strcpy(configuracion->ip,string_duplicate(config_get_string_value(temporal,"IP")));
 
 }
 
