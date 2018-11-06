@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
 	//printf("result:  %d",result);
 	dtb_struct* dtb_deserializado = deserializar_dtb(dtb_serializado);
 
-
+	exit(0);
 	puts("//////DTB DESERIALIZADO//////");
 	printf("id_dtb: %d\n",dtb_deserializado->id_dtb);
 	printf("longitud escriptorio: %d\n",strlen(dtb_deserializado->escriptorio));
@@ -85,11 +85,11 @@ int main(int argc, char *argv[]) {
 	printf("inicializado: %d\n",dtb_deserializado->inicializado);
 	printf("quantum: %d\n",dtb_deserializado->quantum);
 	puts("Direcciones: ");
-	list_iterate(dtb_deserializado->direcciones, (void *)puts);
+	//list_iterate(dtb_deserializado->direcciones, (void *)puts);
 	puts("///FIN DTB DESERIALIZADO/////");
 
 
-	liberar_recursos(EXIT_SUCCESS);
+	//liberar_recursos(EXIT_SUCCESS);
 }
 
 void  conectarse_con_safa(){

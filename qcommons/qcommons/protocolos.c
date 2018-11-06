@@ -83,22 +83,27 @@ void* serializar_header_conexion(header_conexion_type *header) {
 
 
 int tamanio_lista_para_buffer(t_list *direcciones){
+	//retorna el tamanio de la lista de direcciones para el buffer
 	int tamanio = 	sizeof((uint8_t)direcciones->elements_count);
 	uint8_t tamanio_ruta = 0;
 
 	t_link_element *element = direcciones->head;
-		t_link_element *aux = NULL;
-		while (element != NULL) {
-			aux = element->next;
-			tamanio_ruta = strlen(element->data);
-			tamanio += (sizeof(tamanio_ruta) + tamanio_ruta);
-			element = aux;
-		}
+	t_link_element *aux = NULL;
+	while (element != NULL) {
+		aux = element->next;
+		tamanio_ruta = strlen(element->data) + 1;
+		tamanio += (sizeof(tamanio_ruta) + tamanio_ruta);
+		element = aux;
+	}
 	return tamanio;
 }
 
 
 void* serializar_dtb(dtb_struct *dtb, int * tamanio_buffer){
+	//funcion que serializa un dtb
+	//recibe como parametro un puntero al dtb a serializar
+	//y un puntero a un int que va a ser el tamanio del buffer despues de serializar
+	//bastante util al momento de hacer un send(dtb)
 	uint8_t tamanio_ruta_escriptorio = strlen(dtb->escriptorio);
 
 	int tamanio = 	sizeof(dtb->id_dtb) +
@@ -131,7 +136,7 @@ void* serializar_dtb(dtb_struct *dtb, int * tamanio_buffer){
 	while (element != NULL) {
 		aux = element->next;
 
-		tamanio_ruta = strlen(element->data);
+		tamanio_ruta = strlen(element->data) + 1;
 		serialize_data(&(tamanio_ruta),sizeof(tamanio_ruta), &buffer, &lastIndex);
 		serialize_data(&(element->data),tamanio_ruta, &buffer, &lastIndex);
 
@@ -145,6 +150,11 @@ void* serializar_dtb(dtb_struct *dtb, int * tamanio_buffer){
 
 
 int tamanio_dtb( dtb_struct *dtb ){
+	//esta funcion calcula el tamaño que va a tener el buffer de un dtb
+	//no se usa por ahora...
+	//va a ser util al momento de enviar un send
+	//aunque tambien se puede solucionar ese problema agregando un parametro mas a la funcion serializar
+	//que acepte un puntero a int y cambie el valor por el tamanio del buffer
 
 	uint8_t tamanio_ruta_escriptorio = strlen(dtb->escriptorio);
 
@@ -160,15 +170,21 @@ int tamanio_dtb( dtb_struct *dtb ){
 }
 
 dtb_struct* deserializar_dtb(void *buffer){
+	//tal como su nombre lo dice esta funcion deserializa un dtb a partir de un buffer
+	//este dtb a deserializar es completamente dinamico en la cantida de direcciones y tamanio de cada direccion
+	//tiene un error de stack smashing en las lineas 213 y 214, si lo descomentas funcion
+	//pero en algun lugar hay un stack smashing...
 	dtb_struct* dtb = malloc(sizeof(dtb_struct));
 	int lastIndex = 0;
+
+
 
 	deserialize_data(&(dtb->id_dtb),sizeof(dtb->id_dtb), buffer, &lastIndex);
 	uint8_t tamanio_ruta_escriptorio;
 	deserialize_data(&(tamanio_ruta_escriptorio),sizeof(uint8_t), buffer, &lastIndex);
 	dtb->escriptorio = malloc((tamanio_ruta_escriptorio + 1) * sizeof(char));
 	deserialize_data(&(dtb->escriptorio),tamanio_ruta_escriptorio, buffer, &lastIndex);
-	dtb->escriptorio[tamanio_ruta_escriptorio]='\0';
+	(dtb->escriptorio)[tamanio_ruta_escriptorio]='\0';
 	deserialize_data(&(dtb->program_counter),sizeof(dtb->program_counter), buffer, &lastIndex);
 	deserialize_data(&(dtb->inicializado),sizeof(dtb->inicializado), buffer, &lastIndex);
 	deserialize_data(&(dtb->quantum),sizeof(dtb->quantum), buffer, &lastIndex);
@@ -182,36 +198,41 @@ dtb_struct* deserializar_dtb(void *buffer){
 
 
 	uint8_t tamanio_direccion = 0;
-	char * direccion;
+	char * direccion = (char *)malloc(sizeof(char));
 	int var;
+
 	for (var = 0; var < cantidad_de_direcciones; ++var) {
 
-		deserialize_data(&(tamanio_direccion),sizeof(uint8_t), buffer, &lastIndex);
+
+		deserialize_data(&tamanio_direccion,sizeof(uint8_t), buffer, &lastIndex);
 		printf("sizeof(tamanio_direccion): %d\n",sizeof(tamanio_direccion));
 		printf("tamanio_direccion: %d\n",tamanio_direccion);
-		direccion = malloc((tamanio_direccion + 1) * sizeof(char));
+		direccion = (char *)realloc(direccion, (tamanio_direccion + 1) * sizeof(char));
 
 
-		deserialize_data(&(direccion),tamanio_direccion, buffer, &lastIndex);
-		direccion[tamanio_direccion] = '\0';
+		//TODO: en estas 2 lineas esta el problema y tambien la solucion...
+		//deserialize_data(&direccion,tamanio_direccion, buffer, &lastIndex);
+		//direccion[tamanio_direccion] = '\0';
 
 
 
-		//char * aux = strdup(direccion);
+
 		printf("direccion: %s\n",direccion);
-
-		list_add(dtb->direcciones,strdup(direccion));
+		//list_add(dtb->direcciones,strdup(direccion));
 
 		tamanio_direccion = 0;
-		free(direccion);
+
+
 
 	}
+	//free(direccion);
 	//TODO: corregir (stack smashing error)
+	/*
 	puts("///////////////////////");
 	puts("Direcciones: ");
 	list_iterate(dtb->direcciones, (void *)puts);
 	puts("///////////////////////");
-
+*/
 	return dtb;
 
 }
