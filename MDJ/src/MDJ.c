@@ -19,13 +19,14 @@ int i;
  char* path_seleccionado[MAX_INPUT_BUFFER];
 pthread_attr_t hilo_escucha;
 pthread_attr_t hilo_consola_fifa;
-//pthread_mutex_t mutex_recibo_mensaje;
 
 char* aMapearAlBloque=NULL;
 FILE* bloqueActual_file=NULL;
 //char* bloqueActual_nombre=NULL;
-char bloqueActual_path[200]; //direccion del bloque actual
+char bloqueActual_path[250]; //direccion del bloque actual
+unsigned int bloqueActual_int=0;
 t_bitarray* bitarray;
+char* bitmap_path_directorio=NULL;
 int main(void) {
 //		cargar_configuracion_mdj();
 //		mostrar_configuracion();
@@ -37,50 +38,68 @@ int main(void) {
 //			pthread_join(&hilo_consola_fifa,NULL);
 //	 	mdj_finish_and_free();
 //	 	return 0;
-	bitarray=bitarray_create("bitmap.bin",metadata.cantidad_bloques);
-	consola_fifa();
-	mdj_liberar_recursos();
+//	bitmap_path_directorio=malloc(MAX_INPUT_BUFFER);
+	char BASE_ARRAY[] = { 0, 0, 0 };
+	char data[] = { 0, 0, 0b00000001 };
+	cargar_configuracion_metadata();
+	char bitmap_array[metadata.cantidad_bloques/8];
+	bitarray = bitarray_create_with_mode(bitmap_array, sizeof(data), LSB_FIRST);
+	unsigned int index=16;
+	bool m = bitarray_test_bit(bitarray, index);
+
+	printf("true %d \n",true);
+	printf("m %d \n",m);
+
+
+	bitarray_clean_bit(bitarray, 8 + 8 + 0);
+	printf("chars %d \n",bitarray_test_bit(bitarray, index));
+
+//	bitarray=bitarray_create_with_mode("bitmap.bin",metadata.cantidad_bloques/8,LSB_FIRST);
+	//-> consola_fifa();
+	//-> mdj_liberar_recursos();
+//	free(bitmap_path_directorio);
+
 	return 0;
 }
-void consola_fifa(){
-	cargar_configuracion_metadata();
-	mostrar_configuracion_metadata();
-	puts("press \"exit\" para salir de consola ");
-		loop{
-			buffer_input_keyboard=readline("fifa@mdj=>  ");
-			if(!strncmp(buffer_input_keyboard, "exit", 4)) break;
-			realloc(buffer_input_keyboard,sizeof(buffer_input_keyboard)+1);
+//void consola_fifa(){
+//	cargar_configuracion_metadata();
+//	mostrar_configuracion_metadata();
+//	puts("press \"exit\" para salir de consola ");
+//		loop{
+//			buffer_input_keyboard=readline("fifa@mdj=>  ");
+//			if(!strncmp(buffer_input_keyboard, "exit", 4)) break;
+////			realloc(buffer_input_keyboard,sizeof(buffer_input_keyboard)+1);
+//
+//			ejecutar_linea_entrante();
+//			free(buffer_input_keyboard);
+//		}
+//}
 
-			ejecutar_linea_entrante();
-			free(buffer_input_keyboard);
-		}
-}
-
-void  ejecutar_linea_entrante(){
-	printf("ingreso \"%s\"  con %d letras \n", buffer_input_keyboard,strlen(buffer_input_keyboard));
-//	system(buffer_input_keyboard);
-	aMapearAlBloque=malloc(metadata.tamanio_de_bloque);
-	memmove(aMapearAlBloque,buffer_input_keyboard,espacioRestanteAlBloque());
-////	FILE* file=txt_open_for_append("bloque1.bin");
-	FILE* file=txt_open_for_append("1.bin");
-	mapearBloque(file,aMapearAlBloque);
-	puts(aMapearAlBloque);
-	for(FILE* unBloque=getBloqueLibre();terminoDeMapearlaLinea();unBloque=getBloqueLibre()){
-		mapearBloque(unBloque,aMapearAlBloque);
-	}
-	free(aMapearAlBloque);
-}
-unsigned espacioRestanteAlBloque(char * path){
-	int espacio_restante=(metadata.tamanio_de_bloque - cantidadDeBytesEnFile(path));
-	if(espacio_restante<0){
-		setBloqueLleno(path);
-		return 0;
-	}
-	return espacio_restante;
-}
-void setBloqueLleno(char* path){//agregar un 1 al bitmap.bin
-
-}
+//void  ejecutar_linea_entrante(){
+//	printf("ingreso \"%s\"  con %d letras \n", buffer_input_keyboard,strlen(buffer_input_keyboard));
+////	system(buffer_input_keyboard);
+//	aMapearAlBloque=malloc(metadata.tamanio_de_bloque);
+//	memmove(aMapearAlBloque,buffer_input_keyboard,espacioRestanteAlBloque());
+//////	FILE* file=txt_open_for_append("bloque1.bin");
+//	FILE* file=txt_open_for_append("1.bin");
+//	mapearBloque(file,aMapearAlBloque);
+//	puts(aMapearAlBloque);
+////	for(FILE* unBloque=getBloqueLibre_file();terminoDeMapearlaLinea();unBloque=getBloqueLibre_file()){
+////		mapearBloque(unBloque,aMapearAlBloque);
+////	}
+//	free(aMapearAlBloque);
+//}
+//unsigned int  espacioRestanteAlBloque(char * path){
+//	unsigned int espacio_restante=(metadata.tamanio_de_bloque - cantidadDeBytesEnFile(path));
+//	if(espacio_restante<0){
+//		setBloqueLleno(path);
+//		return 0;
+//	}
+//	return espacio_restante;
+//}
+//void setBloqueLleno(char* path){//agregar un 1 al bitmap.bin
+//
+//}
 void  mapearBloque(FILE* bloque, char * contenido){
 //	if(estaOcupado(bloque)){
 //		puts("bloque ocupado");
@@ -89,8 +108,13 @@ void  mapearBloque(FILE* bloque, char * contenido){
 	txt_write_in_file(bloque,contenido);
 	txt_close_file(bloque);
 }
-//FILE* getBloqueLibre(){
-//	return
+//FILE* getBloqueLibre_file(){
+//	bloqueActual_file=txt_open_for_append(getBloqueLibre_path());
+//	return bloqueActual_file;
+//}
+//char* getBloqueLibre_path(){
+//
+//
 //}
 bool esta_lLeno(FILE* bloque){///debe usarse con Bitmap.bin
 	return cantidadDeBytesEnFile(bloque)>=metadata.tamanio_de_bloque;
@@ -98,14 +122,14 @@ bool esta_lLeno(FILE* bloque){///debe usarse con Bitmap.bin
 //bool estaOcupado(char* path){ //debe usarse con Bitmap.bin
 //	return true;
 //}
-bool terminoDeMapearlaLinea(){
-	bool estaOcupado=bitmap_bloque_esta_ocupado(bloqueActual_path);
-	return estaOcupado;
-}
-bool bitmap_bloque_esta_ocupado(char* path_del_bloque){
-	int n = bitmap_posicion_del_bloque(path_del_bloque);
-	return bitarray_test_bit(bitarray,n);
-}
+//bool terminoDeMapearlaLinea(){
+//	bool estaOcupado=bitmap_bloque_esta_ocupado(bloqueActual_path);
+//	return estaOcupado;
+//}
+//bool bitmap_bloque_esta_ocupado(char* path_del_bloque){
+//	int n = bitmap_posicion_del_bloque(path_del_bloque);
+//	return bitarray_test_bit(bitarray,n);
+//}
 int cantidadDeBytesEnFile(char *pathFile){
 	  FILE *fich;
 	  int ftam=-1;

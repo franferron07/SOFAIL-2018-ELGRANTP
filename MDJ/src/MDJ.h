@@ -92,7 +92,7 @@ void loggear_info(char * s, ...);// solo guarda log
 
 void escuchar_mensajes_entrantes();
 void mdj_liberar_recursos();
-void  ejecutar_linea_entrante();
+//void  ejecutar_linea_entrante();
 void cargar_configuracion_mdj();
 void cargar_configuracion_mdj();//hardcodeada, completar con config.h
 void mostrar_configuracion_metadata();
@@ -100,6 +100,7 @@ bool esta_lLeno(FILE* bloque);///debe usarse con Bitmap.bin
 bool estaOcupaco(char* path);
 bool terminoDeMapearlaLinea();
 void consola_fifa();
-bool bitmap_bloque_esta_ocupado(char* path_del_bloque);
+//bool bitmap_bloque_esta_ocupado(char* path_del_bloque);
+void  mapearBloque(FILE* bloque, char * contenido);
 
 #endif /* MDJ_H_ */
