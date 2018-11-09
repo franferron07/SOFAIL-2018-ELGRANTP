@@ -78,6 +78,12 @@ typedef struct {
 } direccion_struct;
 
 
+
+typedef enum {
+	NUEVO = 1, LISTO = 2, EJECUTANDO = 3, BLOQUEADO = 4, CARGANDODUMMY = 5
+} tipo_estado_dtb;
+
+
 //TODO: discutir si estas estructuras pertenecen o no al DTB para la muestra de las metricas
 //analizar alternativas
 //comentado pq rompe la serializacion, falta serializar la struct o no se vemos
@@ -85,15 +91,17 @@ typedef struct {
 //uint8_t sentencias_dam;
 //uint8_t sentencias_totales;
 
+
 typedef struct {
 	uint8_t id_dtb;
 	char *escriptorio;
 	uint8_t program_counter;
 	uint8_t inicializado;
 	uint8_t quantum;
-
+	tipo_estado_dtb estado;
 	t_list *direcciones;
 } dtb_struct;
+
 
 
 

@@ -43,6 +43,8 @@ int inicializar() {
 
 	dtb_dummy.inicializado = 0;
 	dtb_dummy.id_dtb = -1;
+	dtb_dummy.quantum = safa.quantum;
+
 	set_quantum(safa.quantum);
 	set_algoritmo(safa.algoritmo);
 
@@ -241,6 +243,13 @@ void atender_cliente_cpu( int *cliente_socket ){
 
 		case BLOQUEARDTB:{
 
+			/* TODO: verificar que el id recibido sea el que esta en el dummy, si lo es debe reiniciarse el dummy para que pueda volver a ser inicializado
+			 * si no lo es mandar a lista de bloqueados el dtb.
+			 *
+			 *   */
+
+
+
 		}
 		break;
 
@@ -328,6 +337,11 @@ void atender_cliente_dam( int *cliente_socket ){
 
 				/*TODO se realiza otro recv para recibir el path del
 				 * archivo cargado el id de dtb y en donde se cargo. si salio ok se debe desbloquear dtb y sino cerrarlo-*/
+
+				/* TODO verificar si el id del dtb corresponde a un dtb en estado cargandoDUmmy si lo es debe pasarse el id del dtb original
+				 * de la cola de nuevos a listos y cambiar su estado . Y si no esta en cargandodummy se manda a lista de bloqueados.
+				 * */
+
 
 			}
 			break;

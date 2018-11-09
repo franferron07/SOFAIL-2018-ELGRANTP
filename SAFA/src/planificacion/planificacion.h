@@ -27,5 +27,7 @@ void liberar_recurso( recurso_struct *recurso );
 
 
 void ejecutar_planificacion_largo_plazo_aux();
+dtb_struct *obtener_dtb_a_ejecutar_dummy(); //funcion que me devuelve el primer dtb de la lista de nuevos en estado nuevo
+bool dtb_estado_nuevo(dtb_struct *dtb);
 
 #endif /* PLANIFICACION_PLANIFICACION_H_ */

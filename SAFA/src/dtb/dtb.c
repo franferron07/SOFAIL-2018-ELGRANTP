@@ -25,6 +25,7 @@ dtb_struct crear_dtb(int id_dtb, char *path) {
 	dtb_nuevo.escriptorio = strdup(path);
 	dtb_nuevo.inicializado = 1;
 	dtb_nuevo.quantum = safa.quantum;
+	dtb_nuevo.estado = NUEVO;
 	/*dtb_nuevo.sentencias_espera=0;
 		dtb_nuevo.sentencias_dam=0;
 		dtb_nuevo.sentencias_totales=0;*/
@@ -33,6 +34,16 @@ dtb_struct crear_dtb(int id_dtb, char *path) {
 
 	return dtb_nuevo;
 }
+
+
+
+void reiniciar_dummy(){
+
+	free(dtb_dummy.escriptorio);
+	dtb_dummy.id_dtb = -1;
+
+}
+
 
 
 void liberar_dtb(dtb_struct * dtb) {
