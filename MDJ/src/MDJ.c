@@ -29,54 +29,19 @@ t_bitarray* bitarray;
 char* bitmap_path_directorio=NULL;
 FILE* bitmap_file=NULL;
 int main(void) {
-//		cargar_configuracion_mdj();
-//		mostrar_configuracion();
+	cargar_configuracion_mdj();
 
-//		puts("MDJ escuchando .."); /* prints MDJ */
-//		pthread_create(&hilo_consola_fifa,NULL,consola_fifa(),NULL);
-//			pthread_create(&hilo_escucha, NULL,escuchar_mensajes_entrantes, NULL);
-////			pthread_join(&hilo_escucha, NULL);
-//			pthread_join(&hilo_consola_fifa,NULL);
-//	 	mdj_finish_and_free();
-//	 	return 0;
-//	bitmap_path_directorio=malloc(MAX_INPUT_BUFFER);
-	char BASE_ARRAY[] = { 0, 0, 0 };
-	char data[] = { 0, 0, 0b00000001 };
+	mostrar_configuracion_mdj();
+	buffer=malloc(MAX_INPUT_BUFFER);
+	puts("cargar config mdj");
+
 	cargar_configuracion_metadata();
 	configurar_bitmap();
-	printf("metadata/8 es %d \n",metadata.cantidad_bloques/8);
-	puts("hola");
-//	for( int j=0;j<metadata.cantidad_bloques;j++)bitarray_clean_bit(bitarray,j);
-	puts("seteos");
-	for(int k =0;k<metadata.cantidad_bloques;k++)printf("test bit pisicion, antes de seteo %d en pos %d \n", bitarray_test_bit(bitarray,k),k);
-	bitarray_set_bit(bitarray,(off_t)(0));
-	bitarray_set_bit(bitarray,(off_t)(1));
-	bitarray_set_bit(bitarray,(off_t)(2));
-	bitarray_set_bit(bitarray,(off_t)(3));
-	bitarray_set_bit(bitarray,(off_t)(4));
-	bitarray_set_bit(bitarray,(off_t)(5));
-	bitarray_set_bit(bitarray,(off_t)(6));
-	bitarray_clean_bit(bitarray,1);
-	bitarray_clean_bit(bitarray,2);
-	bitarray_set_bit(bitarray,(off_t)(7));
-	printf("bitarray %s \n",bitarray->bitarray);
+//	consola_fifa();
 
-
-//	unsigned int index=16;
-//	bool m = bitarray_test_bit(bitarray, index);
-
-//	printf("true %d \n",true);
-//	printf("m %d \n",m);
-//
-//
-//	bitarray_clean_bit(bitarray, 8 + 8 + 0);
-//	printf("chars %d \n",bitarray_test_bit(bitarray, index));
-
-//	bitarray=bitarray_create_with_mode("bitmap.bin",metadata.cantidad_bloques/8,LSB_FIRST);
-	//-> consola_fifa();
-	//-> mdj_liberar_recursos();
-//	free(bitmap_path_directorio);
-
+	bitarray_destroy(bitarray);
+	mdj_liberar_recursos();
+	puts("fin");
 	return 0;
 }
 void configurar_bitmap(){
@@ -84,7 +49,7 @@ void configurar_bitmap(){
 	for(int i =0;i<metadata.cantidad_bloques/8;i++)bitmap_array[i]=0;
 	bitarray = bitarray_create_with_mode(bitmap_array, sizeof(bitmap_array), LSB_FIRST);
 	bitmap_file=txt_open_for_append("bitmap.bin");
-	txt_write_in_file(bitmap_file,bitarray->bitarray);
+	txt_write_in_file(bitmap_file,bitarray->bitarray);//hacerlo con mmap()
 	txt_close_file(bitmap_file);
 //	bitarray_destroy(bitarray);
 }
@@ -152,9 +117,12 @@ void  mapearBloque(FILE* bloque, char * contenido){
 //
 //
 //}
-bool esta_lLeno(FILE* bloque){///debe usarse con Bitmap.bin
-	return cantidadDeBytesEnFile(bloque)>=metadata.tamanio_de_bloque;
+
+
+bool esta_lLeno(){///debe usarse con Bitmap.bin
+	return testear_en_posicion(bloqueActual_int);
 }
+
 //bool estaOcupado(char* path){ //debe usarse con Bitmap.bin
 //	return true;
 //}
@@ -162,24 +130,11 @@ bool esta_lLeno(FILE* bloque){///debe usarse con Bitmap.bin
 //	bool estaOcupado=bitmap_bloque_esta_ocupado(bloqueActual_path);
 //	return estaOcupado;
 //}
-//bool bitmap_bloque_esta_ocupado(char* path_del_bloque){
+//bool bitmap_bloque_esta_ocupado(char* path_del_bloque)
 //	int n = bitmap_posicion_del_bloque(path_del_bloque);
 //	return bitarray_test_bit(bitarray,n);
 //}
-int cantidadDeBytesEnFile(char *pathFile){
-	  FILE *fich;
-	  int ftam=-1;
-	  fich=fopen(pathFile, "r");
-	  if (fich)
-	    {
-	      fseek(fich, 0L, SEEK_END);
-	      ftam=ftell(fich);
-	      fclose(fich);
-	    }
-	  else
-	    printf("error al saber santidad de bytes de archivo , ERRNO: %d - %s\n", errno, strerror(errno));
-	  return ftam;
-	}
+
 void cargar_configuracion_metadata(){//hardcodeada, completar con config.h y  Metadata.bin
 	(&metadata)->cantidad_bloques=64;
 	(&metadata)->tamanio_de_bloque=50;
@@ -192,7 +147,6 @@ void mostrar_configuracion_metadata(){
 
 }
 void mdj_liberar_recursos(){
-	 config_destroy_mdj(&mdj);
 	 loggear_y_guardar_info("MDJ terminando..");
 	 log_info(mdj_log, "Finish.cfg");
 	 log_destroy(mdj_log);
@@ -301,44 +255,35 @@ void escuchar_mensajes_entrantes(){
 	cerrar_socket(mdj_socket);
 }
 
-
 void cargar_configuracion_mdj(){
 	mdj_log = log_create("MDJ.log", "MDJ",false, LOG_LEVEL_INFO);
 	loggear_info("INICIO MDJ");
-	t_config *configuracion_cfg_temporal=cargar_en_memoria_cfg("mdj.cfg");
-	montar_configuracion(configuracion_cfg_temporal,&mdj);
+	t_config *configuracion_cfg_temporal=cargar_en_memoria_cfg("MDJ.cfg");
+	puts("antes de  montar_configuracion");
+	montar_configuracion(configuracion_cfg_temporal);
 	config_destroy(configuracion_cfg_temporal);
-	buffer=malloc(MAX_INPUT_BUFFER);
+	puts("despues de montar config");
 }
 
 
-t_config* cargar_en_memoria_cfg(char* dir){
+t_config* cargar_en_memoria_cfg(char* dir){//ok
 	t_config*aux=config_create(dir);
 	if(aux==NULL){
-//		free(mdj);
-		loggear_y_guardar_info("No se encuentra archivo MDJ.cfg");
-		log_error(mdj_log, leyenda_temporal);
+		perror("No se encuentra archivo MDJ.cfg \n");
+		log_error(mdj_log, "No se encuentra archivo MDJ.cfg \n");
 	}
 	return aux;
 }
 
-void montar_configuracion(t_config*  temporal,MDJ_CONFIG* configuracion){
-	//tomo las key para inicializar duplicando el string devuelvo para luego hacer los free
-	strcpy(configuracion->puerto,string_duplicate(config_get_string_value(temporal,"PUERTO")));
-	strcpy(configuracion->punto_de_montaje,string_duplicate(config_get_string_value(temporal,"PUNTO_MONTAJE")));
-	configuracion->retardo=config_get_int_value(temporal,"RETARDO");
-	strcpy(configuracion->ip,string_duplicate(config_get_string_value(temporal,"IP")));
+void montar_configuracion(t_config*  temporal){
+//	strcpy(mdj.puerto ,string_duplicate(config_get_string_value(temporal,"PUERTO")));
+	strcpy(mdj.puerto ,config_get_string_value(temporal,"PUERTO"));
+	strcpy(mdj.punto_de_montaje,config_get_string_value(temporal,"PUNTO_MONTAJE"));
+	mdj.retardo=config_get_int_value(temporal,"RETARDO");
+	strcpy(mdj.ip,config_get_string_value(temporal,"IP"));
 
 }
-
-void config_destroy_mdj(MDJ_CONFIG* mdj_configuracion_){
-	free(mdj_configuracion_->puerto);
-	free(mdj_configuracion_->punto_de_montaje);
-	free(mdj_configuracion_->ip);
-//	free(mdj_configuracion_);
-
-}
-void mostrar_configuracion(){
+void mostrar_configuracion_mdj(){
 	printf("iniciando lectura de configuracion...\n");
 	printf("PUNTO_DE_MONTAJE = %s \n",mdj.punto_de_montaje);
 	printf("RETARDO = %d \n",mdj.retardo);

@@ -38,16 +38,16 @@
 
 
 #define  MAX_INPUT_BUFFER 1000
+
 #define loop while(1)
  char leyenda_temporal[MAX_INPUT_BUFFER];
 
 //----------------------------
 typedef struct{
-	char* puerto;
+	char puerto[100];
 	int retardo;
-	char* punto_de_montaje;
-	char * ip;
-
+	char punto_de_montaje[100];
+	char  ip[100];
 }MDJ_CONFIG;
 //----------------------------
 
@@ -77,27 +77,23 @@ int socketServidor;				/* Descriptor del socket servidor */
 //funciones
 void liberar_memoria_de_configuracion(MDJ_CONFIG* configuracion_inicial);
 //freeshea el puntero de configuracion inicial
-void montar_configuracion(t_config* ,MDJ_CONFIG*);
-void mostrar_configuracion();
+void montar_configuracion(t_config* );
+void mostrar_configuracion_mdj();
 t_config* cargar_en_memoria_cfg(char*);
-void config_destroy_mdj(MDJ_CONFIG* );
 //--------------
-void mdj_inicializar();
 
 
 void loggear_y_guardar_info(char * s, ...); //imprime como printf y guarda en log
-void loggear_info(char * s, ...);// solo guarda log
-
+void loggear_info(char * s, ...);
 
 
 void escuchar_mensajes_entrantes();
 void mdj_liberar_recursos();
 //void  ejecutar_linea_entrante();
-void cargar_configuracion_mdj();
 void cargar_configuracion_mdj();//hardcodeada, completar con config.h
 void mostrar_configuracion_metadata();
 
-bool esta_lLeno(FILE* bloque);///debe usarse con Bitmap.bin
+bool esta_lLeno();///debe usarse con Bitmap.bin
 bool estaOcupaco(char* path);
 bool terminoDeMapearlaLinea();
 void consola_fifa();
