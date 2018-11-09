@@ -27,6 +27,7 @@ char bloqueActual_path[250]; //direccion del bloque actual
 unsigned int bloqueActual_int=0;
 t_bitarray* bitarray;
 char* bitmap_path_directorio=NULL;
+FILE* bitmap_file=NULL;
 int main(void) {
 //		cargar_configuracion_mdj();
 //		mostrar_configuracion();
@@ -42,17 +43,42 @@ int main(void) {
 	char BASE_ARRAY[] = { 0, 0, 0 };
 	char data[] = { 0, 0, 0b00000001 };
 	cargar_configuracion_metadata();
+	printf("metadata/8 es %d \n",metadata.cantidad_bloques/8);
 	char bitmap_array[metadata.cantidad_bloques/8];
-	bitarray = bitarray_create_with_mode(bitmap_array, sizeof(data), LSB_FIRST);
-	unsigned int index=16;
-	bool m = bitarray_test_bit(bitarray, index);
+	for(int i =0;i<metadata.cantidad_bloques/8;i++)bitmap_array[i]=0;
+	puts("hola");
+//	for( int j=0;j<metadata.cantidad_bloques;j++)bitarray_clean_bit(bitarray,j);
+	bitarray = bitarray_create_with_mode(bitmap_array, sizeof(bitmap_array), LSB_FIRST);
+	bitmap_file=txt_open_for_append("bitmap.bin");
+	puts("seteos");
+	for(int k =0;k<metadata.cantidad_bloques;k++)printf("test bit pisicion, antes de seteo %d en pos %d \n", bitarray_test_bit(bitarray,k),k);
+	bitarray_set_bit(bitarray,(off_t)(0));
+	bitarray_set_bit(bitarray,(off_t)(1));
+	bitarray_set_bit(bitarray,(off_t)(2));
+	bitarray_set_bit(bitarray,(off_t)(3));
+	bitarray_set_bit(bitarray,(off_t)(4));
+	bitarray_set_bit(bitarray,(off_t)(5));
+	bitarray_set_bit(bitarray,(off_t)(6));
+	bitarray_clean_bit(bitarray,1);
+	bitarray_clean_bit(bitarray,2);
+	bitarray_set_bit(bitarray,(off_t)(7));
+	txt_write_in_file(bitmap_file,bitarray->bitarray);
+	bitarray_set_bit(bitarray,(off_t)(8));
+	printf("bitarray %s \n",bitarray->bitarray);
+	for(int k =0;k<metadata.cantidad_bloques;k++)printf("test bit pisicion, despues de seteo %d en pos %d \n", bitarray_test_bit(bitarray,k),k);
 
-	printf("true %d \n",true);
-	printf("m %d \n",m);
 
+	bitarray_destroy(bitarray);
+//	unsigned int index=16;
+//	bool m = bitarray_test_bit(bitarray, index);
 
-	bitarray_clean_bit(bitarray, 8 + 8 + 0);
-	printf("chars %d \n",bitarray_test_bit(bitarray, index));
+//	printf("true %d \n",true);
+//	printf("m %d \n",m);
+//
+//
+//	bitarray_clean_bit(bitarray, 8 + 8 + 0);
+//	printf("chars %d \n",bitarray_test_bit(bitarray, index));
+	txt_close_file(bitmap_file);
 
 //	bitarray=bitarray_create_with_mode("bitmap.bin",metadata.cantidad_bloques/8,LSB_FIRST);
 	//-> consola_fifa();

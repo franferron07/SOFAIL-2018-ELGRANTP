@@ -96,6 +96,7 @@ void mdj_liberar_recursos();
 void cargar_configuracion_mdj();
 void cargar_configuracion_mdj();//hardcodeada, completar con config.h
 void mostrar_configuracion_metadata();
+
 bool esta_lLeno(FILE* bloque);///debe usarse con Bitmap.bin
 bool estaOcupaco(char* path);
 bool terminoDeMapearlaLinea();
