@@ -103,5 +103,6 @@ bool terminoDeMapearlaLinea();
 void consola_fifa();
 //bool bitmap_bloque_esta_ocupado(char* path_del_bloque);
 void  mapearBloque(FILE* bloque, char * contenido);
+void configurar_bitmap();
 
 #endif /* MDJ_H_ */

@@ -43,13 +43,10 @@ int main(void) {
 	char BASE_ARRAY[] = { 0, 0, 0 };
 	char data[] = { 0, 0, 0b00000001 };
 	cargar_configuracion_metadata();
+	configurar_bitmap();
 	printf("metadata/8 es %d \n",metadata.cantidad_bloques/8);
-	char bitmap_array[metadata.cantidad_bloques/8];
-	for(int i =0;i<metadata.cantidad_bloques/8;i++)bitmap_array[i]=0;
 	puts("hola");
 //	for( int j=0;j<metadata.cantidad_bloques;j++)bitarray_clean_bit(bitarray,j);
-	bitarray = bitarray_create_with_mode(bitmap_array, sizeof(bitmap_array), LSB_FIRST);
-	bitmap_file=txt_open_for_append("bitmap.bin");
 	puts("seteos");
 	for(int k =0;k<metadata.cantidad_bloques;k++)printf("test bit pisicion, antes de seteo %d en pos %d \n", bitarray_test_bit(bitarray,k),k);
 	bitarray_set_bit(bitarray,(off_t)(0));
@@ -62,13 +59,9 @@ int main(void) {
 	bitarray_clean_bit(bitarray,1);
 	bitarray_clean_bit(bitarray,2);
 	bitarray_set_bit(bitarray,(off_t)(7));
-	txt_write_in_file(bitmap_file,bitarray->bitarray);
-	bitarray_set_bit(bitarray,(off_t)(8));
 	printf("bitarray %s \n",bitarray->bitarray);
-	for(int k =0;k<metadata.cantidad_bloques;k++)printf("test bit pisicion, despues de seteo %d en pos %d \n", bitarray_test_bit(bitarray,k),k);
 
 
-	bitarray_destroy(bitarray);
 //	unsigned int index=16;
 //	bool m = bitarray_test_bit(bitarray, index);
 
@@ -78,7 +71,6 @@ int main(void) {
 //
 //	bitarray_clean_bit(bitarray, 8 + 8 + 0);
 //	printf("chars %d \n",bitarray_test_bit(bitarray, index));
-	txt_close_file(bitmap_file);
 
 //	bitarray=bitarray_create_with_mode("bitmap.bin",metadata.cantidad_bloques/8,LSB_FIRST);
 	//-> consola_fifa();
@@ -86,6 +78,24 @@ int main(void) {
 //	free(bitmap_path_directorio);
 
 	return 0;
+}
+void configurar_bitmap(){
+	char bitmap_array[metadata.cantidad_bloques/8];
+	for(int i =0;i<metadata.cantidad_bloques/8;i++)bitmap_array[i]=0;
+	bitarray = bitarray_create_with_mode(bitmap_array, sizeof(bitmap_array), LSB_FIRST);
+	bitmap_file=txt_open_for_append("bitmap.bin");
+	txt_write_in_file(bitmap_file,bitarray->bitarray);
+	txt_close_file(bitmap_file);
+//	bitarray_destroy(bitarray);
+}
+void setear_en_posicion(int pos){
+	bitarray_set_bit(bitarray,(off_t)(pos));
+}
+bool testear_en_posicion(int pos){
+	return bitarray_test_bit(bitarray,(off_t)(pos));
+}
+void probar_seteo_de_bits(){
+	for(int k =0;k<metadata.cantidad_bloques;k++)printf("test bit posicion, despues de seteo %d en pos %d \n", bitarray_test_bit(bitarray,k),k);
 }
 //void consola_fifa(){
 //	cargar_configuracion_metadata();
