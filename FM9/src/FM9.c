@@ -13,9 +13,8 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-	iniciar_administracion_memoria();
 	imprimir_config();
-
+	iniciar_administracion_memoria();
 	pthread_create(&hilo_principal, NULL, (void*) iniciar_fm9, NULL);
 	pthread_create(&hilo_consola, NULL, (void*) escuchar_consola, NULL);
 

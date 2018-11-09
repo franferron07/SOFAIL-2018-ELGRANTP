@@ -14,6 +14,7 @@ void inicializar_memoria() {
 		memoria[i] = malloc(fm9.max_linea);
 		strcpy(memoria[i], "null");
 	}
+	log_info(fm9_log, "Se inicializó el storage con %d líneas\n", cant_lineas);
 }
 
 void iniciar_segmentacion_pura(int tamanio_memoria) {
@@ -21,11 +22,13 @@ void iniciar_segmentacion_pura(int tamanio_memoria) {
 }
 
 void iniciar_segmentacion_paginada(int tamanio_memoria) {
-
+	tabla_segmentos = list_create();
+	tabla_procesos = list_create();
+	tabla_paginas = list_create();
 }
 
 void iniciar_paginas_invertidas(int tamanio_memoria) {
-
+	tabla_paginas_invertidas = list_create();
 }
 
 int obtener_primer_indice_libre(int cant_lineas) {
@@ -35,7 +38,7 @@ int obtener_primer_indice_libre(int cant_lineas) {
 		if (!strcmp(memoria[i], "null")) {
 			int aux;
 			bool cumple = true;
-			//evaluo valores entre el inicio y el final (cant_lineas-1)
+			//Evaluo valores entre el inicio y el final (cant_lineas-1)
 			for (aux = i + 1; aux < cant_lineas + i; aux++) {
 				if (aux >= total_lineas) {
 					return -1;
