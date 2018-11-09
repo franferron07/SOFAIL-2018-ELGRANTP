@@ -100,5 +100,7 @@ void consola_fifa();
 //bool bitmap_bloque_esta_ocupado(char* path_del_bloque);
 void  mapearBloque(FILE* bloque, char * contenido);
 void configurar_bitmap();
+FILE* getBloqueLibre_file();
+
 
 #endif /* MDJ_H_ */

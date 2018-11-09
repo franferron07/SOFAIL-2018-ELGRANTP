@@ -35,9 +35,8 @@ int main(void) {
 	buffer=malloc(MAX_INPUT_BUFFER);
 	puts("cargar config mdj");
 
-	cargar_configuracion_metadata();
 	configurar_bitmap();
-//	consola_fifa();
+	consola_fifa();
 
 	bitarray_destroy(bitarray);
 	mdj_liberar_recursos();
@@ -56,63 +55,62 @@ void configurar_bitmap(){
 void setear_en_posicion(int pos){
 	bitarray_set_bit(bitarray,(off_t)(pos));
 }
-bool testear_en_posicion(int pos){
+bool testear_bloque_libre_en_posicion(int pos){
 	return bitarray_test_bit(bitarray,(off_t)(pos));
 }
 void probar_seteo_de_bits(){
 	for(int k =0;k<metadata.cantidad_bloques;k++)printf("test bit posicion, despues de seteo %d en pos %d \n", bitarray_test_bit(bitarray,k),k);
 }
-//void consola_fifa(){
-//	cargar_configuracion_metadata();
-//	mostrar_configuracion_metadata();
-//	puts("press \"exit\" para salir de consola ");
-//		loop{
-//			buffer_input_keyboard=readline("fifa@mdj=>  ");
-//			if(!strncmp(buffer_input_keyboard, "exit", 4)) break;
-////			realloc(buffer_input_keyboard,sizeof(buffer_input_keyboard)+1);
-//
-//			ejecutar_linea_entrante();
-//			free(buffer_input_keyboard);
-//		}
-//}
+void consola_fifa(){
+	cargar_configuracion_metadata();
+	mostrar_configuracion_metadata();
+	puts("press \"exit\" para salir de consola ");
+		loop{
+			buffer_input_keyboard=readline("fifa@mdj=>  ");
+			if(!strncmp(buffer_input_keyboard, "exit", 4)) break;
+//			realloc(buffer_input_keyboard,sizeof(buffer_input_keyboard)+1);
 
-//void  ejecutar_linea_entrante(){
-//	printf("ingreso \"%s\"  con %d letras \n", buffer_input_keyboard,strlen(buffer_input_keyboard));
-////	system(buffer_input_keyboard);
-//	aMapearAlBloque=malloc(metadata.tamanio_de_bloque);
-//	memmove(aMapearAlBloque,buffer_input_keyboard,espacioRestanteAlBloque());
-//////	FILE* file=txt_open_for_append("bloque1.bin");
-//	FILE* file=txt_open_for_append("1.bin");
-//	mapearBloque(file,aMapearAlBloque);
-//	puts(aMapearAlBloque);
-////	for(FILE* unBloque=getBloqueLibre_file();terminoDeMapearlaLinea();unBloque=getBloqueLibre_file()){
-////		mapearBloque(unBloque,aMapearAlBloque);
-////	}
-//	free(aMapearAlBloque);
-//}
-//unsigned int  espacioRestanteAlBloque(char * path){
-//	unsigned int espacio_restante=(metadata.tamanio_de_bloque - cantidadDeBytesEnFile(path));
-//	if(espacio_restante<0){
-//		setBloqueLleno(path);
-//		return 0;
-//	}
-//	return espacio_restante;
-//}
-//void setBloqueLleno(char* path){//agregar un 1 al bitmap.bin
-//
-//}
+//			ejecutar_linea_entrante();
+			free(buffer_input_keyboard);
+		}
+}
+
+void  ejecutar_linea_entrante(){
+	printf("ingreso \"%s\"  con %d letras \n", buffer_input_keyboard,strlen(buffer_input_keyboard));
+//	system(buffer_input_keyboard);
+	aMapearAlBloque=malloc(metadata.tamanio_de_bloque);
+	memmove(aMapearAlBloque,buffer_input_keyboard,espacioRestanteAlBloque());
+	puts(aMapearAlBloque);
+	for(bloqueActual_file=getBloqueLibre_file();terminoDeMapearlaLinea();bloqueActual_file=getBloqueLibre_file()){
+		mapearBloque(bloqueActual_file,aMapearAlBloque);
+		bloqueActual_int++;
+	}
+	free(aMapearAlBloque);
+}
+ int  espacioRestanteAlBloque(){
+	unsigned int espacio_restante=(metadata.tamanio_de_bloque );
+	if(espacio_restante<0){
+		setBloqueLleno();
+		return 0;
+	}
+	return espacio_restante;
+}
+void setBloqueLleno(){//agregar un 1 al bitmap.bin
+	bitarray_set_bit(bitarray,bloqueActual_int);
+}
 void  mapearBloque(FILE* bloque, char * contenido){
-//	if(estaOcupado(bloque)){
-//		puts("bloque ocupado");
-//		return ;
-//	}
 	txt_write_in_file(bloque,contenido);
 	txt_close_file(bloque);
 }
-//FILE* getBloqueLibre_file(){
-//	bloqueActual_file=txt_open_for_append(getBloqueLibre_path());
-//	return bloqueActual_file;
-//}
+FILE* getBloqueLibre_file(){
+	int i;
+	for( i =0;testear_bloque_libre_en_posicion(i);i++);//hasta un bloque lbre
+	char* path_bloque = malloc(1000);
+	sprintf(path_bloque,"%d.bin",i);//rehacer path con punto de ontaje y carpeta segun dam
+	bloqueActual_file = fopen(path_bloque,"w");//txt_open_for_append(path_bloque);
+	free(path_bloque);
+	return bloqueActual_file;
+}
 //char* getBloqueLibre_path(){
 //
 //
@@ -120,16 +118,15 @@ void  mapearBloque(FILE* bloque, char * contenido){
 
 
 bool esta_lLeno(){///debe usarse con Bitmap.bin
-	return testear_en_posicion(bloqueActual_int);
+	return testear_bloque_libre_en_posicion(bloqueActual_int);
 }
 
 //bool estaOcupado(char* path){ //debe usarse con Bitmap.bin
 //	return true;
 //}
-//bool terminoDeMapearlaLinea(){
-//	bool estaOcupado=bitmap_bloque_esta_ocupado(bloqueActual_path);
-//	return estaOcupado;
-//}
+bool terminoDeMapearlaLinea(){
+	return bitarray_test_bit(bitarray,bloqueActual_int);
+}
 //bool bitmap_bloque_esta_ocupado(char* path_del_bloque)
 //	int n = bitmap_posicion_del_bloque(path_del_bloque);
 //	return bitarray_test_bit(bitarray,n);
