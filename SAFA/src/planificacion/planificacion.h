@@ -25,4 +25,7 @@ recurso_struct*  crear_recurso( char*nombre_recurso );
 void asignar_recurso( recurso_struct *recurso );
 void liberar_recurso( recurso_struct *recurso );
 
+
+void ejecutar_planificacion_largo_plazo_aux();
+
 #endif /* PLANIFICACION_PLANIFICACION_H_ */

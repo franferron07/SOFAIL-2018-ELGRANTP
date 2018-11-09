@@ -69,7 +69,9 @@ void ejecutar_planificacion_largo_plazo() {
 
 			log_info(safa_log, "DTBS en lista de nuevos");
 
-			/*pthread_mutex_lock(&sem_nuevo_mutex);
+			/*
+			mutex en nuevo es probable que no haga falta
+			pthread_mutex_lock(&sem_nuevo_mutex);
 
 			dtb = (dtb_struct*) list_get(dtb_nuevos, 0);
 
@@ -96,6 +98,44 @@ void ejecutar_planificacion_largo_plazo() {
 		}
 
 	}
+
+}
+
+
+
+void ejecutar_planificacion_largo_plazo_aux(  ){
+
+
+	dtb_struct *dtb;
+
+	while(1){
+
+		/* se activa semaforo al entrar un nuevo proceso a nuevo */
+		pthread_mutex_lock(&sem_nuevo_mutex);
+
+		dtb = (dtb_struct*) list_get(dtb_nuevos, 0);//aca deberia tomar el ultimo de la lista no el primero.
+		log_info(safa_log, "Se toma DTB para inicializar procesos dummy: %d",dtb->id_dtb);
+
+		/***** ESPERAMOS A QUE DUMMY ESTE DISPONIBLE PARA REALIZAR OTRO PASAJE A LISTO *******/
+		while( dtb_dummy.id_dtb == -1 ){
+
+		}
+		log_info(safa_log, "El dummy esta disponible");
+
+		inicializar_dummy(dtb);
+		log_info(safa_log, "DTB dummy inicializado");
+
+		/**************** AGREGO DUMMY A LISTOS SI MULTIPROGRAMACION LO PERMITE **************************/
+		sem_wait(&sem_listo_max);
+		pthread_mutex_lock(&sem_listo_mutex);
+
+		list_add(dtb_listos, &dtb_dummy);
+		log_info(safa_log, "DUMMY pasado a listos");
+
+		pthread_mutex_unlock(&sem_listo_mutex);
+	}
+
+
 }
 
 

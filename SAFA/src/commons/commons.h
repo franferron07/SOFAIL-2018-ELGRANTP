@@ -59,5 +59,7 @@ pthread_mutex_t sem_listo_mutex; //mutex para lista de listos
 pthread_mutex_t sem_cpu_mutex; //mutex para lista de cpus . SE PODRIA QUITAR
 pthread_mutex_t mutex_consola;
 
+void *ultimo_elemento_lista( t_list *lista  );
+
 
 #endif /* SRC_COMMONS_COMMONS_H_ */

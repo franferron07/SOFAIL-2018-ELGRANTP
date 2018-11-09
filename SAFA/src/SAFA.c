@@ -42,6 +42,7 @@ int inicializar() {
 
 
 	dtb_dummy.inicializado = 0;
+	dtb_dummy.id_dtb = -1;
 	set_quantum(safa.quantum);
 	set_algoritmo(safa.algoritmo);
 
@@ -311,6 +312,51 @@ void atender_cliente_cpu( int *cliente_socket ){
 
 
 void atender_cliente_dam( int *cliente_socket ){
+
+
+	request_operacion_type *header_operacion = NULL;
+	void *buffer_operacion = malloc(TAMANIO_REQUEST_OPERACION);
+	int res ;
+
+
+	/****** ESPERANDO MENSAJES DE DAM *******/
+	while ( ( res = recv(*cliente_socket, buffer_operacion, TAMANIO_REQUEST_OPERACION,MSG_WAITALL) )  > 0) {
+
+		switch (header_operacion->tipo_operacion ) {
+
+			case ARCHIVOCARGADO:{
+
+				/*TODO se realiza otro recv para recibir el path del
+				 * archivo cargado el id de dtb y en donde se cargo. si salio ok se debe desbloquear dtb y sino cerrarlo-*/
+
+			}
+			break;
+
+			case ARCHIVOCREADO:{
+
+				/*TODO se realiza otro recv con el id del dtb que hizo el abrir, se debe desbloquear el dtb si salio todo ok */
+
+			}
+			break;
+
+			case ARCHIVOMODIFICADO:{
+
+			}
+			break;
+
+			case ARCHIVOBORRADO:{
+
+			}
+			break;
+
+			default:
+			break;
+
+		}
+
+	}
+
+
 
 }
 
