@@ -40,6 +40,7 @@
 #define  MAX_INPUT_BUFFER 1000
 
 #define loop while(1)
+//#define minimo(unNum,otroNum) return unNum>otroNum?unNum:otroNum;
  char leyenda_temporal[MAX_INPUT_BUFFER];
 
 //----------------------------
@@ -93,7 +94,7 @@ void mdj_liberar_recursos();
 void cargar_configuracion_mdj();//hardcodeada, completar con config.h
 void mostrar_configuracion_metadata();
 
-bool esta_lLeno();///debe usarse con Bitmap.bin
+bool estaLLenoElBloqueActual();///debe usarse con Bitmap.bin
 bool estaOcupaco(char* path);
 bool terminoDeMapearContenido();
 void consola_fifa();
@@ -102,5 +103,6 @@ void  mapearBloque(FILE* bloque, char * contenido);
 void configurar_bitmap();
 FILE* getBloqueLibre_file();
 char* recortarPrimerosCaracteres(char* s, int primerosCaracteres);
+int cantidadDeCaracteres_file(FILE* bloque);
 
 #endif /* MDJ_H_ */

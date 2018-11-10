@@ -29,7 +29,7 @@ t_bitarray* bitarray;
 char* bitmap_path_directorio=NULL;
 FILE* bitmap_file=NULL;
 int main(void) {
-	cargar_configuracion_mdj();
+//	cargar_configuracion_mdj();
 //
 //	mostrar_configuracion_mdj();
 //	buffer=malloc(MAX_INPUT_BUFFER);
@@ -41,27 +41,17 @@ int main(void) {
 //	bitarray_destroy(bitarray);
 //	mdj_liberar_recursos();
 //	puts("fin");
-	int n=0 ;
-	char* s=NULL;
-	char*s2=NULL;//=malloc(100);
-	loop{
-		s = readline("-> ingrese char*");
-		n=atoi(readline("ingrese numero"));
-//		scanf("%s %d\n",s,n );
-		printf("ingreso %s y %d \n",s,n);
-		s2=recortarPrimerosCaracteres(s,n);
-		printf("los primeros caracteres son %s y los restantes %s \n",s2,s);
-		if(s==NULL)break;
-	}
-	puts("esNulo");
-	free(s);
-	free(s2);
+
+	consola_fifa();
+	bitarray_destroy(bitarray);
 	return 0;
 }
-char* recortarPrimerosCaracteres(char* s, int primerosCaracteres){//ok, malloquea automaticamente
+char* recortarPrimerosCaracteres(char* s, int primerosCaracteres){//ok y  malloquea automaticamente
+	if(s==NULL)perror("la cadena a recortar es es nula o termino de recortar cadena \n");
+	if(strlen(s)<primerosCaracteres)return s;
 	char* recorte = strndup(s,primerosCaracteres);
 	char* aux=strdup(s);
-	if(strlen(s)<primerosCaracteres)perror("Error en recorte de caracteres \n");
+//	if(strlen(s)<primerosCaracteres)perror("Error en recorte de caracteres \n");
 	strcpy(s,aux+primerosCaracteres);
 	free(aux);
 	return recorte;
@@ -87,6 +77,7 @@ void probar_seteo_de_bits(){
 void consola_fifa(){
 	cargar_configuracion_metadata();
 	mostrar_configuracion_metadata();
+	configurar_bitmap();
 	puts("press \"exit\" para salir de consola ");
 		loop{
 			buffer_input_keyboard=readline("fifa@mdj=>  ");
@@ -101,13 +92,8 @@ void consola_fifa(){
 void  ejecutar_linea_entrante(){
 	printf("ingreso \"%s\"  con %d letras \n", buffer_input_keyboard,strlen(buffer_input_keyboard));
 //	system(buffer_input_keyboard);
-	aMapearAlBloque=malloc(metadata.tamanio_de_bloque);
-	memmove(aMapearAlBloque,buffer_input_keyboard,espacioRestanteAlBloque());
-	puts(aMapearAlBloque);
 	for(bloqueActual_file=getBloqueLibre_file();terminoDeMapearContenido();bloqueActual_file=getBloqueLibre_file()){
-		mapearBloque(bloqueActual_file,aMapearAlBloque);
-
-
+		mapearBloque(bloqueActual_file,buffer_input_keyboard);
 	}
 	free(aMapearAlBloque);
 }
@@ -122,8 +108,11 @@ void  ejecutar_linea_entrante(){
 void setBloqueLleno(){//agregar un 1 al bitmap.bin
 	bitarray_set_bit(bitarray,bloqueActual_int);
 }
+int minimo(int unNum,int otroNum){return unNum>otroNum?unNum:otroNum;}
 void  mapearBloque(FILE* bloque, char * contenido){
-	txt_write_in_file(bloque,contenido);
+	aMapearAlBloque=recortarPrimerosCaracteres(contenido,metadata.tamanio_de_bloque);
+	printf("se va a mapear al bloque %s y el restante es %s \n",aMapearAlBloque,buffer_input_keyboard);
+	txt_write_in_file(bloque,aMapearAlBloque);
 	txt_close_file(bloque);
 }
 FILE* getBloqueLibre_file(){
@@ -136,13 +125,25 @@ FILE* getBloqueLibre_file(){
 	return bloqueActual_file;
 }
 
-bool esta_lLeno(){///debe usarse con Bitmap.bin
-	return testear_bloque_libre_en_posicion(bloqueActual_int);
+bool estaLLenoElBloqueActual(){///debe usarse con Bitmap.bin
+	return cantidadDeCaracteres_file(bloqueActual_file)==metadata.tamanio_de_bloque;
 }
-
+bool estaLibreElBloqueActual(){return cantidadDeCaracteres_file(bloqueActual_file)<metadata.tamanio_de_bloque;}
+int cantidadDeCaracteres_file(FILE* bloque){
+	int i ;
+	for(i=0;getc(bloque)!=EOF;i++);
+	return i;
+}
+int cantidadDeCaracteres_path(char* path ){
+	FILE * f = fopen(path,"r");
+	int n = cantidadDeCaracteres_file(f);
+	fclose(f);
+	return n ;
+}
 bool terminoDeMapearContenido(){
-	bool aux = buffer_input_keyboard==NULL;
-	return bitarray_test_bit(bitarray,bloqueActual_int)&&aux;
+	bool hayCaracteresParaMapear=strlen(buffer_input_keyboard)>0;
+	bool archivoLleno()
+	return bitarray_test_bit(bitarray,bloqueActual_int)&&hayCaracteresParaMapear;
 }
 
 void cargar_configuracion_metadata(){//hardcodeada, completar con config.h y  Metadata.bin
@@ -156,7 +157,7 @@ void mostrar_configuracion_metadata(){
 	puts("leyendo metadata");
 	printf("tamanio bloque %d \n", metadata.tamanio_de_bloque);
 	printf("cantidad_bloques %d \n", metadata.cantidad_bloques);
-	puts("fin lectura ");
+	puts("fin lectura metadata ");
 
 }
 void mdj_liberar_recursos(){
