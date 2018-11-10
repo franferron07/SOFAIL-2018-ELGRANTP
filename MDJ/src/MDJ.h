@@ -104,5 +104,6 @@ void configurar_bitmap();
 FILE* getBloqueLibre_file();
 char* recortarPrimerosCaracteres(char* s, int primerosCaracteres);
 int cantidadDeCaracteres_file(FILE* bloque);
+bool quedaContenidoParaMapear();
 
 #endif /* MDJ_H_ */

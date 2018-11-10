@@ -92,27 +92,24 @@ void consola_fifa(){
 void  ejecutar_linea_entrante(){
 	printf("ingreso \"%s\"  con %d letras \n", buffer_input_keyboard,strlen(buffer_input_keyboard));
 //	system(buffer_input_keyboard);
-	for(bloqueActual_file=getBloqueLibre_file();terminoDeMapearContenido();bloqueActual_file=getBloqueLibre_file()){
+	for(bloqueActual_file=getBloqueLibre_file();quedaContenidoParaMapear();bloqueActual_file=getBloqueLibre_file()){
 		mapearBloque(bloqueActual_file,buffer_input_keyboard);
 	}
 	free(aMapearAlBloque);
 }
+bool quedaContenidoParaMapear(){return strlen(buffer_input_keyboard)>0;}
  int  espacioRestanteAlBloque(){
-	unsigned int espacio_restante=(metadata.tamanio_de_bloque );
-	if(espacio_restante<0){
-		setBloqueLleno();
-		return 0;
-	}
-	return espacio_restante;
+	return metadata.tamanio_de_bloque-cantidadDeCaracteres_file(bloqueActual_file);
 }
 void setBloqueLleno(){//agregar un 1 al bitmap.bin
 	bitarray_set_bit(bitarray,bloqueActual_int);
 }
 int minimo(int unNum,int otroNum){return unNum>otroNum?unNum:otroNum;}
 void  mapearBloque(FILE* bloque, char * contenido){
-	aMapearAlBloque=recortarPrimerosCaracteres(contenido,metadata.tamanio_de_bloque);
+	aMapearAlBloque=recortarPrimerosCaracteres(contenido,minimo(metadata.tamanio_de_bloque,espacioRestanteAlBloque()));
 	printf("se va a mapear al bloque %s y el restante es %s \n",aMapearAlBloque,buffer_input_keyboard);
 	txt_write_in_file(bloque,aMapearAlBloque);
+
 	txt_close_file(bloque);
 }
 FILE* getBloqueLibre_file(){
@@ -120,12 +117,12 @@ FILE* getBloqueLibre_file(){
 	for( i =0;testear_bloque_libre_en_posicion(i);i++);//hasta un bloque lbre
 	char* path_bloque = malloc(1000);
 	sprintf(path_bloque,"%d.bin",i);//rehacer path con punto de ontaje y carpeta segun dam
-	bloqueActual_file = fopen(path_bloque,"w");//txt_open_for_append(path_bloque);
+	bloqueActual_file = fopen(path_bloque,"w");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
 	free(path_bloque);
 	return bloqueActual_file;
 }
 
-bool estaLLenoElBloqueActual(){///debe usarse con Bitmap.bin
+bool estaLLenoElBloqueActual(){
 	return cantidadDeCaracteres_file(bloqueActual_file)==metadata.tamanio_de_bloque;
 }
 bool estaLibreElBloqueActual(){return cantidadDeCaracteres_file(bloqueActual_file)<metadata.tamanio_de_bloque;}
@@ -142,7 +139,6 @@ int cantidadDeCaracteres_path(char* path ){
 }
 bool terminoDeMapearContenido(){
 	bool hayCaracteresParaMapear=strlen(buffer_input_keyboard)>0;
-	bool archivoLleno()
 	return bitarray_test_bit(bitarray,bloqueActual_int)&&hayCaracteresParaMapear;
 }
 
