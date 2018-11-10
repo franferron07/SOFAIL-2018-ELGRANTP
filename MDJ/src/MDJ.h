@@ -95,12 +95,12 @@ void mostrar_configuracion_metadata();
 
 bool esta_lLeno();///debe usarse con Bitmap.bin
 bool estaOcupaco(char* path);
-bool terminoDeMapearlaLinea();
+bool terminoDeMapearContenido();
 void consola_fifa();
 //bool bitmap_bloque_esta_ocupado(char* path_del_bloque);
 void  mapearBloque(FILE* bloque, char * contenido);
 void configurar_bitmap();
 FILE* getBloqueLibre_file();
-
+char* recortarPrimerosCaracteres(char* s, int primerosCaracteres);
 
 #endif /* MDJ_H_ */

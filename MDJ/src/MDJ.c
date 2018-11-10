@@ -30,18 +30,41 @@ char* bitmap_path_directorio=NULL;
 FILE* bitmap_file=NULL;
 int main(void) {
 	cargar_configuracion_mdj();
-
-	mostrar_configuracion_mdj();
-	buffer=malloc(MAX_INPUT_BUFFER);
-	puts("cargar config mdj");
-
-	configurar_bitmap();
-	consola_fifa();
-
-	bitarray_destroy(bitarray);
-	mdj_liberar_recursos();
-	puts("fin");
+//
+//	mostrar_configuracion_mdj();
+//	buffer=malloc(MAX_INPUT_BUFFER);
+//	puts("cargar config mdj");
+//
+//	configurar_bitmap();
+//	consola_fifa();
+//
+//	bitarray_destroy(bitarray);
+//	mdj_liberar_recursos();
+//	puts("fin");
+	int n=0 ;
+	char* s=NULL;
+	char*s2=NULL;//=malloc(100);
+	loop{
+		s = readline("-> ingrese char*");
+		n=atoi(readline("ingrese numero"));
+//		scanf("%s %d\n",s,n );
+		printf("ingreso %s y %d \n",s,n);
+		s2=recortarPrimerosCaracteres(s,n);
+		printf("los primeros caracteres son %s y los restantes %s \n",s2,s);
+		if(s==NULL)break;
+	}
+	puts("esNulo");
+	free(s);
+	free(s2);
 	return 0;
+}
+char* recortarPrimerosCaracteres(char* s, int primerosCaracteres){//ok, malloquea automaticamente
+	char* recorte = strndup(s,primerosCaracteres);
+	char* aux=strdup(s);
+	if(strlen(s)<primerosCaracteres)perror("Error en recorte de caracteres \n");
+	strcpy(s,aux+primerosCaracteres);
+	free(aux);
+	return recorte;
 }
 void configurar_bitmap(){
 	char bitmap_array[metadata.cantidad_bloques/8];
@@ -70,7 +93,7 @@ void consola_fifa(){
 			if(!strncmp(buffer_input_keyboard, "exit", 4)) break;
 //			realloc(buffer_input_keyboard,sizeof(buffer_input_keyboard)+1);
 
-//			ejecutar_linea_entrante();
+			ejecutar_linea_entrante();
 			free(buffer_input_keyboard);
 		}
 }
@@ -81,9 +104,10 @@ void  ejecutar_linea_entrante(){
 	aMapearAlBloque=malloc(metadata.tamanio_de_bloque);
 	memmove(aMapearAlBloque,buffer_input_keyboard,espacioRestanteAlBloque());
 	puts(aMapearAlBloque);
-	for(bloqueActual_file=getBloqueLibre_file();terminoDeMapearlaLinea();bloqueActual_file=getBloqueLibre_file()){
+	for(bloqueActual_file=getBloqueLibre_file();terminoDeMapearContenido();bloqueActual_file=getBloqueLibre_file()){
 		mapearBloque(bloqueActual_file,aMapearAlBloque);
-		bloqueActual_int++;
+
+
 	}
 	free(aMapearAlBloque);
 }
@@ -111,30 +135,22 @@ FILE* getBloqueLibre_file(){
 	free(path_bloque);
 	return bloqueActual_file;
 }
-//char* getBloqueLibre_path(){
-//
-//
-//}
-
 
 bool esta_lLeno(){///debe usarse con Bitmap.bin
 	return testear_bloque_libre_en_posicion(bloqueActual_int);
 }
 
-//bool estaOcupado(char* path){ //debe usarse con Bitmap.bin
-//	return true;
-//}
-bool terminoDeMapearlaLinea(){
-	return bitarray_test_bit(bitarray,bloqueActual_int);
+bool terminoDeMapearContenido(){
+	bool aux = buffer_input_keyboard==NULL;
+	return bitarray_test_bit(bitarray,bloqueActual_int)&&aux;
 }
-//bool bitmap_bloque_esta_ocupado(char* path_del_bloque)
-//	int n = bitmap_posicion_del_bloque(path_del_bloque);
-//	return bitarray_test_bit(bitarray,n);
-//}
 
 void cargar_configuracion_metadata(){//hardcodeada, completar con config.h y  Metadata.bin
-	(&metadata)->cantidad_bloques=64;
-	(&metadata)->tamanio_de_bloque=50;
+	t_config *configuracion_cfg_temporal=cargar_en_memoria_cfg("Metadata.bin");
+//	(&metadata)->cantidad_bloques=config_get_int_value(configuracion_cfg_temporal,"CANTIDAD_BLOQUES");
+	metadata.cantidad_bloques=config_get_int_value(configuracion_cfg_temporal,"CANTIDAD_BLOQUES");
+	metadata.tamanio_de_bloque=config_get_int_value(configuracion_cfg_temporal,"TAMANIO_BLOQUES");
+	config_destroy(configuracion_cfg_temporal);
 }
 void mostrar_configuracion_metadata(){
 	puts("leyendo metadata");
