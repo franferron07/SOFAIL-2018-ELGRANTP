@@ -41,15 +41,27 @@ int main(void) {
 //	bitarray_destroy(bitarray);
 //	mdj_liberar_recursos();
 //	puts("fin");
-
+//	char* aux="";
+//	char* s =recortarPrimerosCaracteres(aux,2);
+//	printf("strlen destino es  %d  y contenido %s  y restante .%s.\n ",strlen(s),s,aux);
 	consola_fifa();
-	bitarray_destroy(bitarray);
+//	bitarray_destroy(bitarray);
+//	free(s);
 	return 0;
 }
+
 char* recortarPrimerosCaracteres(char* s, int primerosCaracteres){//ok y  malloquea automaticamente
-	if(s==NULL)perror("la cadena a recortar es es nula o termino de recortar cadena \n");
-	if(strlen(s)<primerosCaracteres)return s;
-	char* recorte = strndup(s,primerosCaracteres);
+	char* recorte=NULL;
+	if(s==NULL ||  strlen(s)==0){
+		perror("la cadena a recortar es es nula o termino de recortar cadena \n");
+		return strdup("") ;
+	}
+	else if(strlen(s)<primerosCaracteres){
+		recorte=strndup(s,primerosCaracteres);
+		strcpy(s,"");
+		return recorte;
+	}
+	recorte= strndup(s,primerosCaracteres);
 	char* aux=strdup(s);
 //	if(strlen(s)<primerosCaracteres)perror("Error en recorte de caracteres \n");
 	strcpy(s,aux+primerosCaracteres);
@@ -60,12 +72,12 @@ void configurar_bitmap(){
 	char bitmap_array[metadata.cantidad_bloques/8];
 	for(int i =0;i<metadata.cantidad_bloques/8;i++)bitmap_array[i]=0;
 	bitarray = bitarray_create_with_mode(bitmap_array, sizeof(bitmap_array), LSB_FIRST);
-	bitmap_file=txt_open_for_append("bitmap.bin");
+	bitmap_file=txt_open_for_append("Bitmap.bin");
 	txt_write_in_file(bitmap_file,bitarray->bitarray);//hacerlo con mmap()
 	txt_close_file(bitmap_file);
 //	bitarray_destroy(bitarray);
 }
-void setear_en_posicion(int pos){
+void setear_bloque_ocupado_en_posicion(int pos){
 	bitarray_set_bit(bitarray,(off_t)(pos));
 }
 bool testear_bloque_libre_en_posicion(int pos){
@@ -79,24 +91,21 @@ void consola_fifa(){
 	mostrar_configuracion_metadata();
 	configurar_bitmap();
 	puts("press \"exit\" para salir de consola ");
-		loop{
+	loop{
 			buffer_input_keyboard=readline("fifa@mdj=>  ");
 			if(!strncmp(buffer_input_keyboard, "exit", 4)) break;
-//			realloc(buffer_input_keyboard,sizeof(buffer_input_keyboard)+1);
-
 			ejecutar_linea_entrante();
 			free(buffer_input_keyboard);
-		}
+	}
 }
-
 void  ejecutar_linea_entrante(){
-	printf("ingreso \"%s\"  con %d letras \n", buffer_input_keyboard,strlen(buffer_input_keyboard));
 //	system(buffer_input_keyboard);
 	for(bloqueActual_file=getBloqueLibre_file();quedaContenidoParaMapear();bloqueActual_file=getBloqueLibre_file()){
 		mapearBloque(bloqueActual_file,buffer_input_keyboard);
+		setear_bloque_ocupado_en_posicion(bloqueActual_int);
 	}
-	free(aMapearAlBloque);
 }
+
 bool quedaContenidoParaMapear(){return strlen(buffer_input_keyboard)>0;}
  int  espacioRestanteAlBloque(){
 	return metadata.tamanio_de_bloque-cantidadDeCaracteres_file(bloqueActual_file);
@@ -104,21 +113,22 @@ bool quedaContenidoParaMapear(){return strlen(buffer_input_keyboard)>0;}
 void setBloqueLleno(){//agregar un 1 al bitmap.bin
 	bitarray_set_bit(bitarray,bloqueActual_int);
 }
-int minimo(int unNum,int otroNum){return unNum>otroNum?unNum:otroNum;}
+//int minimo(int unNum,int otroNum){return unNum>otroNum?unNum:otroNum;}
+
 void  mapearBloque(FILE* bloque, char * contenido){
 	aMapearAlBloque=recortarPrimerosCaracteres(contenido,minimo(metadata.tamanio_de_bloque,espacioRestanteAlBloque()));
 	printf("se va a mapear al bloque %s y el restante es %s \n",aMapearAlBloque,buffer_input_keyboard);
 	txt_write_in_file(bloque,aMapearAlBloque);
-
 	txt_close_file(bloque);
+	free(aMapearAlBloque);
 }
 FILE* getBloqueLibre_file(){
 	int i;
 	for( i =0;testear_bloque_libre_en_posicion(i);i++);//hasta un bloque lbre
-	char* path_bloque = malloc(1000);
-	sprintf(path_bloque,"%d.bin",i);//rehacer path con punto de ontaje y carpeta segun dam
-	bloqueActual_file = fopen(path_bloque,"w");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
-	free(path_bloque);
+	char* path_del_bloque_libre = malloc(1000);
+	sprintf(path_del_bloque_libre,"%d.bin",i);//rehacer path con punto de ontaje y carpeta segun dam
+	bloqueActual_file = fopen(path_del_bloque_libre,"w");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
+	free(path_del_bloque_libre);
 	return bloqueActual_file;
 }
 

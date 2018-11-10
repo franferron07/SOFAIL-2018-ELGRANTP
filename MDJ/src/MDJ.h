@@ -40,7 +40,8 @@
 #define  MAX_INPUT_BUFFER 1000
 
 #define loop while(1)
-//#define minimo(unNum,otroNum) return unNum>otroNum?unNum:otroNum;
+#define minimo(unNum,otroNum)  ((unNum>otroNum)?unNum:otroNum)
+
  char leyenda_temporal[MAX_INPUT_BUFFER];
 
 //----------------------------
@@ -93,6 +94,7 @@ void mdj_liberar_recursos();
 //void  ejecutar_linea_entrante();
 void cargar_configuracion_mdj();//hardcodeada, completar con config.h
 void mostrar_configuracion_metadata();
+void cargar_configuracion_metadata();//hardcodeada, completar con config.h y  Metadata.bin
 
 bool estaLLenoElBloqueActual();///debe usarse con Bitmap.bin
 bool estaOcupaco(char* path);
