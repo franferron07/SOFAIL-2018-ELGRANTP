@@ -76,6 +76,40 @@ void* serializar_header_conexion(header_conexion_type *header) {
 	return buffer;
 }
 
+void* serializar_operacion_archivo(operacion_archivo struct_archivo)
+{
+	int tamanio_path = 	strlen(struct_archivo.ruta_archivo);
+	int TAMANIO_OPERACION_ARCHIVO = sizeof(int)+sizeof(int)+tamanio_path;
+
+	int lastIndex = 0;
+	void* buffer = malloc(TAMANIO_OPERACION_ARCHIVO);
+
+	serialize_data(&struct_archivo.pid, sizeof(int), &buffer, &lastIndex);
+	serialize_data(&tamanio_path, sizeof(int), &buffer, &lastIndex);
+	serialize_data(&struct_archivo.ruta_archivo, tamanio_path, &buffer, &lastIndex);
+
+	return buffer;
+
+}
+
+operacion_archivo* deserializar_operacion_archivo(void *buffer) {
+	operacion_archivo* struct_archivo = malloc(sizeof(operacion_archivo));
+	int tamanio_path;
+
+	int lastIndex = 0;
+
+	deserialize_data(&(struct_archivo->pid), sizeof(int), buffer, &lastIndex);
+	deserialize_data(&(tamanio_path), sizeof(int), buffer, &lastIndex);
+
+	struct_archivo->ruta_archivo = malloc(tamanio_path+1);
+
+	memcpy(&(struct_archivo->ruta_archivo) , buffer+lastIndex, tamanio_path);
+
+	struct_archivo->ruta_archivo[tamanio_path] = '\0';
+
+	return struct_archivo;
+}
+
 
 //////////////////////////////////////////
 ///////INTENTO DE SERIALIZO DE DTB/////////

@@ -14,7 +14,27 @@ pthread_t idHilo;
 
 int main(void) {
 
-	if (inicializar() < 0) {
+	operacion_archivo struct_archivo;
+
+	operacion_archivo* struct_archivo2;
+
+	struct_archivo.pid = 30;
+	struct_archivo.ruta_archivo = strdup("/hola/archivo/prueba.txtasdfasdf4345");
+
+	void * buffer = serializar_operacion_archivo(struct_archivo);
+
+	struct_archivo2 = deserializar_operacion_archivo(buffer);
+
+	printf("%d\n",struct_archivo2->pid);
+	puts(struct_archivo2->ruta_archivo);
+
+	free(buffer);
+	free(struct_archivo.ruta_archivo);
+	free(struct_archivo2->ruta_archivo);
+	free(struct_archivo2);
+
+
+/*	if (inicializar() < 0) {
 		liberar_recursos(EXIT_FAILURE);
 		return -1;
 	}
@@ -30,7 +50,7 @@ int main(void) {
 	//Aceptar Conexiones de CPU y lanzar un Hilo por cada CPU
 	aceptarConexiones();
 
-	liberar_recursos(EXIT_SUCCESS);
+	liberar_recursos(EXIT_SUCCESS);*/
 
 	return EXIT_SUCCESS;
 }
@@ -168,12 +188,6 @@ typedef struct
 {
 	char* ruta_archivo;
 	int pid;
-} operacion_archivo;
-
-typedef struct
-{
-	char* ruta_archivo;
-	int pid;
 	int cant_lineas;
 } operacion_crear;
 
@@ -193,12 +207,12 @@ void atender_operacion_cpu(int cliente_socket) {
 	while ( ( res = recv(cliente_socket, buffer_operacion, TAMANIO_REQUEST_OPERACION,MSG_WAITALL) )  > 0) {
 			header_operacion = deserializar_request_operacion(buffer_operacion);
 
-			log_info(dam_log, "Se recibio operacion del CPU: %s",header_operacion->tipo_operacion);
+/*			log_info(dam_log, "Se recibio operacion del CPU: %s",header_operacion->tipo_operacion);
 
 
 			switch (header_operacion->tipo_operacion ) {
 
-			/*solicitud a El Diego para que traiga desde el MDJ el archivo requerido*/
+			solicitud a El Diego para que traiga desde el MDJ el archivo requerido
 			case ABRIR:{
 				operacion_archivo abrir;
 				void *buffer_abrir = malloc(sizeof(operacion_archivo));
@@ -247,7 +261,7 @@ void atender_operacion_cpu(int cliente_socket) {
 			}
 			break;
 
-			/*solicitud a El Diego indicando que se requiere hacer un Flush del archivo, necesito parametros*/
+			solicitud a El Diego indicando que se requiere hacer un Flush del archivo, necesito parametros
 			case FLUSH:{
 
 				operacion_flush flush;
@@ -259,7 +273,7 @@ void atender_operacion_cpu(int cliente_socket) {
 
 			}
 			break;
-			/*Tengo que enviar mensaje de crear archivo a mdj con un determinado path y cantidad de lineas necesarias*/
+			Tengo que enviar mensaje de crear archivo a mdj con un determinado path y cantidad de lineas necesarias
 			case CREAR:{
 
 				operacion_crear crear;
@@ -272,7 +286,7 @@ void atender_operacion_cpu(int cliente_socket) {
 
 			}
 			break;
-			/*debo enviar a mdj borrar determinado archivo*/
+			debo enviar a mdj borrar determinado archivo
 			case BORRAR:{
 
 				operacion_archivo abrir;
@@ -284,7 +298,7 @@ void atender_operacion_cpu(int cliente_socket) {
 			}
 			break;
 
-			}
+			}*/
 
 		}
 

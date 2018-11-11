@@ -102,7 +102,11 @@ typedef struct {
 	t_list *direcciones;
 } dtb_struct;
 
-
+typedef struct
+{
+	char* ruta_archivo;
+	int pid;
+} operacion_archivo;
 
 
 int enviar_header_conexion(int socket_server, char* nombre_instancia,
@@ -131,5 +135,8 @@ void* serializar_dtb(dtb_struct *dtb, int * tamanio_buffer);
 dtb_struct* deserializar_dtb(void *buffer);
 
 int tamanio_dtb( dtb_struct *dtb );
+
+void* serializar_operacion_archivo(operacion_archivo struct_archivo);
+operacion_archivo* deserializar_operacion_archivo(void *buffer);
 
 #endif /* PROTOCOLOS_H_ */
