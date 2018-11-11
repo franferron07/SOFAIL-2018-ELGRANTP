@@ -210,6 +210,7 @@ dtb_struct* deserializar_dtb(void *buffer){
 		direccion = (char *)realloc(direccion, (tamanio_direccion + 1) * sizeof(char));
 
 
+
 		//TODO: en estas 2 lineas esta el problema y tambien la solucion...
 		//deserialize_data(&direccion,tamanio_direccion, buffer, &lastIndex);
 		//direccion[tamanio_direccion] = '\0';
@@ -221,7 +222,7 @@ dtb_struct* deserializar_dtb(void *buffer){
 		//list_add(dtb->direcciones,strdup(direccion));
 
 		tamanio_direccion = 0;
-
+		break;
 
 
 	}

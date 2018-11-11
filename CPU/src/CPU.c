@@ -68,6 +68,8 @@ int main(int argc, char *argv[]) {
 
 
 
+/*
+ 	//prueba de deserializacion de DTB
 	int tamanio_buffer;
 	void * dtb_serializado = serializar_dtb(&dtb_a_enviar, &tamanio_buffer);
 	printf("DTB tamanio %d\n",tamanio_buffer);
@@ -87,7 +89,7 @@ int main(int argc, char *argv[]) {
 	puts("Direcciones: ");
 	//list_iterate(dtb_deserializado->direcciones, (void *)puts);
 	puts("///FIN DTB DESERIALIZADO/////");
-
+*/
 
 	//liberar_recursos(EXIT_SUCCESS);
 }
@@ -136,6 +138,10 @@ void ejecutar_instruccion(struct_instruccion instruccion){
 		default:
 			break;
 	}
+	(dtb_ejecutado.quantum)-=1;
+	//TODO: contabilizar el quantum ejecutado
+	//hacer confirmacion(send) de ejecucion de 1 unidad de quantum
+
 	liberar_instruccion(instruccion);
 }
 
@@ -143,29 +149,85 @@ void ejecutar_instruccion(struct_instruccion instruccion){
  * TODO: en estas funciones va a estar la logica del anexo 1
  * */
 unsigned escriptorio_abrir(char** parametros){
+
 	char * path = parametros[0];
 	if(se_encuentra_archivo_en_gdt(path)){
-		printf("el path que encontre perro es %s",path);
-
-		//INFO:SDA
+		printf("El archivo se encuentra abierto %s",path);
 		return 0;
+	}else{
+		solicitar_abrir_a_dam(dtb_ejecutado.id_dtb,path);
+		desalojar_dtb(dtb_ejecutado.id_dtb,path);
 	}
+
 	return 0;
 }
 
-bool se_encuentra_archivo_en_gdt(path){
-	return true;
+void desalojar_dtb(uint8_t id_dtb,char* path){
+	/*TODO: borrar dtb
+	*indicar a SAFA que CPU esta esperano que DAM cargue en FM9 el archivo del path
+	*/
+
+}
+
+void solicitar_abrir_a_dam(uint8_t id_dtb,char * path){
+	//TODO: enviar solicitud a diego para traer path desde mdj
+}
+
+bool se_encuentra_archivo_en_gdt(char *path){
+	bool coincide_el_path(char * direccion){
+		return string_equals_ignore_case(direccion, path);
+	}
+	return list_find(dtb_ejecutado.direcciones, (void*)coincide_el_path);
 }
 
 
 
+unsigned escriptorio_concentrar(char** parametros){
+	sleep(cpu.retardo);
+	return 0;
+}
 
 
-unsigned escriptorio_concentrar(char** parametros){return 0;}
-unsigned escriptorio_asignar(char** parametros){return 0;}
+
+unsigned escriptorio_asignar(char** parametros){
+	char * path = parametros[0];
+	char * linea = parametros[1];
+	char * datos = parametros[2];
+
+	if(se_encuentra_archivo_en_gdt(path)){
+		printf("El archivo se encuentra abierto %s",path);
+		actualizar_en_memoria(path,linea,datos);
+		return 0;
+	}else{
+		//TODO: enviar a safa 	//20001: El archivo no se encuentra abierto.
+		abortar_dtb(dtb_ejecutado.id_dtb);
+	}
+
+
+	return 0;
+}
+
+void actualizar_en_memoria(char *path,char *linea,char *datos){
+	//TODO hacer un send de los datos a actualizar a FM9
+	//hacer receive del resultado de la operacion desde FM9
+	//20002: Fallo de segmento/memoria.
+	//20003: Espacio insuficiente en FM9.
+	//hacer el send a SAFA
+}
+
+void abortar_dtb(int8_t id_dtb){
+	//TODO: enviar a safa el id del DTB para que
+	//se aborte de forma gratuita y segura
+}
+
 unsigned escriptorio_wait(char** parametros){return 0;}
 unsigned escriptorio_signal(char** parametros){return 0;}
-unsigned escriptorio_flush(char** parametros){return 0;}
+
+unsigned escriptorio_flush(char** parametros){
+	char * path = parametros[0];
+
+	return 0;
+}
 unsigned escriptorio_close(char** parametros){return 0;}
 unsigned escriptorio_crear(char** parametros){return 0;}
 unsigned escriptorio_borrar(char** parametros){return 0;}

@@ -20,6 +20,8 @@
 
 int socket_safa, socket_diego, socket_fm9;
 struct_instruccion instruccion;
+dtb_struct dtb_ejecutado;
+//INFO: dtb_ejecutado lo voy a actualizar cada vez que ejecuto un dtb
 
 
 
@@ -49,8 +51,12 @@ unsigned escriptorio_borrar(char** parametros);
 unsigned escriptorio_comentario(char** parametros);
 ///////////////////////////////////
 
-bool se_encuentra_archivo_en_gdt(path);
+bool se_encuentra_archivo_en_gdt(char* path);
+void solicitar_abrir_a_dam(uint8_t id_dtb,char * path);
+void desalojar_dtb(uint8_t id_dtb,char* path);
 
+void actualizar_en_memoria(char *path,char *linea,char *datos);
+void abortar_dtb(int8_t id_dtb);
 
 
 
