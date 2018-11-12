@@ -16,6 +16,7 @@ void set_algoritmo(int p_algoritmo) {
 }
 
 
+
 void ejecutar_planificacion() {
 
 	cpu_struct *cpu_ejecutar= NULL;
@@ -32,7 +33,7 @@ void ejecutar_planificacion() {
 
 			log_info(safa_log, "Se encontro CPU para ejecutar");
 
-			/* SI LISTA DE LISTOS VACIA NO HAGO NADA */
+			/******* SI NO HAY DTBS DISPONIBLES ME QUEDO ESPERANDO *******/
 			while( list_size(dtb_listos) <= 0  ){
 
 			}
@@ -40,6 +41,7 @@ void ejecutar_planificacion() {
 			/******** BUSCO DTB A EJECUTAR ********/
 			pthread_mutex_lock( &sem_listo_mutex );
 			dtb_ejecutar = aplicar_algoritmo_planificacion();
+			dtb_ejecutar->estado = EJECUTANDO;
 			log_info(safa_log, "Se encontro dtb a ejecutar: %s",dtb_ejecutar->id_dtb);
 			pthread_mutex_unlock( &sem_listo_mutex );
 
@@ -57,75 +59,29 @@ void ejecutar_planificacion() {
 
 
 
-void ejecutar_planificacion_largo_plazo() {
-
-	dtb_struct *dtb;
-
-	while (1) {
-
-		/**********  SI HAY DTB NUEVOS ************/
-		if( !list_is_empty( dtb_nuevos )  )
-		{
-
-			log_info(safa_log, "DTBS en lista de nuevos");
-
-			/*
-			mutex en nuevo es probable que no haga falta
-			pthread_mutex_lock(&sem_nuevo_mutex);
-
-			dtb = (dtb_struct*) list_get(dtb_nuevos, 0);
-
-			pthread_mutex_unlock(&sem_nuevo_mutex);*/
-
-			/**********INICIO EL PROCESO DUMMY **************/
-			pthread_mutex_lock(&sem_dtb_dummy_mutex);
-
-			dtb = (dtb_struct*) list_get(dtb_nuevos, 0);
-			log_info(safa_log, "Se toma DTB para inicializar procesos dummy: %d",dtb->id_dtb);
-
-			inicializar_dummy(dtb);
-			log_info(safa_log, "DTB dummy inicializado");
-
-			/**************** AGREGO DUMMY A LISTOS SI MULTIPROGRAMACION LO PERMITE **************************/
-			sem_wait(&sem_listo_max);
-			pthread_mutex_lock(&sem_listo_mutex);
-
-			list_add(dtb_listos, &dtb_dummy);
-			log_info(safa_log, "DUMMY pasado a listos");
-
-			pthread_mutex_unlock(&sem_listo_mutex);
-
-		}
-
-	}
-
-}
-
-
-
-void ejecutar_planificacion_largo_plazo_aux(  ){
+void ejecutar_planificacion_largo_plazo(){
 
 
 	dtb_struct *dtb = NULL;
 
 	while(1){
 
-		/* ejecuto funcion que me diga que dtb no fue inicializado en dummy es decir esta en estado nuevo */
+		/**** si hay dtb para ejecutar(en estado nuevo) *******/
 		dtb = obtener_dtb_a_ejecutar_dummy();
 		if( dtb != NULL ){
 
 			log_info(safa_log, "Se toma DTB para inicializar procesos dummy: %d",dtb->id_dtb);
 
-			/***** ESPERAMOS A QUE DUMMY ESTE DISPONIBLE PARA REALIZAR OTRO PASAJE A LISTO *******/
+			/***** ESPERAMOS A QUE DUMMY ESTE DISPONIBLE PARA REALIZAR PASAJE A LISTO *******/
 			while( dtb_dummy.id_dtb != -1 ){
 
 			}
 			log_info(safa_log, "El dummy esta disponible");
 
 			inicializar_dummy(dtb);
+			dtb->estado = CARGANDODUMMY;
 			log_info(safa_log, "DTB dummy inicializado");
 
-			/* TODO aca habria que setear el estado del dtb a CARGANDODUMMY */
 
 			/**************** AGREGO DUMMY A LISTOS SI MULTIPROGRAMACION LO PERMITE **************************/
 			sem_wait(&sem_listo_max);
@@ -144,30 +100,6 @@ void ejecutar_planificacion_largo_plazo_aux(  ){
 
 }
 
-
-
-dtb_struct *obtener_dtb_a_ejecutar_dummy(){
-
-	dtb_struct *dtb_libre = NULL;
-
-	dtb_libre = list_find( dtb_nuevos , (void*)dtb_estado_nuevo );
-
-	return dtb_libre;
-}
-
-bool dtb_estado_nuevo(dtb_struct *dtb) {
-
-	if(dtb->estado == NUEVO) return true;
-	return false;
-}
-
-
-
-void inicializar_dummy(dtb_struct* dtb) {
-
-	dtb_dummy.id_dtb = dtb->id_dtb;
-	dtb_dummy.escriptorio = strdup(dtb->escriptorio);
-}
 
 
 dtb_struct* aplicar_algoritmo_planificacion() {
@@ -223,6 +155,31 @@ dtb_struct* aplicarPropio() {
 	return dtbAEjecutar;
 
 }
+
+
+
+
+dtb_struct* quitar_dtb_lista_id( t_list *lista  ,int id ){
+
+	bool dtb_tiene_id(dtb_struct *dtb) {
+		return dtb->id_dtb == id;
+	}
+
+	return list_remove_by_condition(lista,(void*)dtb_tiene_id);
+
+}
+
+
+dtb_struct* buscar_dtb_id( t_list *lista  ,int id ){
+
+	bool dtb_tiene_id(dtb_struct *dtb) {
+		return dtb->id_dtb == id;
+	}
+
+	return list_find(lista,(void*)dtb_tiene_id);
+
+}
+
 
 
 recurso_struct* buscar_recurso( char*nombre_recurso ){

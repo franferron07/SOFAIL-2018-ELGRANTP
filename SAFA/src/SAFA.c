@@ -59,7 +59,7 @@ void inicializar_semaforos(){
 	pthread_mutex_init(&sem_dtb_dummy_mutex, NULL);
 	pthread_mutex_init(&sem_listo_mutex, NULL);
 	pthread_mutex_init(&sem_cpu_mutex, NULL);
-	pthread_mutex_init(&sem_nuevo_mutex, NULL);
+
 }
 
 void escuchar_consola() {
@@ -243,12 +243,30 @@ void atender_cliente_cpu( int *cliente_socket ){
 
 		case BLOQUEARDTB:{
 
-			/* TODO: verificar que el id recibido sea el que esta en el dummy, si lo es debe reiniciarse el dummy para que pueda volver a ser inicializado
-			 * si no lo es mandar a lista de bloqueados el dtb.
-			 *
-			 *   */
+			/*
+			 * TODO faltan los recv del id del dtb
+			 * */
+
+			/* ASUMIENDO QUE RECIBO EL ID DE DTB  */
+			int id_dtb_recibido=0;
+			log_info(safa_log, "Se recibe de cpu un Bloqueo de dtb id: %d",id_dtb_recibido);
+
+			/***** VERIFICO SI ES EL DUMMY *****/
+			if( dtb_dummy.id_dtb == id_dtb_recibido ){
+
+				reiniciar_dummy();
+				log_info(safa_log, "Se reinicio DUMMY");
+			}
+			else{
+
+				dtb_struct *dtb_a_bloquear = quitar_dtb_lista_id( dtb_ejecutando  ,id_dtb_recibido );
+				dtb_a_bloquear->estado = BLOQUEADO;
+				list_add(dtb_bloqueados , dtb_a_bloquear);
+				log_info(safa_log, "Se bloquea dtb id: %d",id_dtb_recibido);
+			}
 
 
+			/* TODO deberia hacer un send si fuera necesario para avisar a cpu que se recibe mensaje. */
 
 		}
 		break;
@@ -295,6 +313,16 @@ void atender_cliente_cpu( int *cliente_socket ){
 
 		case QUANTUMEJECUTADO:{
 
+			/* TODO se recibe el id del dtb y el quantu que se ejecuto.
+			 * hacer los recv
+			 *  */
+			int id_dtb = 0;
+
+			dtb_struct *dtb_encontrado = buscar_dtb_id( dtbs , id_dtb );
+
+			/*TODO : aca se sumarian todas la parte de estadisticas del dtb.
+			 *
+			 * */
 
 		}
 		break;
@@ -379,7 +407,6 @@ void atender_cliente_dam( int *cliente_socket ){
 void liberar_recursos(int tipo_salida) {
 	print_footer(SAFA, safa_log);
 
-	pthread_mutex_destroy(&sem_nuevo_mutex);
 	pthread_mutex_destroy(&sem_dtb_dummy_mutex);
 	pthread_mutex_destroy(&sem_listo_mutex);
 	pthread_mutex_destroy(&sem_cpu_mutex);

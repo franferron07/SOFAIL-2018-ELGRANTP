@@ -15,19 +15,17 @@ void set_quantum(int p_quantum);
 void set_algoritmo(int p_algoritmo);
 void ejecutar_planificacion();
 void ejecutar_planificacion_largo_plazo();
-void inicializar_dummy(dtb_struct* dtb);
 dtb_struct* aplicarRR();
 dtb_struct* aplicarVRR();
 dtb_struct* aplicarPropio();
+
+dtb_struct* quitar_dtb_lista_id( t_list *lista  ,int id ); //a partir de un id de dtb lo quita de la lista y devuelve el elemento
+dtb_struct* buscar_dtb_id( t_list *lista  ,int id ); //a partir de un id busca el dtb en una lista
 
 recurso_struct* buscar_recurso( char*nombre_recurso );
 recurso_struct*  crear_recurso( char*nombre_recurso );
 void asignar_recurso( recurso_struct *recurso );
 void liberar_recurso( recurso_struct *recurso );
 
-
-void ejecutar_planificacion_largo_plazo_aux();
-dtb_struct *obtener_dtb_a_ejecutar_dummy(); //funcion que me devuelve el primer dtb de la lista de nuevos en estado nuevo
-bool dtb_estado_nuevo(dtb_struct *dtb);
 
 #endif /* PLANIFICACION_PLANIFICACION_H_ */
