@@ -155,7 +155,7 @@ unsigned escriptorio_abrir(char** parametros){
 		printf("El archivo se encuentra abierto %s",path);
 		return 0;
 	}else{
-		solicitar_abrir_a_dam(dtb_ejecutado.id_dtb,path);
+		DAM_abrir(dtb_ejecutado.id_dtb,path);
 		desalojar_dtb();
 		SAFA_avisar_espera_de_carga(path);
 	}
@@ -171,10 +171,10 @@ void desalojar_dtb(){
 }
 
 void SAFA_avisar_espera_de_carga(char *path){
-
+	//TODO: SAFA_avisar_espera_de_carga
 }
 
-void solicitar_abrir_a_dam(uint8_t id_dtb,char * path){
+void DAM_abrir(uint8_t id_dtb,char * path){
 	//TODO: enviar solicitud a diego para traer path desde mdj
 }
 
@@ -201,7 +201,7 @@ unsigned escriptorio_asignar(char** parametros){
 
 	if(se_encuentra_archivo_en_gdt(path)){
 		printf("El archivo se encuentra abierto %s",path);
-		actualizar_en_memoria(path,linea,datos);
+		FM9_actualizar(path,linea,datos);
 		return 0;
 	}else{
 		//TODO: enviar a safa 	//20001: El archivo no se encuentra abierto.
@@ -212,7 +212,7 @@ unsigned escriptorio_asignar(char** parametros){
 	return 0;
 }
 
-void actualizar_en_memoria(char *path,char *linea,char *datos){
+void FM9_actualizar(char *path,char *linea,char *datos){
 	//TODO hacer un send de los datos a actualizar a FM9
 	//hacer receive del resultado de la operacion desde FM9
 	//20002: Fallo de segmento/memoria.
@@ -233,8 +233,8 @@ unsigned escriptorio_flush(char** parametros){
 
 	if(se_encuentra_archivo_en_gdt(path)){
 		printf("El archivo se encuentra abierto %s",path);
-		solicitar_flush_a_dam(path);
-		comunicar_a_safa_espera(dtb_ejecutado.id_dtb);
+		DAM_flush(path);
+		SAFA_espera_flush(dtb_ejecutado.id_dtb);
 		return 0;
 	}else{
 		//TODO: enviar a safa 	//20001: El archivo no se encuentra abierto.
@@ -243,12 +243,12 @@ unsigned escriptorio_flush(char** parametros){
 	return 0;
 }
 
-void solicitar_flush_a_dam(char *path){
-
+void DAM_flush(char *path){
+	//TODO: DAM_flush
 }
 
-void comunicar_a_safa_espera(uint8_t id_gdt){
-
+void SAFA_espera_flush(uint8_t id_gdt){
+	//TODO: SAFA_espera_flush
 }
 
 unsigned escriptorio_close(char** parametros){
@@ -268,11 +268,11 @@ unsigned escriptorio_close(char** parametros){
 }
 
 void FM9_solicitar_liberar_memoria(char *path){
-
+	//TODO: FM9_solicitar_liberar_memoria
 }
 
 void SAFA_borrar_referencia(char *path){
-
+	//TODO: SAFA_borrar_referencia
 }
 
 unsigned escriptorio_crear(char** parametros){
@@ -285,6 +285,10 @@ unsigned escriptorio_crear(char** parametros){
 	return 0;
 }
 
+void DAM_solicitar_crear_archivo(char *path,char *lineas){
+	//TODO:DAM_solicitar_crear_archivo
+}
+
 unsigned escriptorio_borrar(char** parametros){
 	char * path = parametros[0];
 
@@ -294,7 +298,7 @@ unsigned escriptorio_borrar(char** parametros){
 }
 
 void DAM_solicitar_borrar(char* path){
-
+	//TODO: DAM_solicitar_borrar
 }
 
 unsigned escriptorio_comentario(char** parametros){return 0;}//no hace nada

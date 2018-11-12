@@ -52,19 +52,23 @@ unsigned escriptorio_comentario(char** parametros);
 ///////////////////////////////////
 
 bool se_encuentra_archivo_en_gdt(char* path);
-void solicitar_abrir_a_dam(uint8_t id_dtb,char * path);
+void DAM_abrir(uint8_t id_dtb,char * path);
 void desalojar_dtb();
 void SAFA_avisar_espera_de_carga(char *path);
 
-void actualizar_en_memoria(char *path,char *linea,char *datos);
+void FM9_actualizar(char *path,char *linea,char *datos);
 void abortar_gdt(int8_t id_dtb);
 
-void solicitar_flush_a_dam(char *path);
-void comunicar_a_safa_espera(uint8_t id_gdt);
+void DAM_flush(char *path);
+void SAFA_espera_flush(uint8_t id_gdt);
 
 
 void FM9_solicitar_liberar_memoria(char *path);
 void SAFA_borrar_referencia(char *path);
+
+
+void DAM_solicitar_crear_archivo(char *path,char *lineas);
+void DAM_solicitar_borrar(char* path);
 
 
 #endif /* CPU_H_ */
