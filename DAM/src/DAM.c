@@ -13,28 +13,7 @@
 pthread_t idHilo;
 
 int main(void) {
-
-	operacion_archivo struct_archivo;
-
-	operacion_archivo* struct_archivo2;
-
-	struct_archivo.pid = 30;
-	struct_archivo.ruta_archivo = strdup("/hola/archivo/prueba.txtasdfasdf4345");
-
-	void * buffer = serializar_operacion_archivo(struct_archivo);
-
-	struct_archivo2 = deserializar_operacion_archivo(buffer);
-
-	printf("%d\n",struct_archivo2->pid);
-	puts(struct_archivo2->ruta_archivo);
-
-	free(buffer);
-	free(struct_archivo.ruta_archivo);
-	free(struct_archivo2->ruta_archivo);
-	free(struct_archivo2);
-
-
-/*	if (inicializar() < 0) {
+	if (inicializar() < 0) {
 		liberar_recursos(EXIT_FAILURE);
 		return -1;
 	}
@@ -50,7 +29,7 @@ int main(void) {
 	//Aceptar Conexiones de CPU y lanzar un Hilo por cada CPU
 	aceptarConexiones();
 
-	liberar_recursos(EXIT_SUCCESS);*/
+	liberar_recursos(EXIT_SUCCESS);
 
 	return EXIT_SUCCESS;
 }

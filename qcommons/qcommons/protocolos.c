@@ -76,37 +76,49 @@ void* serializar_header_conexion(header_conexion_type *header) {
 	return buffer;
 }
 
-void* serializar_operacion_archivo(operacion_archivo struct_archivo)
+void* serializar_operacion_archivo(operacion_archivo* struct_archivo)
 {
-	int tamanio_path = 	strlen(struct_archivo.ruta_archivo);
-	int TAMANIO_OPERACION_ARCHIVO = sizeof(int)+sizeof(int)+tamanio_path;
+	int tamanio_path = strlen(struct_archivo->ruta_archivo);
+	int TAMANIO_OPERACION_ARCHIVO = sizeof(struct_archivo->pid)+sizeof(tamanio_path)+tamanio_path;
 
-	int lastIndex = 0;
 	void* buffer = malloc(TAMANIO_OPERACION_ARCHIVO);
+	int lastIndex = 0;
 
-	serialize_data(&struct_archivo.pid, sizeof(int), &buffer, &lastIndex);
-	serialize_data(&tamanio_path, sizeof(int), &buffer, &lastIndex);
-	serialize_data(&struct_archivo.ruta_archivo, tamanio_path, &buffer, &lastIndex);
+	memcpy(buffer, &(struct_archivo->pid), sizeof(struct_archivo->pid));
+	lastIndex += sizeof(struct_archivo->pid);
+	memcpy(buffer+lastIndex, &(tamanio_path), sizeof(tamanio_path));
+	lastIndex += sizeof(tamanio_path);
+	memcpy(buffer+lastIndex, &(struct_archivo->ruta_archivo),tamanio_path);
 
 	return buffer;
-
 }
 
 operacion_archivo* deserializar_operacion_archivo(void *buffer) {
+
+	void myMemCpy(void *dest, void *src, size_t n)
+	{
+	   // Typecast src and dest addresses to (char *)
+	   char *csrc = (char *)src;
+	   char *cdest = (char *)dest;
+
+	   // Copy contents of src[] to dest[]
+	   for (int i=0; i<n; i++)
+	       cdest[i] = csrc[i];
+	}
+
 	operacion_archivo* struct_archivo = malloc(sizeof(operacion_archivo));
 	int tamanio_path;
 
 	int lastIndex = 0;
 
-	deserialize_data(&(struct_archivo->pid), sizeof(int), buffer, &lastIndex);
-	deserialize_data(&(tamanio_path), sizeof(int), buffer, &lastIndex);
+	memcpy(&(struct_archivo->pid), buffer, sizeof(struct_archivo->pid));
+	lastIndex += sizeof(struct_archivo->pid);
+	memcpy(&(tamanio_path), buffer+lastIndex, sizeof(tamanio_path));
+	lastIndex += sizeof(tamanio_path);
 
 	struct_archivo->ruta_archivo = malloc(tamanio_path+1);
-
-	memcpy(&(struct_archivo->ruta_archivo) , buffer+lastIndex, tamanio_path);
-
+	myMemCpy(&(struct_archivo->ruta_archivo), buffer+lastIndex, tamanio_path);
 	struct_archivo->ruta_archivo[tamanio_path] = '\0';
-
 	return struct_archivo;
 }
 
