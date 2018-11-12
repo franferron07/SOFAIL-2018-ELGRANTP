@@ -72,14 +72,15 @@ void comando_ejecutar(char* ruta_sript) {
 		generar_id_dtb();
 		dtb_struct dtb_nuevo = crear_dtb(id_dtb ,ruta_sript);
 		agregar_dtb_nuevo( dtb_nuevo );
+		log_info(safa_log, "DTB creado y en cola de nuevos:%d\n", dtb_nuevo.id_dtb);
 	}
 }
 
 void agregar_dtb_nuevo( dtb_struct dtb_nuevo ){
 
-	pthread_mutex_lock(&sem_nuevo_mutex);
+	/*pthread_mutex_lock(&sem_nuevo_mutex);*/
 	list_add(dtb_nuevos, &dtb_nuevo);
-	pthread_mutex_unlock(&sem_nuevo_mutex);
+	/*pthread_mutex_unlock(&sem_nuevo_mutex);*/
 	list_add( dtbs , &dtb_nuevo );
 }
 

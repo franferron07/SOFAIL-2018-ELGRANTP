@@ -37,12 +37,41 @@ dtb_struct crear_dtb(int id_dtb, char *path) {
 
 
 
+void inicializar_dummy(dtb_struct* dtb) {
+
+	dtb_dummy.id_dtb = dtb->id_dtb;
+	dtb_dummy.escriptorio = strdup(dtb->escriptorio);
+}
+
+
 void reiniciar_dummy(){
 
 	free(dtb_dummy.escriptorio);
 	dtb_dummy.id_dtb = -1;
 
 }
+
+
+
+
+dtb_struct *obtener_dtb_a_ejecutar_dummy(){
+
+	dtb_struct *dtb_libre = NULL;
+
+	dtb_libre = list_find( dtb_nuevos , (void*)dtb_estado_nuevo );
+
+	return dtb_libre;
+}
+
+
+bool dtb_estado_nuevo(dtb_struct *dtb) {
+
+	if(dtb->estado == NUEVO) return true;
+	return false;
+}
+
+
+
 
 
 
