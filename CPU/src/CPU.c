@@ -156,16 +156,21 @@ unsigned escriptorio_abrir(char** parametros){
 		return 0;
 	}else{
 		solicitar_abrir_a_dam(dtb_ejecutado.id_dtb,path);
-		desalojar_dtb(dtb_ejecutado.id_dtb,path);
+		desalojar_dtb();
+		SAFA_avisar_espera_de_carga(path);
 	}
 
 	return 0;
 }
 
-void desalojar_dtb(uint8_t id_dtb,char* path){
+void desalojar_dtb(){
 	/*TODO: borrar dtb
-	*indicar a SAFA que CPU esta esperano que DAM cargue en FM9 el archivo del path
+	*indicar a SAFA que CPU esta esperando que DAM cargue en FM9 el archivo del path
 	*/
+
+}
+
+void SAFA_avisar_espera_de_carga(char *path){
 
 }
 
@@ -200,7 +205,7 @@ unsigned escriptorio_asignar(char** parametros){
 		return 0;
 	}else{
 		//TODO: enviar a safa 	//20001: El archivo no se encuentra abierto.
-		abortar_dtb(dtb_ejecutado.id_dtb);
+		abortar_gdt(dtb_ejecutado.id_dtb);
 	}
 
 
@@ -215,7 +220,7 @@ void actualizar_en_memoria(char *path,char *linea,char *datos){
 	//hacer el send a SAFA
 }
 
-void abortar_dtb(int8_t id_dtb){
+void abortar_gdt(int8_t id_dtb){
 	//TODO: enviar a safa el id del DTB para que
 	//se aborte de forma gratuita y segura
 }
@@ -226,14 +231,77 @@ unsigned escriptorio_signal(char** parametros){return 0;}
 unsigned escriptorio_flush(char** parametros){
 	char * path = parametros[0];
 
+	if(se_encuentra_archivo_en_gdt(path)){
+		printf("El archivo se encuentra abierto %s",path);
+		solicitar_flush_a_dam(path);
+		comunicar_a_safa_espera(dtb_ejecutado.id_dtb);
+		return 0;
+	}else{
+		//TODO: enviar a safa 	//20001: El archivo no se encuentra abierto.
+		abortar_gdt(dtb_ejecutado.id_dtb);
+	}
 	return 0;
 }
-unsigned escriptorio_close(char** parametros){return 0;}
-unsigned escriptorio_crear(char** parametros){return 0;}
-unsigned escriptorio_borrar(char** parametros){return 0;}
-unsigned escriptorio_comentario(char** parametros){return 0;}
 
-void liberar_instruccion(struct_instruccion instruccion){}
+void solicitar_flush_a_dam(char *path){
+
+}
+
+void comunicar_a_safa_espera(uint8_t id_gdt){
+
+}
+
+unsigned escriptorio_close(char** parametros){
+	char * path = parametros[0];
+	if(se_encuentra_archivo_en_gdt(path)){
+		printf("El archivo se encuentra abierto %s",path);
+		FM9_solicitar_liberar_memoria(path);
+		SAFA_borrar_referencia(path);
+		return 0;
+	}else{
+		//TODO: enviar a safa 	//20001: El archivo no se encuentra abierto.
+		abortar_gdt(dtb_ejecutado.id_dtb);
+	}
+
+
+	return 0;
+}
+
+void FM9_solicitar_liberar_memoria(char *path){
+
+}
+
+void SAFA_borrar_referencia(char *path){
+
+}
+
+unsigned escriptorio_crear(char** parametros){
+	char * path = parametros[0];
+	char * lineas = parametros[1];
+
+	DAM_solicitar_crear_archivo(path,lineas);
+	desalojar_dtb();
+
+	return 0;
+}
+
+unsigned escriptorio_borrar(char** parametros){
+	char * path = parametros[0];
+
+	DAM_solicitar_borrar(path);
+	desalojar_dtb();
+	return 0;
+}
+
+void DAM_solicitar_borrar(char* path){
+
+}
+
+unsigned escriptorio_comentario(char** parametros){return 0;}//no hace nada
+
+void liberar_instruccion(struct_instruccion instruccion){
+	string_iterate_lines(instruccion.parametros,(void *)free);
+}
 
 
 int validar_parametros_consola(int cant_parametros) {
