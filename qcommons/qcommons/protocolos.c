@@ -132,15 +132,26 @@ int tamanio_lista_para_buffer(t_list *direcciones){
 	//retorna el tamanio de la lista de direcciones para el buffer
 	int tamanio = 	sizeof((uint8_t)direcciones->elements_count);
 	uint8_t tamanio_ruta = 0;
+	uint8_t tamanio_direccion = 0;
 
 	t_link_element *element = direcciones->head;
 	t_link_element *aux = NULL;
+
 	while (element != NULL) {
 		aux = element->next;
-		tamanio_ruta = strlen(element->data) + 1;
+
+		direccion_struct* direcciones = element->data;
+
+		tamanio_ruta = strlen(direcciones->path);
 		tamanio += (sizeof(tamanio_ruta) + tamanio_ruta);
+
+		tamanio_direccion = strlen(direcciones->direccion);
+		tamanio += (sizeof(tamanio_direccion) + tamanio_direccion);
+
+
 		element = aux;
 	}
+
 	return tamanio;
 }
 
@@ -150,6 +161,7 @@ void* serializar_dtb(dtb_struct *dtb, int * tamanio_buffer){
 	//recibe como parametro un puntero al dtb a serializar
 	//y un puntero a un int que va a ser el tamanio del buffer despues de serializar
 	//bastante util al momento de hacer un send(dtb)
+	uint8_t cantidad_elementos;
 	uint8_t tamanio_ruta_escriptorio = strlen(dtb->escriptorio);
 
 	int tamanio = 	sizeof(dtb->id_dtb) +
@@ -158,9 +170,10 @@ void* serializar_dtb(dtb_struct *dtb, int * tamanio_buffer){
 					sizeof(dtb->program_counter) +
 					sizeof(dtb->inicializado) +
 					sizeof(dtb->quantum) +
+					sizeof(cantidad_elementos) +
 					tamanio_lista_para_buffer(dtb->direcciones);
 
-	void* buffer = (void *) malloc(tamanio);
+	void* buffer = malloc(tamanio);
 	printf("longitud: %d\n",tamanio);
 
 
@@ -171,20 +184,28 @@ void* serializar_dtb(dtb_struct *dtb, int * tamanio_buffer){
 	serialize_data(&(dtb->program_counter),sizeof(dtb->program_counter), &buffer, &lastIndex);
 	serialize_data(&(dtb->inicializado),sizeof(dtb->inicializado), &buffer, &lastIndex);
 	serialize_data(&(dtb->quantum),sizeof(dtb->quantum), &buffer, &lastIndex);
+
 	//serializo la cantidad de elementos
-	uint8_t cantidad_elementos = dtb->direcciones->elements_count;
+	cantidad_elementos = dtb->direcciones->elements_count;
 	serialize_data(&(cantidad_elementos),sizeof(cantidad_elementos), &buffer, &lastIndex);
 
 	//serializo los elementos de la forma [tamanio -> elemento]
 	uint8_t tamanio_ruta = 0;
+	uint8_t tamanio_direccion = 0;
 	t_link_element *element = dtb->direcciones->head;
 	t_link_element *aux = NULL;
 	while (element != NULL) {
 		aux = element->next;
 
-		tamanio_ruta = strlen(element->data) + 1;
+		direccion_struct* direccion = element->data;
+
+		tamanio_ruta = strlen(direccion->path);
 		serialize_data(&(tamanio_ruta),sizeof(tamanio_ruta), &buffer, &lastIndex);
-		serialize_data(&(element->data),tamanio_ruta, &buffer, &lastIndex);
+		serialize_data(&(direccion->path),tamanio_ruta, &buffer, &lastIndex);
+
+		tamanio_direccion = strlen(direccion->direccion);
+		serialize_data(&(tamanio_direccion),sizeof(tamanio_direccion), &buffer, &lastIndex);
+		serialize_data(&(direccion->direccion),tamanio_direccion, &buffer, &lastIndex);
 
 		element = aux;
 	}
@@ -223,14 +244,27 @@ dtb_struct* deserializar_dtb(void *buffer){
 	dtb_struct* dtb = malloc(sizeof(dtb_struct));
 	int lastIndex = 0;
 
+	void myMemCpy(void *dest, void *src, size_t n)
+	{
+	   // Typecast src and dest addresses to (char *)
+	   char *csrc = (char *)src;
+	   char *cdest = (char *)dest;
+
+	   // Copy contents of src[] to dest[]
+	   for (int i=0; i<n; i++)
+	       cdest[i] = csrc[i];
+	}
 
 
 	deserialize_data(&(dtb->id_dtb),sizeof(dtb->id_dtb), buffer, &lastIndex);
 	uint8_t tamanio_ruta_escriptorio;
 	deserialize_data(&(tamanio_ruta_escriptorio),sizeof(uint8_t), buffer, &lastIndex);
 	dtb->escriptorio = malloc((tamanio_ruta_escriptorio + 1) * sizeof(char));
-	deserialize_data(&(dtb->escriptorio),tamanio_ruta_escriptorio, buffer, &lastIndex);
+
+	myMemCpy(&(dtb->escriptorio), buffer+lastIndex, tamanio_ruta_escriptorio);
+	lastIndex += tamanio_ruta_escriptorio;
 	(dtb->escriptorio)[tamanio_ruta_escriptorio]='\0';
+
 	deserialize_data(&(dtb->program_counter),sizeof(dtb->program_counter), buffer, &lastIndex);
 	deserialize_data(&(dtb->inicializado),sizeof(dtb->inicializado), buffer, &lastIndex);
 	deserialize_data(&(dtb->quantum),sizeof(dtb->quantum), buffer, &lastIndex);
@@ -243,18 +277,27 @@ dtb_struct* deserializar_dtb(void *buffer){
 	printf("Cantidad de direcciones a deserializar: %d\n", cantidad_de_direcciones);
 
 
+	uint8_t tamanio_path = 0;
 	uint8_t tamanio_direccion = 0;
-	char * direccion = (char *)malloc(sizeof(char));
 	int var;
 
-	for (var = 0; var < cantidad_de_direcciones; ++var) {
+	for (var = 0; var < cantidad_de_direcciones; var++) {
 
+		direccion_struct * direcciones = malloc(sizeof(direccion_struct));
+
+		deserialize_data(&tamanio_path,sizeof(uint8_t), buffer, &lastIndex);
+		direcciones->path = malloc(tamanio_path+1);
+		myMemCpy(&(direcciones->path), buffer+lastIndex, tamanio_path);
+		lastIndex += tamanio_path;
+		(direcciones->path)[tamanio_path]='\0';
 
 		deserialize_data(&tamanio_direccion,sizeof(uint8_t), buffer, &lastIndex);
-		printf("sizeof(tamanio_direccion): %d\n",sizeof(tamanio_direccion));
-		printf("tamanio_direccion: %d\n",tamanio_direccion);
-		direccion = (char *)realloc(direccion, (tamanio_direccion + 1) * sizeof(char));
+		direcciones->direccion = malloc(tamanio_direccion+1);
+		myMemCpy(&(direcciones->direccion), buffer+lastIndex, tamanio_direccion);
+		lastIndex += tamanio_direccion;
+		(direcciones->direccion)[tamanio_direccion]='\0';
 
+		list_add(dtb->direcciones,direcciones);
 
 
 		//TODO: en estas 2 lineas esta el problema y tambien la solucion...
@@ -264,11 +307,11 @@ dtb_struct* deserializar_dtb(void *buffer){
 
 
 
-		printf("direccion: %s\n",direccion);
+		//printf("direccion: %s\n",direccion);
 		//list_add(dtb->direcciones,strdup(direccion));
 
-		tamanio_direccion = 0;
-		break;
+		//tamanio_direccion = 0;
+		//break;
 
 
 	}
