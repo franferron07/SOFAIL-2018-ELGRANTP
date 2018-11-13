@@ -83,7 +83,7 @@ void setear_bloque_ocupado_en_posicion(int pos){
 bool testear_bloque_libre_en_posicion(int pos){
 	return bitarray_test_bit(bitarray,(off_t)(pos));
 }
-void probar_seteo_de_bits(){
+void mostrar_bitarray(){
 	for(int k =0;k<metadata.cantidad_bloques;k++)printf("test bit posicion, despues de seteo %d en pos %d \n", bitarray_test_bit(bitarray,k),k);
 }
 void consola_fifa(){
