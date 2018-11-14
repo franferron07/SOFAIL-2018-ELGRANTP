@@ -37,6 +37,12 @@ typedef enum {
 	ARCHIVOCREADO=21,
 	ARCHIVOMODIFICADO=22,
 	ARCHIVOBORRADO=23,
+	
+	/***** DAM A MDJ *****/
+	CREAR_ARCHIVO=24,
+	BORRAR_ARCHIVO=25,
+	OBTENER_DATOS=26,
+	GUARDAR_DATOS=27,
 
 	/*****ERRORES POSIBLES TODO:hay errores que se repiten pero cambia el codigo. Decidir con grupo que hacer. *****/
 	PATHINEXISTENTE = 10001,
