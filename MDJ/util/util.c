@@ -24,16 +24,3 @@ char* recortarPrimerosCaracteres(char* s, int primerosCaracteres){//ok y  malloq
 	free(aux);
 	return recorte;
 }
-
-int cantidadDeCaracteres_file(FILE* bloque){
-	int i ;
-	for(i=0;getc(bloque)!=EOF;i++);
-	return i;
-}
-int cantidadDeCaracteres_path(char* path ){
-	FILE * f = fopen(path,"r");
-	int n = cantidadDeCaracteres_file(f);
-	fclose(f);
-	return n ;
-}
-//int minimo(int unNum,int otroNum){return unNum>otroNum?unNum:otroNum;}

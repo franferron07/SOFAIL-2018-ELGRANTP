@@ -10,7 +10,7 @@
 
 
 #include "MDJ.h"
-
+int i;
 // char buffer[MAX_INPUT_BUFFER];							/* Buffer para leer de los socket */
  char *buffer=NULL;				/* Buffer para leer de los socket */
  numeroClientes = 0;
@@ -20,14 +20,14 @@
 pthread_attr_t hilo_escucha;
 pthread_attr_t hilo_consola_fifa;
 
-
-
-
 char* aMapearAlBloque=NULL;
-
-
-
-
+FILE* bloqueActual_file=NULL;
+//char* bloqueActual_nombre=NULL;
+char bloqueActual_path[250]; //direccion del bloque actual
+unsigned int bloqueActual_int=0;
+t_bitarray* bitarray;
+char* bitmap_path_directorio=NULL;
+FILE* bitmap_file=NULL;
 int main(void) {
 //	cargar_configuracion_mdj();
 //
@@ -44,24 +44,35 @@ int main(void) {
 //	char* aux="";
 //	char* s =recortarPrimerosCaracteres(aux,2);
 //	printf("strlen destino es  %d  y contenido %s  y restante .%s.\n ",strlen(s),s,aux);
-//	consola_fifa();
+	consola_fifa();
 //	bitarray_destroy(bitarray);
 //	free(s);
-
-
-
-
-
 	return 0;
 }
 
 
-
-
+void configurar_bitmap(){
+	char bitmap_array[metadata.cantidad_bloques/8];
+	for(int i =0;i<metadata.cantidad_bloques/8;i++)bitmap_array[i]=0;
+	bitarray = bitarray_create_with_mode(bitmap_array, sizeof(bitmap_array), LSB_FIRST);
+	bitmap_file=txt_open_for_append("Bitmap.bin");
+	txt_write_in_file(bitmap_file,bitarray->bitarray);//hacerlo con mmap()
+	txt_close_file(bitmap_file);
+//	bitarray_destroy(bitarray);
+}
+void setear_bloque_ocupado_en_posicion(int pos){
+	bitarray_set_bit(bitarray,(off_t)(pos));
+}
+bool testear_bloque_libre_en_posicion(int pos){
+	return bitarray_test_bit(bitarray,(off_t)(pos));
+}
+void mostrar_bitarray(){
+	for(int k =0;k<metadata.cantidad_bloques;k++)printf("test bit posicion, despues de seteo %d en pos %d \n", bitarray_test_bit(bitarray,k),k);
+}
 void consola_fifa(){
 	cargar_configuracion_metadata();
 	mostrar_configuracion_metadata();
-	configurar_bitmap(metadata.cantidad_bloques/8);
+	configurar_bitmap();
 	puts("press \"exit\" para salir de consola ");
 	loop{
 			buffer_input_keyboard=readline("fifa@mdj=>  ");
@@ -82,6 +93,10 @@ bool quedaContenidoParaMapear(){return strlen(buffer_input_keyboard)>0;}
  int  espacioRestanteAlBloque(){
 	return metadata.tamanio_de_bloque-cantidadDeCaracteres_file(bloqueActual_file);
 }
+void setBloqueLleno(){//agregar un 1 al bitmap.bin
+	bitarray_set_bit(bitarray,bloqueActual_int);
+}
+//int minimo(int unNum,int otroNum){return unNum>otroNum?unNum:otroNum;}
 
 void  mapearBloque(FILE* bloque, char * contenido){
 	aMapearAlBloque=recortarPrimerosCaracteres(contenido,minimo(metadata.tamanio_de_bloque,espacioRestanteAlBloque()));
@@ -90,16 +105,50 @@ void  mapearBloque(FILE* bloque, char * contenido){
 	txt_close_file(bloque);
 	free(aMapearAlBloque);
 }
+FILE* getBloqueLibre_file(){
+	int i;
+	for( i =0;testear_bloque_libre_en_posicion(i);i++);//hasta un bloque lbre
+	char* path_del_bloque_libre = malloc(1000);
+	sprintf(path_del_bloque_libre,"%d.bin",i);//rehacer path con punto de ontaje y carpeta segun dam
+	bloqueActual_file = fopen(path_del_bloque_libre,"w");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
+	free(path_del_bloque_libre);
+	return bloqueActual_file;
+}
 
-
+bool estaLLenoElBloqueActual(){
+	return cantidadDeCaracteres_file(bloqueActual_file)==metadata.tamanio_de_bloque;
+}
+bool estaLibreElBloqueActual(){return cantidadDeCaracteres_file(bloqueActual_file)<metadata.tamanio_de_bloque;}
+int cantidadDeCaracteres_file(FILE* bloque){
+	int i ;
+	for(i=0;getc(bloque)!=EOF;i++);
+	return i;
+}
+int cantidadDeCaracteres_path(char* path ){
+	FILE * f = fopen(path,"r");
+	int n = cantidadDeCaracteres_file(f);
+	fclose(f);
+	return n ;
+}
 bool terminoDeMapearContenido(){
 	bool hayCaracteresParaMapear=strlen(buffer_input_keyboard)>0;
 	return bitarray_test_bit(bitarray,bloqueActual_int)&&hayCaracteresParaMapear;
 }
 
+void cargar_configuracion_metadata(){//hardcodeada, completar con config.h y  Metadata.bin
+	t_config *configuracion_cfg_temporal=cargar_en_memoria_cfg("Metadata.bin");
+//	(&metadata)->cantidad_bloques=config_get_int_value(configuracion_cfg_temporal,"CANTIDAD_BLOQUES");
+	metadata.cantidad_bloques=config_get_int_value(configuracion_cfg_temporal,"CANTIDAD_BLOQUES");
+	metadata.tamanio_de_bloque=config_get_int_value(configuracion_cfg_temporal,"TAMANIO_BLOQUES");
+	config_destroy(configuracion_cfg_temporal);
+}
+void mostrar_configuracion_metadata(){
+	puts("leyendo metadata");
+	printf("tamanio bloque %d \n", metadata.tamanio_de_bloque);
+	printf("cantidad_bloques %d \n", metadata.cantidad_bloques);
+	puts("fin lectura metadata ");
 
-
-
+}
 void mdj_liberar_recursos(){
 	 loggear_y_guardar_info("MDJ terminando..");
 	 log_info(mdj_log, "Finish.cfg");
@@ -139,7 +188,7 @@ void inicializando_socket(){
 void escuchar_mensajes_entrantes(){
 	inicializando_socket();
 	while (1)
-		 		{int i;
+		 		{
 		 			/* Cuando un cliente cierre la conexión, se pondrá un -1 en su descriptor
 		 			 * de socket dentro del array socketCliente. La función compactaClaves()
 		 			 * eliminará dichos -1 de la tabla, haciéndola más pequeña.

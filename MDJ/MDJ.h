@@ -36,10 +36,11 @@
 //#include "archivos/util.h"//cuantos archivos hay etc
 #include <qcommons/utilitaria.h>
 #include "util/util.h"
-#include "file_system/bitmap.h"
-#include "file_system/metadata.h"
+
 #define  MAX_INPUT_BUFFER 1000
 
+#define loop while(1)
+#define minimo(unNum,otroNum)  ((unNum>otroNum)?unNum:otroNum)
 
  char leyenda_temporal[MAX_INPUT_BUFFER];
 
@@ -57,9 +58,13 @@ Socket mdj_socket;//socket mdj
 
 
 
+struct METADATA{
+	int tamanio_de_bloque;//en bytes, ni dice eso el enunciado
+	int cantidad_bloques;
+	char* MAGIC_NUMBER;//es fifa , puede ser un charArray, charlable
+}metadata;
 
 t_log *mdj_log= NULL;
-
 fd_set descriptoresLectura;	/* Descriptores de interes para select() */
 int maximo;							/* Número de descriptor más grande */
 int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
@@ -88,15 +93,18 @@ void escuchar_mensajes_entrantes();
 void mdj_liberar_recursos();
 //void  ejecutar_linea_entrante();
 void cargar_configuracion_mdj();//hardcodeada, completar con config.h
+void mostrar_configuracion_metadata();
+void cargar_configuracion_metadata();//hardcodeada, completar con config.h y  Metadata.bin
 
-
+bool estaLLenoElBloqueActual();///debe usarse con Bitmap.bin
+bool estaOcupaco(char* path);
 bool terminoDeMapearContenido();
 void consola_fifa();
 //bool bitmap_bloque_esta_ocupado(char* path_del_bloque);
-void  mapearBloque(FILE* bloque, char * contenido);//escribe contenido en bloque de manera consecutiva hasta ocupar segun metadata
-
-char* recortarPrimerosCaracteres(char* s, int primerosCaracteres);
-
+void  mapearBloque(FILE* bloque, char * contenido);
+void configurar_bitmap();
+FILE* getBloqueLibre_file();
+int cantidadDeCaracteres_file(FILE* bloque);
 bool quedaContenidoParaMapear();
 
 #endif /* MDJ_H_ */
