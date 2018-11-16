@@ -208,6 +208,13 @@ void atender_operacion_cpu(int cliente_socket) {
 
 			log_info(dam_log,"Enviando Peticion MDJ Crear Archivo");
 
+			void* buffer_request_operacion=NULL;
+
+			request_operacion_type* operacion=malloc(TAMANIO_REQUEST_OPERACION);
+			operacion->tipo_operacion = CREAR_ARCHIVO;
+			buffer_request_operacion = serializar_request_operacion_(operacion);
+			send(socket_mdj,buffer_request_operacion,TAMANIO_REQUEST_OPERACION,0);
+
 			send(socket_mdj,tam_buffer,sizeof(int),0);
 			send(socket_mdj,buffer_mdj,(size_t)tam_buffer_mdj,0);
 
@@ -221,6 +228,8 @@ void atender_operacion_cpu(int cliente_socket) {
 			free(operacion_crear);
 			free(operacion_crear_mdj->ruta_archivo);
 			free(operacion_crear_mdj);
+			free(operacion);
+			free(buffer_request_operacion);
 
 			}
 			break;
@@ -241,9 +250,16 @@ void atender_operacion_cpu(int cliente_socket) {
 				operacion_archivo_mdj* operacion_archivo_mdj = malloc(sizeof(operacion_archivo_mdj));
 				operacion_archivo_mdj->ruta_archivo = string_duplicate(operacion_archivo->ruta_archivo);
 
-				void* buffer_mdj = serializar_operacion_archivo_mdj(operacion_archivo,tam_buffer_mdj);
+				void* buffer_mdj = serializar_operacion_archivo_mdj(operacion_archivo_mdj,tam_buffer_mdj);
 
 				log_info(dam_log,"Enviando Peticion MDJ Borrar Archivo");
+
+				void* buffer_request_operacion=NULL;
+
+				request_operacion_type* operacion=malloc(TAMANIO_REQUEST_OPERACION);
+				operacion->tipo_operacion = BORRAR_ARCHIVO;
+				buffer_request_operacion = serializar_request_operacion_(operacion);
+				send(socket_mdj,buffer_request_operacion,TAMANIO_REQUEST_OPERACION,0);
 
 				send(socket_mdj,tam_buffer,sizeof(int),0);
 				send(socket_mdj,buffer_mdj,(size_t)tam_buffer_mdj,0);
@@ -258,6 +274,8 @@ void atender_operacion_cpu(int cliente_socket) {
 				free(operacion_archivo);
 				free(operacion_archivo_mdj->ruta_archivo);
 				free(operacion_archivo_mdj);
+				free(operacion);
+				free(buffer_request_operacion);
 
 			}
 			break;
