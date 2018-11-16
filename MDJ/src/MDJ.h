@@ -6,7 +6,9 @@
  */
 #ifndef MDJ_H_
 #define MDJ_H_
-
+#include "config/config.h"
+#include "file_system/util.h"
+//#include "file_system/bitmap.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,26 +37,7 @@
 //#include "archivos/util.h"//cuantos archivos hay etc
 #include <qcommons/utilitaria.h>
 
-
-
-
-
-
-
-//----------------------------
-typedef struct{
-	char puerto[100];
-	int retardo;
-	char punto_de_montaje[100];
-	char  ip[100];
-}MDJ_CONFIG;
-//----------------------------
-
-MDJ_CONFIG mdj;
 Socket mdj_socket;//socket mdj
-
-
-
 
 
 
@@ -66,21 +49,19 @@ int socketServidor;				/* Descriptor del socket servidor */
 
 //variables globales
 
-
-//funciones
-void liberar_memoria_de_configuracion(MDJ_CONFIG* configuracion_inicial);
-
-
 //--------------
 
+//MDJ
+void mostrar_configuracion_mdj();
+void mdj_liberar_recursos();
 
 
+//MDJ
 
 void escuchar_mensajes_entrantes();
-void mdj_liberar_recursos();
+
 void  ejecutar_linea_entrante();
 
-void cargar_configuracion_mdj();//hardcodeada, completar con config.h
 
 
 bool estaLLenoElBloqueActual();///debe usarse con Bitmap.bin
@@ -91,7 +72,7 @@ void consola_fifa();
 void  mapearBloque(FILE* bloque, char * contenido);
 
 
-bool quedaContenidoParaMapear(char* contenido);
+
 
 
 
@@ -107,6 +88,28 @@ void cargar_configuracion_metadata();
 void mostrar_configuracion_metadata();
 
 //METADATA
+
+
+//BITMAP begin
+
+FILE* bloqueActual_file;
+char bloqueActual_path[250]; //direccion del bloque actual
+ int bloqueActual_int;
+char* bitmap_path_directorio;
+FILE* bitmap_file;
+t_bitarray* bitarray_=NULL;
+
+void setear_bloque_ocupado_en_posicion(off_t pos);
+bool testear_bloque_libre_en_posicion(int pos);
+void setBloqueLleno();//agregar un 1 al bitmap.bin
+void mostrar_bitarray();
+
+FILE* getBloqueLibre_file();
+bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque);
+void configurar_bitmap(int cantidadDeBytes);
+
+
+//BITMAP end
 
 
 #endif /* MDJ_H_ */

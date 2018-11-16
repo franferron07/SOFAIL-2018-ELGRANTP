@@ -10,9 +10,8 @@
 
 
 #include "MDJ.h"
-#include "util.h"
-#include "bitmap.h"
-#include "config.h"
+
+
 
 int i;
 // char buffer[MAX_INPUT_BUFFER];							/* Buffer para leer de los socket */
@@ -37,7 +36,16 @@ mostrar_configuracion_mdj();
 cargar_configuracion_metadata();
 mostrar_configuracion_metadata();
 
+configurar_bitmap(8);
 
+	bitarray_set_bit(bitarray_,63);
+	setear_bloque_ocupado_en_posicion(62);
+	bitarray_set_bit(bitarray_,0);
+	bitarray_set_bit(bitarray_,1);
+	bitarray_set_bit(bitarray_,2);
+	mostrar_bitarray();
+	puts(bitarray_->bitarray);
+	bitarray_destroy(bitarray_);
 	return 0;
 }
 
@@ -45,11 +53,6 @@ mostrar_configuracion_metadata();
 
 
 void consola_fifa(){
-	puts("Holass");
-	cargar_configuracion_metadata();
-	puts("holas");
-	mostrar_configuracion_metadata();
-	configurar_bitmap(metadata.cantidad_bloques/8);
 	puts("press \"exit\" para salir de consola ");
 	loop{
 			buffer_input_keyboard=readline("fifa@mdj=>  ");
@@ -66,12 +69,11 @@ void  ejecutar_linea_entrante(char* buffer_entrante){
 	}
 }
 
-bool quedaContenidoParaMapear(char* contenido){return strlen(contenido)>0;}
+
  int  espacioRestanteAlBloque(){
 	return metadata.tamanio_de_bloque-cantidadDeCaracteres_file(bloqueActual_file);
 }
 
-//int minimo(int unNum,int otroNum){return unNum>otroNum?unNum:otroNum;}
 
 void  mapearBloque(FILE* bloque, char * contenido){
 	aMapearAlBloque=recortarPrimerosCaracteres(contenido,minimo(metadata.tamanio_de_bloque,espacioRestanteAlBloque()));
@@ -86,15 +88,9 @@ bool estaLLenoElBloqueActual(){
 
 bool terminoDeMapearContenido(){
 	bool hayCaracteresParaMapear=strlen(buffer_input_keyboard)>0;
-	return bitarray_test_bit(bitarray,bloqueActual_int)&&hayCaracteresParaMapear;
+	return bitarray_test_bit(bitarray_,bloqueActual_int)&&hayCaracteresParaMapear;
 }
-void montar_configuracion(t_config*  temporal){
-//	strcpy(mdj.puerto ,string_duplicate(config_get_string_value(temporal,"PUERTO")));
-	strcpy(mdj.puerto ,config_get_string_value(temporal,"PUERTO"));
-	strcpy(mdj.punto_de_montaje,config_get_string_value(temporal,"PUNTO_MONTAJE"));
-	mdj.retardo=config_get_int_value(temporal,"RETARDO");
-	strcpy(mdj.ip,config_get_string_value(temporal,"IP"));
-}
+
 
 void mostrar_configuracion_mdj(){
  	printf("iniciando lectura de configuracion...\n");
@@ -197,15 +193,7 @@ void escuchar_mensajes_entrantes(){
 	cerrar_socket(mdj_socket);
 }
 
-void cargar_configuracion_mdj(){
-	mdj_log = log_create("MDJ.log", "MDJ",false, LOG_LEVEL_INFO);
-	loggear_info("INICIO MDJ");
-	t_config *configuracion_cfg_temporal=cargar_en_memoria_cfg("MDJ.cfg");
-	puts("antes de  montar_configuracion");
-	montar_configuracion(configuracion_cfg_temporal);
-	config_destroy(configuracion_cfg_temporal);
-	puts("despues de montar config");
-}
+
 
 
 //METADATA
@@ -223,7 +211,49 @@ void mostrar_configuracion_metadata(){
 	printf("cantidad_bloques %d \n", metadata.cantidad_bloques);
 	puts("fin lectura metadata ");
 }
+//METADATA
 
+
+//BITMAP
+void configurar_bitmap(int cantidadDeBytes){
+	char bitmap_array[cantidadDeBytes];
+	for(int i =0;i<cantidadDeBytes;i++)bitmap_array[i]=0;
+	printf("sizeof es  %d\n",sizeof(bitmap_array));
+	bitarray_ = bitarray_create_with_mode(bitmap_array, sizeof(bitmap_array), LSB_FIRST);
+	bitmap_file=fopen("Bitmap.bin","w+");
+	txt_write_in_file(bitmap_file,bitarray_->bitarray);//hacerlo con mmap()
+	txt_close_file(bitmap_file);
+}
+
+void setear_bloque_ocupado_en_posicion(off_t pos){
+	bitarray_set_bit(bitarray_,pos);
+}
+bool testear_bloque_libre_en_posicion(int pos){
+	return bitarray_test_bit(bitarray_,(off_t)(pos));
+}
+void mostrar_bitarray(){
+	for(int k =0;k<(bitarray_get_max_bit(bitarray_));k++)printf("test bit posicion, despues de seteo %d en pos %d \n", bitarray_test_bit(bitarray_,k),k);
+}
+void setBloqueActuaLleno(){//agregar un 1 al bitmap.bin
+	bitarray_set_bit(bitarray_,bloqueActual_int);
+}
+
+
+
+FILE* getBloqueLibre_file(){
+	int i;
+	for( i =0;testear_bloque_libre_en_posicion(i);i++);//hasta un bloque lbre
+	char* path_del_bloque_libre = malloc(1000);
+	sprintf(path_del_bloque_libre,"%d.bin",i);//rehacer path con punto de ontaje y carpeta segun dam
+	bloqueActual_file = fopen(path_del_bloque_libre,"w");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
+	free(path_del_bloque_libre);
+	return bloqueActual_file;
+}
+bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque){
+	return cantidadDeCaracteres_file(bloqueActual)<tamanioDeBloque;
+}
+
+//BITMAP
 
 
 
