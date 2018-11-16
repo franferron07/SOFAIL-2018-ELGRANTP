@@ -110,9 +110,34 @@ typedef struct {
 
 typedef struct
 {
-	char* ruta_archivo;
 	int pid;
+	char* ruta_archivo;
 } operacion_archivo;
+
+typedef struct
+{
+	char* ruta_archivo;
+} operacion_archivo_mdj;
+
+typedef struct
+{
+	int pid;
+	int cant_lineas;
+	char* ruta_archivo;
+} operacion_crear;
+
+typedef struct
+{
+	int cant_lineas;
+	char* ruta_archivo;
+} operacion_crear_mdj;
+
+typedef struct
+{
+	int pid;
+	char* ruta_archivo;
+	direccion_struct* direccion;
+} operacion_flush;
 
 
 int enviar_header_conexion(int socket_server, char* nombre_instancia,
@@ -142,7 +167,13 @@ dtb_struct* deserializar_dtb(void *buffer);
 
 int tamanio_dtb( dtb_struct *dtb );
 
-void* serializar_operacion_archivo(operacion_archivo* struct_archivo);
+void* serializar_operacion_archivo(operacion_archivo* struct_archivo,int* tamanio_buffer);
 operacion_archivo* deserializar_operacion_archivo(void *buffer);
+void* serializar_operacion_archivo_mdj(operacion_archivo_mdj* struct_archivo, int* tamanio_buffer);
+operacion_archivo_mdj* deserializar_operacion_archivo_mdj(void *buffer);
+void* serializar_operacion_crear(operacion_crear* struct_archivo_crear, int* tamanio_buffer);
+operacion_crear* deserializar_operacion_crear(void *buffer);
+void* serializar_operacion_crear_mdj(operacion_crear_mdj* struct_archivo_crear, int* tamanio_buffer);
+operacion_crear_mdj* deserializar_operacion_crear_mdj(void *buffer);
 
 #endif /* PROTOCOLOS_H_ */

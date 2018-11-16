@@ -76,7 +76,7 @@ void* serializar_header_conexion(header_conexion_type *header) {
 	return buffer;
 }
 
-void* serializar_operacion_archivo(operacion_archivo* struct_archivo)
+void* serializar_operacion_archivo(operacion_archivo* struct_archivo, int* tamanio_buffer)
 {
 	int tamanio_path = strlen(struct_archivo->ruta_archivo);
 	int TAMANIO_OPERACION_ARCHIVO = sizeof(struct_archivo->pid)+sizeof(tamanio_path)+tamanio_path;
@@ -89,6 +89,8 @@ void* serializar_operacion_archivo(operacion_archivo* struct_archivo)
 	memcpy(buffer+lastIndex, &(tamanio_path), sizeof(tamanio_path));
 	lastIndex += sizeof(tamanio_path);
 	memcpy(buffer+lastIndex, &(struct_archivo->ruta_archivo),tamanio_path);
+
+	*tamanio_buffer = lastIndex;
 
 	return buffer;
 }
@@ -122,7 +124,152 @@ operacion_archivo* deserializar_operacion_archivo(void *buffer) {
 	return struct_archivo;
 }
 
+void* serializar_operacion_archivo_mdj(operacion_archivo_mdj* struct_archivo, int* tamanio_buffer)
+{
+	int tamanio_path = strlen(struct_archivo->ruta_archivo);
+	int TAMANIO_OPERACION_ARCHIVO = sizeof(tamanio_path)+tamanio_path;
 
+	void* buffer = malloc(TAMANIO_OPERACION_ARCHIVO);
+	int lastIndex = 0;
+
+	memcpy(buffer+lastIndex, &(tamanio_path), sizeof(tamanio_path));
+	lastIndex += sizeof(tamanio_path);
+	memcpy(buffer+lastIndex, &(struct_archivo->ruta_archivo),tamanio_path);
+
+	*tamanio_buffer = lastIndex;
+
+	return buffer;
+}
+
+operacion_archivo_mdj* deserializar_operacion_archivo_mdj(void *buffer) {
+
+	void myMemCpy(void *dest, void *src, size_t n)
+	{
+	   // Typecast src and dest addresses to (char *)
+	   char *csrc = (char *)src;
+	   char *cdest = (char *)dest;
+
+	   // Copy contents of src[] to dest[]
+	   for (int i=0; i<n; i++)
+	       cdest[i] = csrc[i];
+	}
+
+	operacion_archivo_mdj* struct_archivo = malloc(sizeof(operacion_archivo_mdj));
+	int tamanio_path;
+
+	int lastIndex = 0;
+
+	memcpy(&(tamanio_path), buffer+lastIndex, sizeof(tamanio_path));
+	lastIndex += sizeof(tamanio_path);
+
+	struct_archivo->ruta_archivo = malloc(tamanio_path+1);
+	myMemCpy(&(struct_archivo->ruta_archivo), buffer+lastIndex, tamanio_path);
+	struct_archivo->ruta_archivo[tamanio_path] = '\0';
+	return struct_archivo;
+}
+
+void* serializar_operacion_crear(operacion_crear* struct_archivo_crear, int* tamanio_buffer)
+{
+	int tamanio_path = strlen(struct_archivo_crear->ruta_archivo);
+	int TAMANIO_OPERACION_ARCHIVO = sizeof(struct_archivo_crear->pid)+sizeof(struct_archivo_crear->cant_lineas)+sizeof(tamanio_path)+tamanio_path;
+
+	void* buffer = malloc(TAMANIO_OPERACION_ARCHIVO);
+	int lastIndex = 0;
+
+	memcpy(buffer, &(struct_archivo_crear->pid), sizeof(struct_archivo_crear->pid));
+	lastIndex += sizeof(struct_archivo_crear->pid);
+	memcpy(buffer, &(struct_archivo_crear->cant_lineas), sizeof(struct_archivo_crear->cant_lineas));
+	lastIndex += sizeof(struct_archivo_crear->cant_lineas);
+	memcpy(buffer+lastIndex, &(tamanio_path), sizeof(tamanio_path));
+	lastIndex += sizeof(tamanio_path);
+	memcpy(buffer+lastIndex, &(struct_archivo_crear->ruta_archivo),tamanio_path);
+
+	*tamanio_buffer = lastIndex;
+
+	return buffer;
+}
+
+operacion_crear* deserializar_operacion_crear(void *buffer) {
+
+	void myMemCpy(void *dest, void *src, size_t n)
+	{
+	   // Typecast src and dest addresses to (char *)
+	   char *csrc = (char *)src;
+	   char *cdest = (char *)dest;
+
+	   // Copy contents of src[] to dest[]
+	   for (int i=0; i<n; i++)
+	       cdest[i] = csrc[i];
+	}
+
+	operacion_crear* struct_archivo = malloc(sizeof(operacion_crear));
+	int tamanio_path;
+
+	int lastIndex = 0;
+
+	memcpy(&(struct_archivo->pid), buffer, sizeof(struct_archivo->pid));
+	lastIndex += sizeof(struct_archivo->pid);
+	memcpy(&(struct_archivo->cant_lineas), buffer, sizeof(struct_archivo->cant_lineas));
+	lastIndex += sizeof(struct_archivo->cant_lineas);
+	memcpy(&(tamanio_path), buffer+lastIndex, sizeof(tamanio_path));
+	lastIndex += sizeof(tamanio_path);
+
+	struct_archivo->ruta_archivo = malloc(tamanio_path+1);
+	myMemCpy(&(struct_archivo->ruta_archivo), buffer+lastIndex, tamanio_path);
+	struct_archivo->ruta_archivo[tamanio_path] = '\0';
+
+	return struct_archivo;
+}
+
+void* serializar_operacion_crear_mdj(operacion_crear_mdj* struct_archivo_crear, int* tamanio_buffer)
+{
+	int tamanio_path = strlen(struct_archivo_crear->ruta_archivo);
+	int TAMANIO_OPERACION_ARCHIVO = sizeof(struct_archivo_crear->cant_lineas)+sizeof(tamanio_path)+tamanio_path;
+
+	void* buffer = malloc(TAMANIO_OPERACION_ARCHIVO);
+	int lastIndex = 0;
+
+	memcpy(buffer, &(struct_archivo_crear->cant_lineas), sizeof(struct_archivo_crear->cant_lineas));
+	lastIndex += sizeof(struct_archivo_crear->cant_lineas);
+	memcpy(buffer+lastIndex, &(tamanio_path), sizeof(tamanio_path));
+	lastIndex += sizeof(tamanio_path);
+	memcpy(buffer+lastIndex, &(struct_archivo_crear->ruta_archivo),tamanio_path);
+
+	*tamanio_buffer = lastIndex;
+
+	return buffer;
+}
+
+operacion_crear_mdj* deserializar_operacion_crear_mdj(void *buffer) {
+
+	void myMemCpy(void *dest, void *src, size_t n)
+	{
+	   // Typecast src and dest addresses to (char *)
+	   char *csrc = (char *)src;
+	   char *cdest = (char *)dest;
+
+	   // Copy contents of src[] to dest[]
+	   for (int i=0; i<n; i++)
+	       cdest[i] = csrc[i];
+	}
+
+	operacion_crear_mdj* struct_archivo = malloc(sizeof(operacion_crear_mdj));
+	int tamanio_path;
+
+	int lastIndex = 0;
+
+
+	memcpy(&(struct_archivo->cant_lineas), buffer, sizeof(struct_archivo->cant_lineas));
+	lastIndex += sizeof(struct_archivo->cant_lineas);
+	memcpy(&(tamanio_path), buffer+lastIndex, sizeof(tamanio_path));
+	lastIndex += sizeof(tamanio_path);
+
+	struct_archivo->ruta_archivo = malloc(tamanio_path+1);
+	myMemCpy(&(struct_archivo->ruta_archivo), buffer+lastIndex, tamanio_path);
+	struct_archivo->ruta_archivo[tamanio_path] = '\0';
+
+	return struct_archivo;
+}
 //////////////////////////////////////////
 ///////INTENTO DE SERIALIZO DE DTB/////////
 //////////////////////////////////////////
