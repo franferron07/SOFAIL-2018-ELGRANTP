@@ -106,7 +106,7 @@ void mostrar_bitarray();
 
 FILE* getBloqueLibre_file();
 bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque);
-void configurar_bitmap(int cantidadDeBytes);
+void configurar_bitmap(char bitmap_array[],int cantidadDeBytes);
 
 
 //BITMAP end

@@ -36,7 +36,16 @@ mostrar_configuracion_mdj();
 cargar_configuracion_metadata();
 mostrar_configuracion_metadata();
 
-configurar_bitmap(8);
+char bits[metadata.cantidad_bloques/8];
+configurar_bitmap(bits,metadata.cantidad_bloques/8);
+
+//char bitmap_array[8];
+//	for(int i =0;i<8;i++)bitmap_array[i]=0;
+//	printf("sizeof es  %d\n",sizeof(bitmap_array));
+//	bitarray_ = bitarray_create_with_mode(bitmap_array, sizeof(bitmap_array), LSB_FIRST);
+//	bitmap_file=fopen("Bitmap.bin","w+");
+//	txt_write_in_file(bitmap_file,bitarray_->bitarray);//hacerlo con mmap()
+//	txt_close_file(bitmap_file);
 
 	bitarray_set_bit(bitarray_,63);
 	setear_bloque_ocupado_en_posicion(62);
@@ -49,7 +58,49 @@ configurar_bitmap(8);
 	return 0;
 }
 
+//BITMAP begin
+void configurar_bitmap(char bitmap_array[], int cantidadDeBytes){
+//	static char  bitmap_array[cantidadDeBytes];
+	for(int k =0;k<cantidadDeBytes;k++)bitmap_array[k]=0b00000000;
+//	char* bitmap_string=malloc(cantidadDeBytes);
+//	memset(bitmap_string,'0',cantidadDeBytes);//mejor con array
+	printf("strlen es  %d con valor %s \n",sizeof(bitmap_array),bitmap_array);
+	bitarray_ = bitarray_create_with_mode(bitmap_array, cantidadDeBytes, LSB_FIRST);
+	bitmap_file=fopen("Bitmap.bin","w+");
+	txt_write_in_file(bitmap_file,bitarray_->bitarray);//hacerlo con mmap()
+//	memmove(bitmap_file,bitarray_->bitarray,bitarray_->size);
+	txt_close_file(bitmap_file);
+}
 
+void setear_bloque_ocupado_en_posicion(off_t pos){
+	bitarray_set_bit(bitarray_,pos);
+}
+bool testear_bloque_libre_en_posicion(int pos){
+	return bitarray_test_bit(bitarray_,(off_t)(pos));
+}
+void mostrar_bitarray(){
+	for(int k =0;k<(bitarray_get_max_bit(bitarray_));k++)printf("test bit posicion, despues de seteo %d en pos %d \n", bitarray_test_bit(bitarray_,k),k);
+}
+void setBloqueActuaLleno(){//agregar un 1 al bitmap.bin
+	bitarray_set_bit(bitarray_,bloqueActual_int);
+}
+
+
+
+FILE* getBloqueLibre_file(){
+	int i;
+	for( i =0;testear_bloque_libre_en_posicion(i);i++);//hasta un bloque lbre
+	char* path_del_bloque_libre = malloc(1000);
+	sprintf(path_del_bloque_libre,"%d.bin",i);//rehacer path con punto de ontaje y carpeta segun dam
+	bloqueActual_file = fopen(path_del_bloque_libre,"w");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
+	free(path_del_bloque_libre);
+	return bloqueActual_file;
+}
+bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque){
+	return cantidadDeCaracteres_file(bloqueActual)<tamanioDeBloque;
+}
+
+//BITMAP end
 
 
 void consola_fifa(){
@@ -214,46 +265,7 @@ void mostrar_configuracion_metadata(){
 //METADATA
 
 
-//BITMAP
-void configurar_bitmap(int cantidadDeBytes){
-	char bitmap_array[cantidadDeBytes];
-	for(int i =0;i<cantidadDeBytes;i++)bitmap_array[i]=0;
-	printf("sizeof es  %d\n",sizeof(bitmap_array));
-	bitarray_ = bitarray_create_with_mode(bitmap_array, sizeof(bitmap_array), LSB_FIRST);
-	bitmap_file=fopen("Bitmap.bin","w+");
-	txt_write_in_file(bitmap_file,bitarray_->bitarray);//hacerlo con mmap()
-	txt_close_file(bitmap_file);
-}
 
-void setear_bloque_ocupado_en_posicion(off_t pos){
-	bitarray_set_bit(bitarray_,pos);
-}
-bool testear_bloque_libre_en_posicion(int pos){
-	return bitarray_test_bit(bitarray_,(off_t)(pos));
-}
-void mostrar_bitarray(){
-	for(int k =0;k<(bitarray_get_max_bit(bitarray_));k++)printf("test bit posicion, despues de seteo %d en pos %d \n", bitarray_test_bit(bitarray_,k),k);
-}
-void setBloqueActuaLleno(){//agregar un 1 al bitmap.bin
-	bitarray_set_bit(bitarray_,bloqueActual_int);
-}
-
-
-
-FILE* getBloqueLibre_file(){
-	int i;
-	for( i =0;testear_bloque_libre_en_posicion(i);i++);//hasta un bloque lbre
-	char* path_del_bloque_libre = malloc(1000);
-	sprintf(path_del_bloque_libre,"%d.bin",i);//rehacer path con punto de ontaje y carpeta segun dam
-	bloqueActual_file = fopen(path_del_bloque_libre,"w");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
-	free(path_del_bloque_libre);
-	return bloqueActual_file;
-}
-bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque){
-	return cantidadDeCaracteres_file(bloqueActual)<tamanioDeBloque;
-}
-
-//BITMAP
 
 
 
