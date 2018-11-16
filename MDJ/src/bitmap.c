@@ -7,12 +7,8 @@
 #include "bitmap.h"
 
 
-FILE* bloqueActual_file=NULL;
-char bloqueActual_path[250]; //direccion del bloque actual
-unsigned int bloqueActual_int=0;
-t_bitarray* bitarray=NULL;
-char* bitmap_path_directorio=NULL;
-FILE* bitmap_file=NULL;
+
+
 
 
 
@@ -25,6 +21,7 @@ void configurar_bitmap(int cantidadDeBytes){
 	bitmap_file=txt_open_for_append("Bitmap.bin");
 	txt_write_in_file(bitmap_file,bitarray->bitarray);//hacerlo con mmap()
 	txt_close_file(bitmap_file);
+//	bitarray_destroy(bitarray);
 }
 void setear_bloque_ocupado_en_posicion(int pos){
 	bitarray_set_bit(bitarray,(off_t)(pos));
@@ -32,13 +29,13 @@ void setear_bloque_ocupado_en_posicion(int pos){
 bool testear_bloque_libre_en_posicion(int pos){
 	return bitarray_test_bit(bitarray,(off_t)(pos));
 }
-void setBloqueLleno(){//agregar un 1 al bitmap.bin
-	bitarray_set_bit(bitarray,bloqueActual_int);
-}
-
 void mostrar_bitarray(int cantidadDeBloques){
 	for(int k =0;k<cantidadDeBloques;k++)printf("test bit posicion, despues de seteo %d en pos %d \n", bitarray_test_bit(bitarray,k),k);
 }
+void setBloqueActuaLleno(){//agregar un 1 al bitmap.bin
+	bitarray_set_bit(bitarray,bloqueActual_int);
+}
+
 
 
 FILE* getBloqueLibre_file(){
@@ -53,3 +50,4 @@ FILE* getBloqueLibre_file(){
 bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque){
 	return cantidadDeCaracteres_file(bloqueActual)<tamanioDeBloque;
 }
+

@@ -6,6 +6,8 @@
  */
 #ifndef MDJ_H_
 #define MDJ_H_
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <commons/config.h> //Commons config archivo
@@ -19,9 +21,6 @@
 #include <stdarg.h>
 #include <pthread.h>
 #include <qcommons/socket_viejo.h> //Libreria Socket Cliente
-
-#include <string.h>
-
 
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -37,12 +36,10 @@
 #include <qcommons/utilitaria.h>
 
 
-#define  MAX_INPUT_BUFFER 1000
 
-#define loop while(1)
-#define minimo(unNum,otroNum)  ((unNum>otroNum)?unNum:otroNum)
 
- char leyenda_temporal[MAX_INPUT_BUFFER];
+
+
 
 //----------------------------
 typedef struct{
@@ -58,43 +55,33 @@ Socket mdj_socket;//socket mdj
 
 
 
-struct METADATA{
-	int tamanio_de_bloque;//en bytes, ni dice eso el enunciado
-	int cantidad_bloques;
-	char* MAGIC_NUMBER;//es fifa , puede ser un charArray, charlable
-}metadata;
 
-t_log *mdj_log= NULL;
+
+
 fd_set descriptoresLectura;	/* Descriptores de interes para select() */
 int maximo;							/* Número de descriptor más grande */
 int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
 int numeroClientes;			/* Número clientes conectados */
 int socketServidor;				/* Descriptor del socket servidor */
 
-//Socket mdj_socket; //socket MDJ
-
 //variables globales
 
 
 //funciones
 void liberar_memoria_de_configuracion(MDJ_CONFIG* configuracion_inicial);
-//freeshea el puntero de configuracion inicial
-void montar_configuracion(t_config* );
-void mostrar_configuracion_mdj();
-t_config* cargar_en_memoria_cfg(char*);
+
+
 //--------------
 
 
-void loggear_y_guardar_info(char * s, ...); //imprime como printf y guarda en log
-void loggear_info(char * s, ...);
 
 
 void escuchar_mensajes_entrantes();
 void mdj_liberar_recursos();
-//void  ejecutar_linea_entrante();
+void  ejecutar_linea_entrante();
+
 void cargar_configuracion_mdj();//hardcodeada, completar con config.h
-void mostrar_configuracion_metadata();
-void cargar_configuracion_metadata();//hardcodeada, completar con config.h y  Metadata.bin
+
 
 bool estaLLenoElBloqueActual();///debe usarse con Bitmap.bin
 bool estaOcupaco(char* path);
@@ -102,10 +89,24 @@ bool terminoDeMapearContenido();
 void consola_fifa();
 //bool bitmap_bloque_esta_ocupado(char* path_del_bloque);
 void  mapearBloque(FILE* bloque, char * contenido);
-void configurar_bitmap();
-FILE* getBloqueLibre_file();
-char* recortarPrimerosCaracteres(char* s, int primerosCaracteres);
-int cantidadDeCaracteres_file(FILE* bloque);
-bool quedaContenidoParaMapear();
+
+
+bool quedaContenidoParaMapear(char* contenido);
+
+
+
+
+//METADATA
+struct METADATA{
+	int tamanio_de_bloque;//en bytes, ni dice eso el enunciado
+	int cantidad_bloques;
+	char* MAGIC_NUMBER;//es fifa , puede ser un charArray, charlable, no sirve , es la extension de los archivos d config escriptorio
+}metadata;
+
+void cargar_configuracion_metadata();
+void mostrar_configuracion_metadata();
+
+//METADATA
+
 
 #endif /* MDJ_H_ */
