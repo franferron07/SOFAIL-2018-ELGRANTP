@@ -94,8 +94,7 @@ void mostrar_configuracion_metadata();
 
 
 //BITMAP begin
-
-char * bloqueActual_path=NULL; //direccion del bloque actual
+char* bloqueActual_path=NULL;
  int bloqueActual_int=0;
 char* bitmap_path_directorio;
 FILE* bitmap_file;

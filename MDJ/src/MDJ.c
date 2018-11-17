@@ -23,7 +23,6 @@ int i;
 pthread_attr_t hilo_escucha;
 pthread_attr_t hilo_consola_fifa;
 
-char* aMapearAlBloque=NULL;
 
 ////variables para seteo de bloques
 //bloqueActual_file=NULL;
@@ -38,11 +37,10 @@ mostrar_configuracion_metadata();
 
 char bits[metadata.cantidad_bloques/8];
 configurar_bitmap(bits,metadata.cantidad_bloques/8);
-//FILE* f = fopen("holas/lol.bin","w+");
-//fprintf(f," no esta");
-//txt_close_file(f);
+
+
 mostrar_bitarray();
-bloqueActual_path=malloc(300);
+
 consola_fifa();
 free(bloqueActual_path);
 
@@ -66,7 +64,7 @@ void configurar_bitmap(char bitmap_array[], int cantidadDeBytes){
 	txt_close_file(bitmap_file);
 }
 
-void setear_bloque_ocupado_en_posicion(off_t pos){
+void setear_bloque_ocupado_en_posicion(off_t pos){//ok
 	bitarray_set_bit(bitarray_,pos);
 }
 bool testear_bloque_libre_en_posicion(int pos){
@@ -84,11 +82,8 @@ void setBloqueActuaLleno(){//agregar un 1 al bitmap.bin
 char* getBloqueLibre_file(){
 	int j;
 	for( j =0;testear_bloque_libre_en_posicion(j);j++);//hasta un bloque lbre
-	char* path_del_bloque_libre = malloc(1000);
-	sprintf(path_del_bloque_libre,"%d.bin",j);//rehacer path con punto de ontaje y carpeta segun dam
+	sprintf(bloqueActual_path,"%d.bin",j);//rehacer path con punto de ontaje y carpeta segun dam
 //	bloqueActual_path = fopen(path_del_bloque_libre,"w+");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
-	strcpy(bloqueActual_path,path_del_bloque_libre);
-	free(path_del_bloque_libre);
 	return bloqueActual_path;
 }
 bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque){
@@ -112,12 +107,13 @@ void  ejecutar_linea_entrante(char* buffer_entrante){
 	persistirContenido(buffer_entrante);
 }
 void persistirContenido(char * contenido){
+	 bloqueActual_path=malloc(400);
 	for(bloqueActual_path=getBloqueLibre_file();quedaContenidoParaMapear(contenido);bloqueActual_path=getBloqueLibre_file()){
 			persistirAlBloque(bloqueActual_path,contenido);
-			if(!quedaContenidoParaMapear(contenido) || estaLLenoElBloqueActual())setear_bloque_ocupado_en_posicion(bloqueActual_int);
+			if(estaLLenoElBloqueActual())setear_bloque_ocupado_en_posicion(bloqueActual_int);
 		}
 			setear_bloque_ocupado_en_posicion(bloqueActual_int);
-		free(aMapearAlBloque);
+	free(bloqueActual_path);
 }
 
 
@@ -127,14 +123,15 @@ void persistirContenido(char * contenido){
 
 
 void  persistirAlBloque(char* unBloquePath, char * contenido){
-	aMapearAlBloque=recortarPrimerosCaracteres(contenido,minimo(metadata.tamanio_de_bloque,espacioRestanteAlBloque()));
-	printf("se va a mapear al bloque %s y el restante es %s \n",aMapearAlBloque,contenido);
+	char* recorte =NULL;
+	recorte=recortarPrimerosCaracteres(contenido,minimo(metadata.tamanio_de_bloque,espacioRestanteAlBloque()));
+	printf("se va a mapear al bloque %s y el restante es %s \n",recorte,contenido);
 //	 sprintf(bloqueActual_path,"%d.bin",bloqueActual_int);
 
 	FILE* bloqueActual =txt_open_for_append(unBloquePath);
-	txt_write_in_file(bloqueActual,aMapearAlBloque);
+	txt_write_in_file(bloqueActual,recorte);
 	txt_close_file(bloqueActual);
-
+	free(recorte);
 }
 bool estaLLenoElBloqueActual(){
 	return cantidadDeCaracteres_path(bloqueActual_path)==metadata.tamanio_de_bloque;
