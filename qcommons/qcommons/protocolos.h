@@ -161,7 +161,7 @@ void* serializar_request_operacion_(request_operacion_type *request);
 
 request_operacion_type* deserializar_request_operacion(void *buffer);
 
-
+void myMemCpy(void *dest, void *src, size_t n);
 void* serializar_dtb(dtb_struct *dtb, int * tamanio_buffer);
 dtb_struct* deserializar_dtb(void *buffer);
 

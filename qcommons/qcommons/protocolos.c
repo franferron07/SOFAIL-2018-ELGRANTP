@@ -76,6 +76,17 @@ void* serializar_header_conexion(header_conexion_type *header) {
 	return buffer;
 }
 
+void myMemCpy(void *dest, void *src, size_t n)
+{
+   // Typecast src and dest addresses to (char *)
+   char *csrc = (char *)src;
+   char *cdest = (char *)dest;
+
+   // Copy contents of src[] to dest[]
+   for (int i=0; i<n; i++)
+       cdest[i] = csrc[i];
+}
+
 void* serializar_operacion_archivo(operacion_archivo* struct_archivo, int* tamanio_buffer)
 {
 	int tamanio_path = strlen(struct_archivo->ruta_archivo);
@@ -96,17 +107,6 @@ void* serializar_operacion_archivo(operacion_archivo* struct_archivo, int* taman
 }
 
 operacion_archivo* deserializar_operacion_archivo(void *buffer) {
-
-	void myMemCpy(void *dest, void *src, size_t n)
-	{
-	   // Typecast src and dest addresses to (char *)
-	   char *csrc = (char *)src;
-	   char *cdest = (char *)dest;
-
-	   // Copy contents of src[] to dest[]
-	   for (int i=0; i<n; i++)
-	       cdest[i] = csrc[i];
-	}
 
 	operacion_archivo* struct_archivo = malloc(sizeof(operacion_archivo));
 	int tamanio_path;
@@ -142,17 +142,6 @@ void* serializar_operacion_archivo_mdj(operacion_archivo_mdj* struct_archivo, in
 }
 
 operacion_archivo_mdj* deserializar_operacion_archivo_mdj(void *buffer) {
-
-	void myMemCpy(void *dest, void *src, size_t n)
-	{
-	   // Typecast src and dest addresses to (char *)
-	   char *csrc = (char *)src;
-	   char *cdest = (char *)dest;
-
-	   // Copy contents of src[] to dest[]
-	   for (int i=0; i<n; i++)
-	       cdest[i] = csrc[i];
-	}
 
 	operacion_archivo_mdj* struct_archivo = malloc(sizeof(operacion_archivo_mdj));
 	int tamanio_path;
@@ -190,17 +179,6 @@ void* serializar_operacion_crear(operacion_crear* struct_archivo_crear, int* tam
 }
 
 operacion_crear* deserializar_operacion_crear(void *buffer) {
-
-	void myMemCpy(void *dest, void *src, size_t n)
-	{
-	   // Typecast src and dest addresses to (char *)
-	   char *csrc = (char *)src;
-	   char *cdest = (char *)dest;
-
-	   // Copy contents of src[] to dest[]
-	   for (int i=0; i<n; i++)
-	       cdest[i] = csrc[i];
-	}
 
 	operacion_crear* struct_archivo = malloc(sizeof(operacion_crear));
 	int tamanio_path;
@@ -241,17 +219,6 @@ void* serializar_operacion_crear_mdj(operacion_crear_mdj* struct_archivo_crear, 
 }
 
 operacion_crear_mdj* deserializar_operacion_crear_mdj(void *buffer) {
-
-	void myMemCpy(void *dest, void *src, size_t n)
-	{
-	   // Typecast src and dest addresses to (char *)
-	   char *csrc = (char *)src;
-	   char *cdest = (char *)dest;
-
-	   // Copy contents of src[] to dest[]
-	   for (int i=0; i<n; i++)
-	       cdest[i] = csrc[i];
-	}
 
 	operacion_crear_mdj* struct_archivo = malloc(sizeof(operacion_crear_mdj));
 	int tamanio_path;
@@ -390,18 +357,6 @@ dtb_struct* deserializar_dtb(void *buffer){
 	//pero en algun lugar hay un stack smashing...
 	dtb_struct* dtb = malloc(sizeof(dtb_struct));
 	int lastIndex = 0;
-
-	void myMemCpy(void *dest, void *src, size_t n)
-	{
-	   // Typecast src and dest addresses to (char *)
-	   char *csrc = (char *)src;
-	   char *cdest = (char *)dest;
-
-	   // Copy contents of src[] to dest[]
-	   for (int i=0; i<n; i++)
-	       cdest[i] = csrc[i];
-	}
-
 
 	deserialize_data(&(dtb->id_dtb),sizeof(dtb->id_dtb), buffer, &lastIndex);
 	uint8_t tamanio_ruta_escriptorio;
