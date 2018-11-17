@@ -38,23 +38,17 @@ mostrar_configuracion_metadata();
 
 char bits[metadata.cantidad_bloques/8];
 configurar_bitmap(bits,metadata.cantidad_bloques/8);
+//FILE* f = fopen("holas/lol.bin","w+");
+//fprintf(f," no esta");
+//txt_close_file(f);
+mostrar_bitarray();
+bloqueActual_path=malloc(300);
+consola_fifa();
+free(bloqueActual_path);
 
-//char bitmap_array[8];
-//	for(int i =0;i<8;i++)bitmap_array[i]=0;
-//	printf("sizeof es  %d\n",sizeof(bitmap_array));
-//	bitarray_ = bitarray_create_with_mode(bitmap_array, sizeof(bitmap_array), LSB_FIRST);
-//	bitmap_file=fopen("Bitmap.bin","w+");
-//	txt_write_in_file(bitmap_file,bitarray_->bitarray);//hacerlo con mmap()
-//	txt_close_file(bitmap_file);
 
-	bitarray_set_bit(bitarray_,63);
-	setear_bloque_ocupado_en_posicion(62);
-	bitarray_set_bit(bitarray_,0);
-	bitarray_set_bit(bitarray_,1);
-	bitarray_set_bit(bitarray_,2);
-	mostrar_bitarray();
-	puts(bitarray_->bitarray);
-	bitarray_destroy(bitarray_);
+
+puts("fin");
 	return 0;
 }
 
@@ -64,7 +58,7 @@ void configurar_bitmap(char bitmap_array[], int cantidadDeBytes){
 	for(int k =0;k<cantidadDeBytes;k++)bitmap_array[k]=0b00000000;
 //	char* bitmap_string=malloc(cantidadDeBytes);
 //	memset(bitmap_string,'0',cantidadDeBytes);//mejor con array
-	printf("strlen es  %d con valor %s \n",sizeof(bitmap_array),bitmap_array);
+	printf("strlen es  %d con valor %s \n",cantidadDeBytes,bitmap_array);
 	bitarray_ = bitarray_create_with_mode(bitmap_array, cantidadDeBytes, LSB_FIRST);
 	bitmap_file=fopen("Bitmap.bin","w+");
 	txt_write_in_file(bitmap_file,bitarray_->bitarray);//hacerlo con mmap()
@@ -87,14 +81,15 @@ void setBloqueActuaLleno(){//agregar un 1 al bitmap.bin
 
 
 
-FILE* getBloqueLibre_file(){
-	int i;
-	for( i =0;testear_bloque_libre_en_posicion(i);i++);//hasta un bloque lbre
+char* getBloqueLibre_file(){
+	int j;
+	for( j =0;testear_bloque_libre_en_posicion(j);j++);//hasta un bloque lbre
 	char* path_del_bloque_libre = malloc(1000);
-	sprintf(path_del_bloque_libre,"%d.bin",i);//rehacer path con punto de ontaje y carpeta segun dam
-	bloqueActual_file = fopen(path_del_bloque_libre,"w");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
+	sprintf(path_del_bloque_libre,"%d.bin",j);//rehacer path con punto de ontaje y carpeta segun dam
+//	bloqueActual_path = fopen(path_del_bloque_libre,"w+");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
+	strcpy(bloqueActual_path,path_del_bloque_libre);
 	free(path_del_bloque_libre);
-	return bloqueActual_file;
+	return bloqueActual_path;
 }
 bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque){
 	return cantidadDeCaracteres_file(bloqueActual)<tamanioDeBloque;
@@ -114,27 +109,35 @@ void consola_fifa(){
 }
 void  ejecutar_linea_entrante(char* buffer_entrante){
 //	system(buffer_entrante);
-	for(bloqueActual_file=getBloqueLibre_file();quedaContenidoParaMapear(buffer_entrante);bloqueActual_file=getBloqueLibre_file()){
-		mapearBloque(bloqueActual_file,buffer_entrante);
-		setear_bloque_ocupado_en_posicion(bloqueActual_int);
-	}
+	persistirContenido(buffer_entrante);
+}
+void persistirContenido(char * contenido){
+	for(bloqueActual_path=getBloqueLibre_file();quedaContenidoParaMapear(contenido);bloqueActual_path=getBloqueLibre_file()){
+			persistirAlBloque(bloqueActual_path,contenido);
+			if(!quedaContenidoParaMapear(contenido) || estaLLenoElBloqueActual())setear_bloque_ocupado_en_posicion(bloqueActual_int);
+		}
+			setear_bloque_ocupado_en_posicion(bloqueActual_int);
+		free(aMapearAlBloque);
 }
 
 
  int  espacioRestanteAlBloque(){
-	return metadata.tamanio_de_bloque-cantidadDeCaracteres_file(bloqueActual_file);
+	return metadata.tamanio_de_bloque-cantidadDeCaracteres_path(bloqueActual_path);
 }
 
 
-void  mapearBloque(FILE* bloque, char * contenido){
+void  persistirAlBloque(char* unBloquePath, char * contenido){
 	aMapearAlBloque=recortarPrimerosCaracteres(contenido,minimo(metadata.tamanio_de_bloque,espacioRestanteAlBloque()));
 	printf("se va a mapear al bloque %s y el restante es %s \n",aMapearAlBloque,contenido);
-	txt_write_in_file(bloque,aMapearAlBloque);
-	txt_close_file(bloque);
-	free(aMapearAlBloque);
+//	 sprintf(bloqueActual_path,"%d.bin",bloqueActual_int);
+
+	FILE* bloqueActual =txt_open_for_append(unBloquePath);
+	txt_write_in_file(bloqueActual,aMapearAlBloque);
+	txt_close_file(bloqueActual);
+
 }
 bool estaLLenoElBloqueActual(){
-	return cantidadDeCaracteres_file(bloqueActual_file)==metadata.tamanio_de_bloque;
+	return cantidadDeCaracteres_path(bloqueActual_path)==metadata.tamanio_de_bloque;
 }
 
 bool terminoDeMapearContenido(){

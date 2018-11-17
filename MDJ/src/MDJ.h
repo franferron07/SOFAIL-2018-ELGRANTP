@@ -62,6 +62,9 @@ void escuchar_mensajes_entrantes();
 
 void  ejecutar_linea_entrante();
 
+//bitmap
+void persistirContenido(char * contenido);
+
 
 
 bool estaLLenoElBloqueActual();///debe usarse con Bitmap.bin
@@ -69,7 +72,7 @@ bool estaOcupaco(char* path);
 bool terminoDeMapearContenido();
 void consola_fifa();
 //bool bitmap_bloque_esta_ocupado(char* path_del_bloque);
-void  mapearBloque(FILE* bloque, char * contenido);
+void  persistirAlBloque(char* unBloquePath, char * contenido);
 
 
 
@@ -92,9 +95,8 @@ void mostrar_configuracion_metadata();
 
 //BITMAP begin
 
-FILE* bloqueActual_file;
-char bloqueActual_path[250]; //direccion del bloque actual
- int bloqueActual_int;
+char * bloqueActual_path=NULL; //direccion del bloque actual
+ int bloqueActual_int=0;
 char* bitmap_path_directorio;
 FILE* bitmap_file;
 t_bitarray* bitarray_=NULL;
@@ -104,7 +106,7 @@ bool testear_bloque_libre_en_posicion(int pos);
 void setBloqueLleno();//agregar un 1 al bitmap.bin
 void mostrar_bitarray();
 
-FILE* getBloqueLibre_file();
+char* getBloqueLibre_file();
 bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque);
 void configurar_bitmap(char bitmap_array[],int cantidadDeBytes);
 
