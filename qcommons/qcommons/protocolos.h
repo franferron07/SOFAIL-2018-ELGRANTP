@@ -135,9 +135,8 @@ typedef struct
 typedef struct
 {
 	int pid;
-	char* ruta_archivo;
 	direccion_struct* direccion;
-} operacion_flush;
+} operacion_archivo_direccion;
 
 
 int enviar_header_conexion(int socket_server, char* nombre_instancia,
@@ -169,6 +168,8 @@ int tamanio_dtb( dtb_struct *dtb );
 
 void* serializar_operacion_archivo(operacion_archivo* struct_archivo,int* tamanio_buffer);
 operacion_archivo* deserializar_operacion_archivo(void *buffer);
+void* serializar_operacion_archivo_direccion(operacion_archivo_direccion* struct_archivo, int* tamanio_buffer);
+operacion_archivo_direccion* deserializar_operacion_archivo_direccion(void *buffer);
 void* serializar_operacion_archivo_mdj(operacion_archivo_mdj* struct_archivo, int* tamanio_buffer);
 operacion_archivo_mdj* deserializar_operacion_archivo_mdj(void *buffer);
 void* serializar_operacion_crear(operacion_crear* struct_archivo_crear, int* tamanio_buffer);

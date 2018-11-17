@@ -100,6 +100,7 @@ void* serializar_operacion_archivo(operacion_archivo* struct_archivo, int* taman
 	memcpy(buffer+lastIndex, &(tamanio_path), sizeof(tamanio_path));
 	lastIndex += sizeof(tamanio_path);
 	memcpy(buffer+lastIndex, &(struct_archivo->ruta_archivo),tamanio_path);
+	lastIndex += tamanio_path;
 
 	*tamanio_buffer = lastIndex;
 
@@ -124,6 +125,61 @@ operacion_archivo* deserializar_operacion_archivo(void *buffer) {
 	return struct_archivo;
 }
 
+void* serializar_operacion_archivo_direccion(operacion_archivo_direccion* struct_archivo, int* tamanio_buffer)
+{
+	int tamanio_path = strlen(struct_archivo->direccion->path);
+	int tamanio_direccion = strlen(struct_archivo->direccion->direccion);
+	int TAMANIO_OPERACION_ARCHIVO = sizeof(struct_archivo->pid)+sizeof(tamanio_path)+tamanio_path+sizeof(tamanio_direccion)+tamanio_direccion;
+
+	void* buffer = malloc(TAMANIO_OPERACION_ARCHIVO);
+	int lastIndex = 0;
+
+	memcpy(buffer, &(struct_archivo->pid), sizeof(struct_archivo->pid));
+	lastIndex += sizeof(struct_archivo->pid);
+	memcpy(buffer+lastIndex, &(tamanio_path), sizeof(tamanio_path));
+	lastIndex += sizeof(tamanio_path);
+	memcpy(buffer+lastIndex, &(struct_archivo->direccion->path),tamanio_path);
+	lastIndex += tamanio_path;
+	memcpy(buffer+lastIndex, &(tamanio_direccion), sizeof(tamanio_direccion));
+	lastIndex += sizeof(tamanio_direccion);
+	memcpy(buffer+lastIndex, &(struct_archivo->direccion->direccion),tamanio_path);
+	lastIndex += tamanio_direccion;
+
+	*tamanio_buffer = lastIndex;
+
+	return buffer;
+}
+
+operacion_archivo_direccion* deserializar_operacion_archivo_direccion(void *buffer) {
+
+	operacion_archivo_direccion* struct_archivo = malloc(sizeof(operacion_archivo_direccion));
+	int tamanio_path;
+	int tamanio_direccion;
+
+	int lastIndex = 0;
+
+	memcpy(&(struct_archivo->pid), buffer, sizeof(struct_archivo->pid));
+	lastIndex += sizeof(struct_archivo->pid);
+	memcpy(&(tamanio_path), buffer+lastIndex, sizeof(tamanio_path));
+	lastIndex += sizeof(tamanio_path);
+
+	struct_archivo->direccion->path = malloc(tamanio_path+1);
+	myMemCpy(&(struct_archivo->direccion->path), buffer+lastIndex, tamanio_path);
+	struct_archivo->direccion->path[tamanio_path] = '\0';
+
+	lastIndex += tamanio_path;
+
+	memcpy(&(tamanio_direccion), buffer+lastIndex, sizeof(tamanio_direccion));
+	lastIndex += sizeof(tamanio_direccion);
+
+	struct_archivo->direccion->path = malloc(tamanio_direccion+1);
+	myMemCpy(&(struct_archivo->direccion->path), buffer+lastIndex, tamanio_direccion);
+	struct_archivo->direccion->path[tamanio_direccion] = '\0';
+
+
+	return struct_archivo;
+}
+
 void* serializar_operacion_archivo_mdj(operacion_archivo_mdj* struct_archivo, int* tamanio_buffer)
 {
 	int tamanio_path = strlen(struct_archivo->ruta_archivo);
@@ -135,6 +191,7 @@ void* serializar_operacion_archivo_mdj(operacion_archivo_mdj* struct_archivo, in
 	memcpy(buffer+lastIndex, &(tamanio_path), sizeof(tamanio_path));
 	lastIndex += sizeof(tamanio_path);
 	memcpy(buffer+lastIndex, &(struct_archivo->ruta_archivo),tamanio_path);
+	lastIndex += tamanio_path;
 
 	*tamanio_buffer = lastIndex;
 
@@ -172,6 +229,7 @@ void* serializar_operacion_crear(operacion_crear* struct_archivo_crear, int* tam
 	memcpy(buffer+lastIndex, &(tamanio_path), sizeof(tamanio_path));
 	lastIndex += sizeof(tamanio_path);
 	memcpy(buffer+lastIndex, &(struct_archivo_crear->ruta_archivo),tamanio_path);
+	lastIndex += tamanio_path;
 
 	*tamanio_buffer = lastIndex;
 
@@ -212,6 +270,7 @@ void* serializar_operacion_crear_mdj(operacion_crear_mdj* struct_archivo_crear, 
 	memcpy(buffer+lastIndex, &(tamanio_path), sizeof(tamanio_path));
 	lastIndex += sizeof(tamanio_path);
 	memcpy(buffer+lastIndex, &(struct_archivo_crear->ruta_archivo),tamanio_path);
+	lastIndex += tamanio_path;
 
 	*tamanio_buffer = lastIndex;
 
