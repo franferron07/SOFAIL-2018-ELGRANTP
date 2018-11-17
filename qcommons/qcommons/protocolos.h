@@ -23,36 +23,35 @@ typedef enum {
 
 	/***** CPU A SAFA *****/
 	ENVIARDTB = 10,
-	CERRARCONEXION= 11,
-	BLOQUEARDTB=12 ,
-	TERMINARDTB=13,
-	FINDEQUANTUM=14,
-	PEDIRRECURSO=15,
-	LIBERARRECURSO=16,
-	CERRARARCHIVO=17,
-	QUANTUMEJECUTADO=18,
+	CERRARCONEXION = 11,
+	BLOQUEARDTB = 12,
+	TERMINARDTB = 13,
+	FINDEQUANTUM = 14,
+	PEDIRRECURSO = 15,
+	LIBERARRECURSO = 16,
+	CERRARARCHIVO = 17,
+	QUANTUMEJECUTADO = 18,
 
 	/***** DAM A SAFA *****/
-	ARCHIVOCARGADO=20,
-	ARCHIVOCREADO=21,
-	ARCHIVOMODIFICADO=22,
-	ARCHIVOBORRADO=23,
-	
+	ARCHIVOCARGADO = 20,
+	ARCHIVOCREADO = 21,
+	ARCHIVOMODIFICADO = 22,
+	ARCHIVOBORRADO = 23,
+
 	/***** DAM A MDJ *****/
-	CREAR_ARCHIVO=24,
-	BORRAR_ARCHIVO=25,
-	OBTENER_DATOS=26,
-	GUARDAR_DATOS=27,
+	CREAR_ARCHIVO = 24,
+	BORRAR_ARCHIVO = 25,
+	OBTENER_DATOS = 26,
+	GUARDAR_DATOS = 27,
 
 	/*****ERRORES POSIBLES TODO:hay errores que se repiten pero cambia el codigo. Decidir con grupo que hacer. *****/
 	PATHINEXISTENTE = 10001,
 	ESPACIOINSUFICIENTEFM9 = 10002,
-	ARCHIVOSINABRIR=20001,
-	FALLODEMEMORIA=20002,
+	ARCHIVOSINABRIR = 20001,
+	FALLODEMEMORIA = 20002,
 	ESPACIOINSUFICIENTEMDJ = 30003,
-	ARCHIVONOEXISTE = 30004 ,
-	ARCHIVOYAEXISTENTE = 50001 ,
-
+	ARCHIVONOEXISTE = 30004,
+	ARCHIVOYAEXISTENTE = 50001,
 
 } tipo_operacion_e;
 
@@ -77,18 +76,33 @@ typedef struct {
 
 static const int TAMANIO_REQUEST_OPERACION = 4 + 41 + 4;
 
-
 typedef struct {
 	char *path;
 	char *direccion;
 } direccion_struct;
 
+/**
+ *  NUEVOIOOOO
+ * */
 
+typedef struct {
+	char nombre_instancia[5];
+	int tamanio_mensaje;
+	tipo_operacion_e tipo_operacion;
+} header_paquete;
+
+typedef struct {
+	header_paquete* encabezado;
+	void* mensaje;
+} nombre_paquete;
+
+/**
+ * NUEVOIOOOO
+ * */
 
 typedef enum {
 	NUEVO = 1, LISTO = 2, EJECUTANDO = 3, BLOQUEADO = 4, CARGANDODUMMY = 5
 } tipo_estado_dtb;
-
 
 //TODO: discutir si estas estructuras pertenecen o no al DTB para la muestra de las metricas
 //analizar alternativas
@@ -96,7 +110,6 @@ typedef enum {
 //uint8_t sentencias_espera;
 //uint8_t sentencias_dam;
 //uint8_t sentencias_totales;
-
 
 typedef struct {
 	uint8_t id_dtb;
@@ -108,36 +121,36 @@ typedef struct {
 	t_list *direcciones;
 } dtb_struct;
 
-typedef struct
-{
+typedef struct {
 	int pid;
 	char* ruta_archivo;
 } operacion_archivo;
 
-typedef struct
-{
+typedef struct {
 	char* ruta_archivo;
 } operacion_archivo_mdj;
 
-typedef struct
-{
+typedef struct {
 	int pid;
 	int cant_lineas;
 	char* ruta_archivo;
 } operacion_crear;
 
-typedef struct
-{
+typedef struct {
 	int cant_lineas;
 	char* ruta_archivo;
 } operacion_crear_mdj;
 
-typedef struct
-{
+typedef struct {
+	int pid;
+	char* ruta_archivo;
+	direccion_struct* direccion;
+} operacion_flush;
+
+typedef struct {
 	int pid;
 	direccion_struct* direccion;
 } operacion_archivo_direccion;
-
 
 int enviar_header_conexion(int socket_server, char* nombre_instancia,
 		tipo_instancia_e tipo_instancia, t_log *logger);
@@ -164,17 +177,25 @@ void myMemCpy(void *dest, void *src, size_t n);
 void* serializar_dtb(dtb_struct *dtb, int * tamanio_buffer);
 dtb_struct* deserializar_dtb(void *buffer);
 
-int tamanio_dtb( dtb_struct *dtb );
+int tamanio_dtb(dtb_struct *dtb);
 
-void* serializar_operacion_archivo(operacion_archivo* struct_archivo,int* tamanio_buffer);
+void* serializar_operacion_archivo(operacion_archivo* struct_archivo,
+		int* tamanio_buffer);
 operacion_archivo* deserializar_operacion_archivo(void *buffer);
-void* serializar_operacion_archivo_direccion(operacion_archivo_direccion* struct_archivo, int* tamanio_buffer);
-operacion_archivo_direccion* deserializar_operacion_archivo_direccion(void *buffer);
-void* serializar_operacion_archivo_mdj(operacion_archivo_mdj* struct_archivo, int* tamanio_buffer);
+
+void* serializar_operacion_archivo_direccion(
+		operacion_archivo_direccion* struct_archivo, int* tamanio_buffer);
+
+operacion_archivo_direccion* deserializar_operacion_archivo_direccion(
+		void *buffer);
+void* serializar_operacion_archivo_mdj(operacion_archivo_mdj* struct_archivo,
+		int* tamanio_buffer);
 operacion_archivo_mdj* deserializar_operacion_archivo_mdj(void *buffer);
-void* serializar_operacion_crear(operacion_crear* struct_archivo_crear, int* tamanio_buffer);
+void* serializar_operacion_crear(operacion_crear* struct_archivo_crear,
+		int* tamanio_buffer);
 operacion_crear* deserializar_operacion_crear(void *buffer);
-void* serializar_operacion_crear_mdj(operacion_crear_mdj* struct_archivo_crear, int* tamanio_buffer);
+void* serializar_operacion_crear_mdj(operacion_crear_mdj* struct_archivo_crear,
+		int* tamanio_buffer);
 operacion_crear_mdj* deserializar_operacion_crear_mdj(void *buffer);
 
 #endif /* PROTOCOLOS_H_ */

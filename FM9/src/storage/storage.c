@@ -2,8 +2,8 @@
 
 int id_segmento = 0;
 
-int generar_id_segmento() {
-	return id_segmento++;
+void generar_id_segmento() {
+	id_segmento++;
 }
 
 void inicializar_memoria() {
@@ -56,13 +56,60 @@ int obtener_primer_indice_libre(int cant_lineas) {
 	return -1;
 }
 
-void crear_segmento(int memoria_requerida) {
+void crear_segmento(int memoria_requerida, char* file_name) {
 	segmento_struct* segmento_nuevo = malloc(sizeof(segmento_struct));
 	segmento_nuevo->id = id_segmento;
 	segmento_nuevo->base = obtener_primer_indice_libre(memoria_requerida);
 	segmento_nuevo->limite = memoria_requerida;
+	memcpy(segmento_nuevo->nombre_archivo, file_name, strlen(file_name));
 	list_add(tabla_segmentos, segmento_nuevo);
 	generar_id_segmento();
+}
+
+void escribir_segmento(char* segmento, int linea, char* nombre_archivo) {
+	int _tiene_archivo(segmento_struct *segmento) {
+		return string_equals_ignore_case(segmento->nombre_archivo,
+				nombre_archivo);
+	}
+
+	segmento_struct *seg = list_find(tabla_segmentos, (void*) _tiene_archivo);
+
+	if (seg != NULL && seg->limite >= linea) {
+		memcpy(memoria[linea + seg->base], segmento, strlen(segmento));
+	}
+}
+
+char* leer_segmento(int linea, char* nombre_archivo) {
+	int _tiene_archivo(segmento_struct *segmento) {
+		return string_equals_ignore_case(segmento->nombre_archivo,
+				nombre_archivo);
+	}
+
+	segmento_struct *seg = list_find(tabla_segmentos, (void*) _tiene_archivo);
+
+	char* segmento = malloc(fm9.max_linea);
+	if (seg != NULL && seg->limite >= linea) {
+		memcpy(segmento, memoria[linea + seg->base],
+				strlen(memoria[linea + seg->base]));
+		return segmento;
+	}
+	return NULL;
+}
+
+void liberar_segmento(char* nombre_archivo) {
+	int _tiene_archivo(segmento_struct *segmento) {
+		return string_equals_ignore_case(segmento->nombre_archivo,
+				nombre_archivo);
+	}
+
+	segmento_struct *seg = list_remove_by_condition(tabla_segmentos, (void*) _tiene_archivo);
+
+	if (seg != NULL) {
+		int i;
+		for (i = seg->base; i < (seg->base + seg->limite); i++) {
+			strcpy(memoria[i + seg->base], "null");
+		}
+	}
 }
 
 void crear_segmento_paginada(int memoria_requerida) {

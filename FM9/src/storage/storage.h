@@ -10,6 +10,7 @@ typedef struct {
 	int id;
 	int limite;
 	int base;
+	char* nombre_archivo;
 	t_list* tabla_paginas;
 } segmento_struct;
 
@@ -34,9 +35,9 @@ t_list *tabla_paginas_invertidas;
 
 void inicializar_memoria();
 int obtener_primer_indice_libre(int cant_lineas);
-int generar_id_segmento() ;
+void generar_id_segmento() ;
 void crear_segmento_paginada(int memoria_requerida);
-void crear_segmento(int memoria_requerida);
+void crear_segmento(int memoria_requerida, char* file_name);
 
 void iniciar_segmentacion_pura(int tamanio_memoria);
 void iniciar_segmentacion_paginada(int tamanio_memoria);

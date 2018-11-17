@@ -26,7 +26,7 @@ void escuchar_consola();
 void iniciar_fm9();
 void crear_servidor();
 void atender_conexiones();
-void *administrar_servidor(void *puntero_fd);
+void administrar_servidor(void *puntero_fd);
 void iniciar_administracion_memoria();
 void liberar_recursos(int tipo_salida);
 void terminar_exitosamente();
