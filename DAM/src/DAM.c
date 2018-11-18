@@ -91,14 +91,14 @@ void realizarConexiones() {
 	conectar_safa(dam);
 	//conectar_mdj(dam);
 	conectar_fm9(dam);
-	if (socket_safa <= 0 || socket_mdj <= 0 || socket_fm9 <= 0) {
+	/*if (socket_safa <= 0 || socket_mdj <= 0 || socket_fm9 <= 0) {
 		log_error(dam_log, "Error al conectarse a safa/mdj/fm9");
 		liberar_recursos(EXIT_FAILURE);
 	}
 	else
 	{
 	log_info(dam_log, "Realizada Conexiones safa/mdj/fm9");
-	}
+	}*/
 }
 
 void conectar_safa(dam_config dam){
@@ -112,7 +112,7 @@ void conectar_mdj(dam_config dam){
 
 	obtener_socket_cliente(&socket_mdj,dam.ip_mdj,dam.puerto_mdj);
 	log_info(dam_log,"HANDSHAKE con MDJ");
-	ejecutar_handshake(socket_mdj,"DAM",DAM,dam_log);
+	//ejecutar_handshake(socket_mdj,"DAM",DAM,dam_log);
 }
 
 void conectar_fm9(dam_config dam){
@@ -179,20 +179,100 @@ void realizarHandshakeCpu(int cliente_socket) {
 
 void atender_operacion_cpu(int cliente_socket) {
 
-	request_operacion_type *header_operacion = NULL;
-	void *buffer_operacion = malloc(TAMANIO_REQUEST_OPERACION);
-	int res ;
+	header_paquete* paquete = malloc(sizeof(header_paquete));
+	char linea[MAX_LINEA];
 
-	while ( ( res = recv(cliente_socket, buffer_operacion, TAMANIO_REQUEST_OPERACION,MSG_WAITALL) )  > 0) {
-			header_operacion = deserializar_request_operacion(buffer_operacion);
-
-			log_info(dam_log, "Se recibio operacion del CPU: %s",header_operacion->tipo_operacion);
-
-
-			switch (header_operacion->tipo_operacion ) {
+	while ( (recv(cliente_socket, paquete, sizeof(header_paquete),MSG_WAITALL) )  > 0)
+	{
+		log_info(dam_log, "Se recibio operacion del CPU: %s",paquete->tipo_operacion);
+		switch (paquete->tipo_operacion)
+		{
 
 			//solicitud a El Diego para que traiga desde el MDJ el archivo requerido
 			case ABRIR:{
+				void* buffer = malloc(paquete->tamanio_mensaje);
+				recv(cliente_socket,&buffer,paquete->tamanio_mensaje,MSG_WAITALL);
+
+				operacion_archivo* operacion_abrir = deserializar_operacion_archivo(buffer);
+
+				log_info(dam_log,"/Procesando/ Abrir Archivo, PID: %s, Archivo: %s",operacion_abrir->pid,operacion_abrir->ruta_archivo);
+
+				int* tam_buffer_mdj = malloc(sizeof(int));
+				operacion_archivo_mdj* operacion_archivo_mdj = malloc(sizeof(operacion_archivo_mdj));
+				operacion_archivo_mdj->ruta_archivo = string_duplicate(operacion_abrir->ruta_archivo);
+
+				void* buffer_mdj = serializar_operacion_archivo_mdj(operacion_archivo_mdj,tam_buffer_mdj);
+
+				log_info(dam_log,"Enviando Peticion MDJ Abrir Archivo");
+
+				header_paquete* paquete=malloc(sizeof(header_paquete));
+				paquete->tipo_operacion = OBTENER_DATOS;
+				paquete->tamanio_mensaje = *tam_buffer_mdj;
+
+				send(socket_mdj,paquete,sizeof(header_paquete),0);
+				send(socket_mdj,buffer_mdj,(size_t)tam_buffer_mdj,0);
+
+				/*CONVERSION DE BYTES A LINEAS*/
+				int se_encuentra_barra_n(char* buffer_chars)
+				{
+					return strchr(buffer_chars,'\n') != NULL;
+				}
+
+				send(socket_mdj,(void*)&MAX_LINEA,sizeof(int),0);
+
+				memset( linea, '\0', sizeof(char)*MAX_LINEA );
+				int bytesRecibidos=0;
+				int lastIndex=0;
+				while(1)
+				{
+					void* buffer_bytes=malloc(dam.transfer_size+1);
+
+					bytesRecibidos+=recv(socket_mdj,buffer_bytes,dam.transfer_size,0);
+
+					log_info(dam_log,"Bytes: %d",bytesRecibidos);
+
+					char* buffer_chars = (char*)buffer_bytes;
+					buffer_chars[dam.transfer_size] = '\0';
+
+					if(se_encuentra_barra_n(buffer_chars))
+					{
+						myMemCpy(&(linea[lastIndex]), buffer_chars, dam.transfer_size);
+						log_info(dam_log,"LINEA COMPLETA CON BARRA_N");
+						log_info(dam_log,"%s",linea);
+						lastIndex=0;
+						memset( linea, '\0', sizeof(char)*MAX_LINEA );
+					}else
+					{
+						int restante = MAX_LINEA - lastIndex;
+
+						if(dam.transfer_size > restante)
+						{
+							myMemCpy(&(linea[lastIndex]), buffer_chars, restante);
+							log_info(dam_log,"LINEA COMPLETA: %s",linea);
+
+							lastIndex=0;
+							memset( linea, '\0', sizeof(char)*MAX_LINEA );
+							myMemCpy(&(linea[lastIndex]), buffer_chars+restante, dam.transfer_size-restante);
+							log_info(dam_log,"Nueva Linea: %s",linea);
+							lastIndex = dam.transfer_size-restante;
+
+						}
+						else
+						{
+							myMemCpy(&(linea[lastIndex]), buffer_chars, dam.transfer_size);
+							log_info(dam_log,"Linea Normal: %s",linea);
+							lastIndex += dam.transfer_size;
+
+							if(lastIndex == MAX_LINEA)
+							{
+								log_info(dam_log,"LINEA COMPLETA");
+								lastIndex=0;
+								memset( linea, '\0', sizeof(char)*MAX_LINEA );
+							}
+						}
+					}
+
+				}
 			}
 			break;
 
@@ -203,11 +283,8 @@ void atender_operacion_cpu(int cliente_socket) {
 			//Tengo que enviar mensaje de crear archivo a mdj con un determinado path y cantidad de lineas necesarias
 			case CREAR:{
 
-			int* tam_buffer=malloc(sizeof(int));
-			recv(cliente_socket,tam_buffer,sizeof(int),MSG_WAITALL);
-
-			void* buffer = malloc(*tam_buffer);
-			recv(cliente_socket,&buffer,*tam_buffer,MSG_WAITALL);
+			void* buffer = malloc(paquete->tamanio_mensaje);
+			recv(cliente_socket,&buffer,paquete->tamanio_mensaje,MSG_WAITALL);
 
 			operacion_crear* operacion_crear = deserializar_operacion_crear(buffer);
 
@@ -222,19 +299,14 @@ void atender_operacion_cpu(int cliente_socket) {
 
 			log_info(dam_log,"Enviando Peticion MDJ Crear Archivo");
 
-			void* buffer_request_operacion=NULL;
+			header_paquete* paquete=malloc(sizeof(header_paquete));
+			paquete->tipo_operacion = CREAR_ARCHIVO;
+			paquete->tamanio_mensaje = *tam_buffer_mdj;
 
-			request_operacion_type* operacion=malloc(TAMANIO_REQUEST_OPERACION);
-			operacion->tipo_operacion = CREAR_ARCHIVO;
-			buffer_request_operacion = serializar_request_operacion_(operacion);
-			send(socket_mdj,buffer_request_operacion,TAMANIO_REQUEST_OPERACION,0);
-
-			send(socket_mdj,tam_buffer,sizeof(int),0);
+			send(socket_mdj,paquete,sizeof(header_paquete),0);
 			send(socket_mdj,buffer_mdj,(size_t)tam_buffer_mdj,0);
 
 			//Debo hacer un recv del resultado de la operacion de MDJ e informar a SAFA
-
-			free(tam_buffer);
 			free(tam_buffer_mdj);
 			free(buffer);
 			free(buffer_mdj);
@@ -242,20 +314,14 @@ void atender_operacion_cpu(int cliente_socket) {
 			free(operacion_crear);
 			free(operacion_crear_mdj->ruta_archivo);
 			free(operacion_crear_mdj);
-			free(operacion);
-			free(buffer_request_operacion);
 
 			}
 			break;
 			//debo enviar a mdj borrar determinado archivo
 			case BORRAR:{
 
-				int* tam_buffer=malloc(sizeof(int));
-				recv(cliente_socket,tam_buffer,sizeof(int),MSG_WAITALL);
-
-				void* buffer = malloc(*tam_buffer);
-				recv(cliente_socket,&buffer,*tam_buffer,MSG_WAITALL);
-
+				void* buffer = malloc(paquete->tamanio_mensaje);
+				recv(cliente_socket,&buffer,paquete->tamanio_mensaje,MSG_WAITALL);
 				operacion_archivo* operacion_archivo = deserializar_operacion_archivo(buffer);
 
 				log_info(dam_log,"/Procesando/ Borrar Archivo, PID: %s, Archivo: %s,",operacion_archivo->pid,operacion_archivo->ruta_archivo);
@@ -268,19 +334,15 @@ void atender_operacion_cpu(int cliente_socket) {
 
 				log_info(dam_log,"Enviando Peticion MDJ Borrar Archivo");
 
-				void* buffer_request_operacion=NULL;
+				header_paquete* paquete=malloc(sizeof(header_paquete));
+				paquete->tipo_operacion = BORRAR_ARCHIVO;
+				paquete->tamanio_mensaje = *tam_buffer_mdj;
 
-				request_operacion_type* operacion=malloc(TAMANIO_REQUEST_OPERACION);
-				operacion->tipo_operacion = BORRAR_ARCHIVO;
-				buffer_request_operacion = serializar_request_operacion_(operacion);
-				send(socket_mdj,buffer_request_operacion,TAMANIO_REQUEST_OPERACION,0);
-
-				send(socket_mdj,tam_buffer,sizeof(int),0);
+				send(socket_mdj,paquete,sizeof(header_paquete),0);
 				send(socket_mdj,buffer_mdj,(size_t)tam_buffer_mdj,0);
 
 				//Debo hacer un recv del resultado de la operacion de MDJ e informar a SAFA
 
-				free(tam_buffer);
 				free(tam_buffer_mdj);
 				free(buffer);
 				free(buffer_mdj);
@@ -288,8 +350,6 @@ void atender_operacion_cpu(int cliente_socket) {
 				free(operacion_archivo);
 				free(operacion_archivo_mdj->ruta_archivo);
 				free(operacion_archivo_mdj);
-				free(operacion);
-				free(buffer_request_operacion);
 
 			}
 			break;
@@ -299,8 +359,7 @@ void atender_operacion_cpu(int cliente_socket) {
 		}
 
 
-	free(buffer_operacion);
-	free(header_operacion);
+	free(paquete);
 
 
 }
