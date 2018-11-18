@@ -22,6 +22,18 @@ typedef enum {
 	CREAR = 8,
 	BORRAR = 9,
 
+	/**
+	 * Operacion entre DAM/FM9
+	 * */
+	INSERTAR = 29, /*fm9 while hasta que no termine, terminar de cargar todo, fm9->dam me tenes que decir la direccion de donde empieza*/
+	DESCARGAR = 31, /*dam->fm9 direccion de donde esta, me tenes que ir mandando las lineas hasta donde termina*/
+
+	/**
+	 * Operacion entre DAM/FM9
+	 * */
+	ACTUALIZAR = 32,
+	ELIMINAR = 33,
+
 	/*****ERRORES POSIBLES TODO:hay errores que se repiten pero cambia el codigo. Decidir con grupo que hacer. *****/
 	PATHINEXISTENTE = 10001,
 	ESPACIOINSUFICIENTEFM9 = 10002,
@@ -33,11 +45,11 @@ typedef enum {
 
 } tipo_operacion_e;
 
-typedef enum {
-	INSERTAR=29, /*fm9 while hasta que no termine, terminar de cargar todo, fm9->dam me tenes que decir la direccion de donde empieza*/
-	DESCARGAR=31 /*dam->fm9 direccion de donde esta, me tenes que ir mandando las lineas hasta donde termina*/
-
-} tipo_operacion_dam_fm9;
+//typedef enum {
+//	INSERTAR = 29, /*fm9 while hasta que no termine, terminar de cargar todo, fm9->dam me tenes que decir la direccion de donde empieza*/
+//	DESCARGAR = 31 /*dam->fm9 direccion de donde esta, me tenes que ir mandando las lineas hasta donde termina*/
+//
+//} tipo_operacion_dam_fm9;
 
 typedef enum {
 	ENVIARDTB = 10,
@@ -99,7 +111,7 @@ typedef struct {
 	tipo_instancia_e tipo_instancia;
 	int tamanio_mensaje;
 	int tipo_operacion;
-} __attribute__ ((__packed__)) header_paquete;
+}__attribute__ ((__packed__)) header_paquete;
 
 typedef struct {
 	header_paquete* encabezado;

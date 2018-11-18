@@ -81,89 +81,82 @@ void atender_conexiones() {
 }
 
 void administrar_servidor(void *puntero_fd) {
-//	int cliente_socket = *(int *) puntero_fd;
-//	mensaje_reconocimiento_type mensaje_reconocimiento;
-//	void *buffer_reconocimiento;
-//	void *buffer_header = malloc(TAMANIO_HEADER_CONEXION);
-//
-//	int res = recv(cliente_socket, buffer_header, TAMANIO_HEADER_CONEXION,
-//	MSG_WAITALL);
-//
-//	if (res <= 0) {
-//		log_error(fm9_log, "¡Error en el handshake con el cliente!");
-//		close(cliente_socket);
-//		free(buffer_header);
-//	}
-//
-//	header_conexion = deserializar_header_conexion(buffer_header);
-//
-//	log_info(fm9_log, "Se realizo handshake del cliente: %s",
-//			header_conexion->nombre_instancia);
-//
-//	strcpy(mensaje_reconocimiento.nombre_instancia, FM9);
-//
-//	buffer_reconocimiento = serializar_mensaje_reconocimiento(
-//			&mensaje_reconocimiento);
-//
-//	if (send(cliente_socket, buffer_reconocimiento,
-//			TAMANIO_MENSAJE_RECONOCIMIENTO, 0)
-//			!= TAMANIO_MENSAJE_RECONOCIMIENTO) {
-//		log_error(fm9_log, "¡No se pudo devolver el handshake al cliente!");
-//		close(cliente_socket);
-//	} else {
-//		log_info(fm9_log, "El cliente %s se ha conectado correctamente",
-//				header_conexion->nombre_instancia);
-//	}
-//
-//	free(buffer_header);
-//	free(header_conexion);
-//	free(buffer_reconocimiento);
-//	free(puntero_fd);
+	int socket_actual = *(int*) puntero_fd;
+	paquete_struct* paquete;
+	void* datos;
+	int datos_a_recibir = 0;
+	while ((datos_a_recibir = recibir_datos(&paquete, socket_actual,
+			sizeof(header_paquete))) > 0) {
+		datos = paquete->mensaje;
+		switch (paquete->encabezado->tipo_instancia) {
+		case CPU:
+			coordinarCPU(socket_actual, datos, paquete);
+			break;
+		case DAM:
+			coordinarDAM(socket_actual, datos, paquete);
+			break;
+		default:
+			break;
+		}
+	}
 
-//	int socketActual = *(int*) socket;
-//	int datosRecibidos = 0;
-//	nombre_paquete* paquete;
-//	void* datos;
-//	int datosARecibir;
-//	while ((datosARecibir = RecibirDatos(&paquete, socketActual,
-//			sizeof('Header'))) > 0) {
-//		datos = paquete->mensaje;
-//		switch (paquete->encabezado.nombre_instancia) {
-//		case "CPU": {
-//			coordinarCPU(socketActual, datos, paquete);
-//		}
-//			break;
-//		case "DAM": {
-//			coordinarDAM(socketActual, datos, paquete);
-//		}
-//			break;
-//		}
-//	}
-//
-//	close(socketActual);
-//	sacar_CPU(socketActual);
-
+	close(socket_actual);
+	free(puntero_fd);
 }
 
-int RecibirDatos(void* paquete, int socketFD, uint32_t cantARecibir) {
-	void* datos = malloc(cantARecibir);
+int recibir_datos(void* paquete, int socketFD, uint32_t cant_a_recibir) {
+	void* datos = malloc(cant_a_recibir);
 	int recibido = 0;
-	int totalRecibido = 0;
+	int total_recibido = 0;
 	do {
-		recibido = recv(socketFD, datos + totalRecibido,
-				cantARecibir - totalRecibido, 0);
-		totalRecibido += recibido;
-	} while (totalRecibido != cantARecibir && recibido > 0);
-	memcpy(paquete, datos, cantARecibir);
+		recibido = recv(socketFD, datos + total_recibido,
+				cant_a_recibir - total_recibido, 0);
+		total_recibido += recibido;
+	} while (total_recibido != cant_a_recibir && recibido > 0);
+	memcpy(paquete, datos, cant_a_recibir);
 	free(datos);
 	if (recibido < 0) {
-		printf("Cliente Desconectado\n");
-		close(socketFD); // ¡Hasta luego!
+		printf("Socket %d desconectado\n", socketFD);
+		close(socketFD);
 	} else if (recibido == 0) {
-		printf("Fin de Conexion en socket %d\n", socketFD);
-		close(socketFD); // ¡Hasta luego!
+		printf("Fin de conexion en socket %d\n", socketFD);
+		close(socketFD);
 	}
 	return recibido;
+}
+
+void coordinarDAM(int socket, void* datos, paquete_struct* paquete) {
+	switch (paquete->encabezado->tipo_operacion) {
+	case HANDSHAKE:
+		if (send(socket, (void*) fm9.max_linea, sizeof(fm9.max_linea), 0)
+				!= sizeof(fm9.max_linea)) {
+			log_error(fm9_log, "¡No se pudo devolver el handshake al DAM!");
+			close(socket);
+		} else {
+			log_info(fm9_log, "El cliente %d se ha conectado correctamente",
+					socket);
+		}
+		break;
+	case INSERTAR:
+//		int memoria_requerida = *((int*) datos);
+		datos += sizeof(int);
+		char* file_name = malloc(strlen(datos));
+		memcpy(file_name, datos, strlen(datos));
+		break;
+	case DESCARGAR:
+		break;
+	}
+}
+
+void coordinarCPU(int socket, void* datos, paquete_struct* paquete) {
+	switch (paquete->encabezado->tipo_operacion) {
+	case HANDSHAKE:
+		break;
+	case ACTUALIZAR:
+		break;
+	case ELIMINAR:
+		break;
+	}
 }
 
 void iniciar_administracion_memoria() {
@@ -192,29 +185,3 @@ void terminar_exitosamente(int ret_val) {
 		close(socket_fm9);
 	exit(ret_val);
 }
-
-//void coordinarDAM(int socket, void* datos, nombre_paquete* paquete) {
-//
-//	switch (paquete->encabezado.tipo_operacion) {
-//	/**
-//	 * INSERTAR, HANDSHAKE, ELIMINAR, ACTUALIZAR, DESCARGAR
-//	 * */
-//	case "Handshake": {
-//
-//		int memoria_requerida = *((int*) datos);
-//		datos += sizeof(int);
-//		char* file_name = malloc(strlen(datos));
-//		memcpy(file_name, datos, strlen(datos));
-//	}
-//		break;
-//	case "Lineas a insertar": {
-//		//leer cantidad lineas
-//		//creo el segmento
-//	}
-//		break;
-//	case "Datos Archivo": {
-//		//Inserto la lineas
-//	}
-//		break;
-//	}
-//}
