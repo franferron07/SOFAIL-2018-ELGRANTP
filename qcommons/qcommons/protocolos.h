@@ -11,6 +11,7 @@ typedef enum {
 } tipo_instancia_e;
 
 typedef enum {
+	HANDSHAKE = 0,
 	ABRIR = 1,
 	CONCENTRAR = 2,
 	ASIGNAR = 3,
@@ -20,29 +21,6 @@ typedef enum {
 	CLOSE = 7,
 	CREAR = 8,
 	BORRAR = 9,
-
-	/***** CPU A SAFA *****/
-	ENVIARDTB = 10,
-	CERRARCONEXION = 11,
-	BLOQUEARDTB = 12,
-	TERMINARDTB = 13,
-	FINDEQUANTUM = 14,
-	PEDIRRECURSO = 15,
-	LIBERARRECURSO = 16,
-	CERRARARCHIVO = 17,
-	QUANTUMEJECUTADO = 18,
-
-	/***** DAM A SAFA *****/
-	ARCHIVOCARGADO = 20,
-	ARCHIVOCREADO = 21,
-	ARCHIVOMODIFICADO = 22,
-	ARCHIVOBORRADO = 23,
-
-	/***** DAM A MDJ *****/
-	CREAR_ARCHIVO = 24,
-	BORRAR_ARCHIVO = 25,
-	OBTENER_DATOS = 26,
-	GUARDAR_DATOS = 27,
 
 	/*****ERRORES POSIBLES TODO:hay errores que se repiten pero cambia el codigo. Decidir con grupo que hacer. *****/
 	PATHINEXISTENTE = 10001,
@@ -54,6 +32,38 @@ typedef enum {
 	ARCHIVOYAEXISTENTE = 50001,
 
 } tipo_operacion_e;
+
+typedef enum {
+	INSERTAR=29, /*fm9 while hasta que no termine, terminar de cargar todo, fm9->dam me tenes que decir la direccion de donde empieza*/
+	DESCARGAR=31 /*dam->fm9 direccion de donde esta, me tenes que ir mandando las lineas hasta donde termina*/
+
+} tipo_operacion_dam_fm9;
+
+typedef enum {
+	ENVIARDTB = 10,
+	CERRARCONEXION = 11,
+	BLOQUEARDTB = 12,
+	TERMINARDTB = 13,
+	FINDEQUANTUM = 14,
+	PEDIRRECURSO = 15,
+	LIBERARRECURSO = 16,
+	CERRARARCHIVO = 17,
+	QUANTUMEJECUTADO = 18
+} tipo_operacion_cpu_safa;
+
+typedef enum {
+	ARCHIVOCARGADO = 20,
+	ARCHIVOCREADO = 21,
+	ARCHIVOMODIFICADO = 22,
+	ARCHIVOBORRADO = 23
+} tipo_operacion_dam_safa;
+
+typedef enum {
+	CREAR_ARCHIVO = 24,
+	BORRAR_ARCHIVO = 25,
+	OBTENER_DATOS = 26,
+	GUARDAR_DATOS = 27,
+} tipo_operacion_dam_mdj;
 
 typedef struct {
 	char nombre_instancia[31];
@@ -86,15 +96,15 @@ typedef struct {
  * */
 
 typedef struct {
-	char nombre_instancia[5];
+	tipo_instancia_e tipo_instancia;
 	int tamanio_mensaje;
-	tipo_operacion_e tipo_operacion;
-} header_paquete;
+	int tipo_operacion;
+} __attribute__ ((__packed__)) header_paquete;
 
 typedef struct {
 	header_paquete* encabezado;
 	void* mensaje;
-} nombre_paquete;
+} paquete_struct;
 
 /**
  * NUEVOIOOOO

@@ -12,6 +12,8 @@
 
 pthread_t idHilo;
 
+int MAX_LINEA=0;
+
 int main(void) {
 	if (inicializar() < 0) {
 		liberar_recursos(EXIT_FAILURE);
@@ -102,18 +104,30 @@ void realizarConexiones() {
 void conectar_safa(dam_config dam){
 
 	obtener_socket_cliente(&socket_safa,dam.ip_safa,dam.puerto_safa);
+	log_info(dam_log,"HANDSHAKE con DAM");
 	ejecutar_handshake(socket_safa,"DAM",DAM,dam_log);
 }
 
 void conectar_mdj(dam_config dam){
 
 	obtener_socket_cliente(&socket_mdj,dam.ip_mdj,dam.puerto_mdj);
+	log_info(dam_log,"HANDSHAKE con MDJ");
 	ejecutar_handshake(socket_mdj,"DAM",DAM,dam_log);
 }
 
 void conectar_fm9(dam_config dam){
 	obtener_socket_cliente(&socket_fm9,dam.ip_fm9,dam.puerto_fm9);
-	ejecutar_handshake(socket_fm9,"DAM",DAM,dam_log);
+	//ejecutar_handshake(socket_fm9,"DAM",DAM,dam_log);
+
+	header_paquete* paquete = malloc(sizeof(header_paquete));
+	paquete->tipo_instancia = DAM;
+	paquete->tipo_operacion = HANDSHAKE;
+
+	log_info(dam_log,"HANDSHAKE con FM9");
+	send(socket_fm9,paquete,sizeof(header_paquete),0);
+	recv(socket_fm9,&MAX_LINEA,sizeof(int),MSG_WAITALL);
+
+	log_info(dam_log,"TAM LINEA: %d", MAX_LINEA);
 }
 
 void conexion_cpu (void *parametro) {

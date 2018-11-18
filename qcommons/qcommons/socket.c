@@ -20,11 +20,16 @@ int obtener_socket_cliente(int* socket_cliente, const char* direccion_ip,
 
 int configurar_socket_servidor(int* socket_servdor, const char* direccion_ip,
 		const int puerto, const int cantidad_clientes) {
+	int yes=1;
 	struct sockaddr_in config_servidor;
 	*socket_servdor = socket(AF_INET, SOCK_STREAM, 0);
 	config_servidor.sin_family = AF_INET;
 	config_servidor.sin_addr.s_addr = inet_addr(direccion_ip);
 	config_servidor.sin_port = htons(puerto);
+    if (setsockopt(*socket_servdor, SOL_SOCKET, SO_REUSEADDR, &yes,sizeof(int)) == -1) {
+        perror("setsockopt");
+        return (-1);
+    }
 	if (bind(*socket_servdor, (struct sockaddr *) &config_servidor,
 			sizeof(config_servidor)) < 0) {
 		perror("Falló el bind");
