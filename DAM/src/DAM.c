@@ -127,6 +127,8 @@ void conectar_fm9(dam_config dam){
 	send(socket_fm9,paquete,sizeof(header_paquete),0);
 	recv(socket_fm9,&MAX_LINEA,sizeof(int),MSG_WAITALL);
 
+	free(paquete);
+
 	log_info(dam_log,"TAM LINEA: %d", MAX_LINEA);
 }
 
@@ -177,6 +179,38 @@ void realizarHandshakeCpu(int cliente_socket) {
 	free(buffer_reconocimiento);
 }
 
+void enviar_linea(int socket_fm9,char* linea)
+{
+	header_paquete* paquete_fm9=malloc(sizeof(header_paquete));
+	paquete_fm9->tipo_instancia = DAM;
+	paquete_fm9->tipo_operacion = INSERTAR;
+	paquete_fm9->tamanio_mensaje = MAX_LINEA;
+
+	send(socket_fm9,paquete_fm9,sizeof(header_paquete),0);
+
+	free(paquete_fm9);
+
+	int tam = MAX_LINEA;
+
+	send_ts(socket_fm9,linea,&tam);
+
+}
+
+int send_ts(int socket, char *buf, int *len)
+{
+	int total = 0;        // cuántos bytes hemos enviado
+	int bytesleft = *len; // cuántos se han quedado pendientes
+	int n;
+	while(total < *len) {
+		n = send(socket, buf+total, dam.transfer_size, 0);
+		if (n == -1) { break; }
+		total += n;
+		bytesleft -= n;
+	}
+	*len = total; // devuelve aquí la cantidad enviada en realidad
+	return n==-1?-1:0; // devuelve -1 si hay fallo, 0 en otro caso
+}
+
 void atender_operacion_cpu(int cliente_socket) {
 
 	header_paquete* paquete = malloc(sizeof(header_paquete));
@@ -188,100 +222,114 @@ void atender_operacion_cpu(int cliente_socket) {
 		switch (paquete->tipo_operacion)
 		{
 
-			//solicitud a El Diego para que traiga desde el MDJ el archivo requerido
-			case ABRIR:{
-				void* buffer = malloc(paquete->tamanio_mensaje);
-				recv(cliente_socket,&buffer,paquete->tamanio_mensaje,MSG_WAITALL);
+		//solicitud a El Diego para que traiga desde el MDJ el archivo requerido
+		case ABRIR:{
+			void* buffer = malloc(paquete->tamanio_mensaje);
+			recv(cliente_socket,&buffer,paquete->tamanio_mensaje,MSG_WAITALL);
 
-				operacion_archivo* operacion_abrir = deserializar_operacion_archivo(buffer);
+			operacion_archivo* operacion_abrir = deserializar_operacion_archivo(buffer);
 
-				log_info(dam_log,"/Procesando/ Abrir Archivo, PID: %s, Archivo: %s",operacion_abrir->pid,operacion_abrir->ruta_archivo);
+			log_info(dam_log,"/Procesando/ Abrir Archivo, PID: %s, Archivo: %s",operacion_abrir->pid,operacion_abrir->ruta_archivo);
 
-				int* tam_buffer_mdj = malloc(sizeof(int));
-				operacion_archivo_mdj* operacion_archivo_mdj = malloc(sizeof(operacion_archivo_mdj));
-				operacion_archivo_mdj->ruta_archivo = string_duplicate(operacion_abrir->ruta_archivo);
+			int* tam_buffer_mdj = malloc(sizeof(int));
+			operacion_archivo_mdj* operacion_archivo_mdj = malloc(sizeof(operacion_archivo_mdj));
+			operacion_archivo_mdj->ruta_archivo = string_duplicate(operacion_abrir->ruta_archivo);
 
-				void* buffer_mdj = serializar_operacion_archivo_mdj(operacion_archivo_mdj,tam_buffer_mdj);
+			void* buffer_mdj = serializar_operacion_archivo_mdj(operacion_archivo_mdj,tam_buffer_mdj);
 
-				log_info(dam_log,"Enviando Peticion MDJ Abrir Archivo");
+			log_info(dam_log,"Enviando Peticion MDJ Abrir Archivo");
 
-				header_paquete* paquete=malloc(sizeof(header_paquete));
-				paquete->tipo_operacion = OBTENER_DATOS;
-				paquete->tamanio_mensaje = *tam_buffer_mdj;
+			header_paquete* paquete_mdj=malloc(sizeof(header_paquete));
+			paquete_mdj->tipo_operacion = OBTENER_DATOS;
+			paquete_mdj->tamanio_mensaje = *tam_buffer_mdj;
 
-				send(socket_mdj,paquete,sizeof(header_paquete),0);
-				send(socket_mdj,buffer_mdj,(size_t)tam_buffer_mdj,0);
+			send(socket_mdj,paquete_mdj,sizeof(header_paquete),0);
+			send(socket_mdj,buffer_mdj,(size_t)tam_buffer_mdj,0);
 
-				/*CONVERSION DE BYTES A LINEAS*/
-				int se_encuentra_barra_n(char* buffer_chars)
+			/*CONVERSION DE BYTES A LINEAS*/
+			int se_encuentra_barra_n(char* buffer_chars)
+			{
+				return strchr(buffer_chars,'\n') != NULL;
+			}
+
+			send(socket_mdj,(void*)&MAX_LINEA,sizeof(int),0);
+
+			memset( linea, '\0', sizeof(char)*MAX_LINEA );
+			int bytesRecibidos=0;
+			int lastIndex=0;
+			while(1)
+			{
+				void* buffer_bytes=malloc(dam.transfer_size+1);
+
+				bytesRecibidos+=recv(socket_mdj,buffer_bytes,dam.transfer_size,0);
+
+				log_info(dam_log,"Bytes: %d",bytesRecibidos);
+
+				char* buffer_chars = (char*)buffer_bytes;
+				buffer_chars[dam.transfer_size] = '\0';
+
+				if(se_encuentra_barra_n(buffer_chars))
 				{
-					return strchr(buffer_chars,'\n') != NULL;
-				}
+					myMemCpy(&(linea[lastIndex]), buffer_chars, dam.transfer_size);
+					log_info(dam_log,"LINEA COMPLETA CON BARRA_N");
+					log_info(dam_log,"%s",linea);
 
-				send(socket_mdj,(void*)&MAX_LINEA,sizeof(int),0);
+					enviar_linea(socket_fm9,linea);
 
-				memset( linea, '\0', sizeof(char)*MAX_LINEA );
-				int bytesRecibidos=0;
-				int lastIndex=0;
-				while(1)
+					lastIndex=0;
+					memset( linea, '\0', sizeof(char)*MAX_LINEA );
+				}else
 				{
-					void* buffer_bytes=malloc(dam.transfer_size+1);
+					int restante = MAX_LINEA - lastIndex;
 
-					bytesRecibidos+=recv(socket_mdj,buffer_bytes,dam.transfer_size,0);
-
-					log_info(dam_log,"Bytes: %d",bytesRecibidos);
-
-					char* buffer_chars = (char*)buffer_bytes;
-					buffer_chars[dam.transfer_size] = '\0';
-
-					if(se_encuentra_barra_n(buffer_chars))
+					if(dam.transfer_size > restante)
 					{
-						myMemCpy(&(linea[lastIndex]), buffer_chars, dam.transfer_size);
-						log_info(dam_log,"LINEA COMPLETA CON BARRA_N");
-						log_info(dam_log,"%s",linea);
+						myMemCpy(&(linea[lastIndex]), buffer_chars, restante);
+						log_info(dam_log,"LINEA COMPLETA: %s",linea);
+
+						enviar_linea(socket_fm9,linea);
+
 						lastIndex=0;
 						memset( linea, '\0', sizeof(char)*MAX_LINEA );
-					}else
-					{
-						int restante = MAX_LINEA - lastIndex;
+						myMemCpy(&(linea[lastIndex]), buffer_chars+restante, dam.transfer_size-restante);
+						log_info(dam_log,"Nueva Linea: %s",linea);
+						lastIndex = dam.transfer_size-restante;
 
-						if(dam.transfer_size > restante)
+					}
+					else
+					{
+						myMemCpy(&(linea[lastIndex]), buffer_chars, dam.transfer_size);
+						log_info(dam_log,"Linea Normal: %s",linea);
+						lastIndex += dam.transfer_size;
+
+						if(lastIndex == MAX_LINEA)
 						{
-							myMemCpy(&(linea[lastIndex]), buffer_chars, restante);
-							log_info(dam_log,"LINEA COMPLETA: %s",linea);
+							log_info(dam_log,"LINEA COMPLETA");
+							enviar_linea(socket_fm9,linea);
 
 							lastIndex=0;
 							memset( linea, '\0', sizeof(char)*MAX_LINEA );
-							myMemCpy(&(linea[lastIndex]), buffer_chars+restante, dam.transfer_size-restante);
-							log_info(dam_log,"Nueva Linea: %s",linea);
-							lastIndex = dam.transfer_size-restante;
-
-						}
-						else
-						{
-							myMemCpy(&(linea[lastIndex]), buffer_chars, dam.transfer_size);
-							log_info(dam_log,"Linea Normal: %s",linea);
-							lastIndex += dam.transfer_size;
-
-							if(lastIndex == MAX_LINEA)
-							{
-								log_info(dam_log,"LINEA COMPLETA");
-								lastIndex=0;
-								memset( linea, '\0', sizeof(char)*MAX_LINEA );
-							}
 						}
 					}
-
 				}
+				free(buffer_bytes);
 			}
-			break;
+			free(buffer);
+			free(tam_buffer_mdj);
+			free(operacion_abrir->ruta_archivo);
+			free(operacion_abrir);
+			free(operacion_archivo_mdj->ruta_archivo);
+			free(operacion_archivo_mdj);
+			free(paquete_mdj);
+		}
+		break;
 
-			//solicitud a El Diego indicando que se requiere hacer un Flush del archivo, necesito parametros
-			case FLUSH:{
-			}
-			break;
-			//Tengo que enviar mensaje de crear archivo a mdj con un determinado path y cantidad de lineas necesarias
-			case CREAR:{
+		//solicitud a El Diego indicando que se requiere hacer un Flush del archivo, necesito parametros
+		case FLUSH:{
+		}
+		break;
+		//Tengo que enviar mensaje de crear archivo a mdj con un determinado path y cantidad de lineas necesarias
+		case CREAR:{
 
 			void* buffer = malloc(paquete->tamanio_mensaje);
 			recv(cliente_socket,&buffer,paquete->tamanio_mensaje,MSG_WAITALL);
@@ -299,11 +347,11 @@ void atender_operacion_cpu(int cliente_socket) {
 
 			log_info(dam_log,"Enviando Peticion MDJ Crear Archivo");
 
-			header_paquete* paquete=malloc(sizeof(header_paquete));
-			paquete->tipo_operacion = CREAR_ARCHIVO;
-			paquete->tamanio_mensaje = *tam_buffer_mdj;
+			header_paquete* paquete_mdj1=malloc(sizeof(header_paquete));
+			paquete_mdj1->tipo_operacion = CREAR_ARCHIVO;
+			paquete_mdj1->tamanio_mensaje = *tam_buffer_mdj;
 
-			send(socket_mdj,paquete,sizeof(header_paquete),0);
+			send(socket_mdj,paquete_mdj1,sizeof(header_paquete),0);
 			send(socket_mdj,buffer_mdj,(size_t)tam_buffer_mdj,0);
 
 			//Debo hacer un recv del resultado de la operacion de MDJ e informar a SAFA
@@ -314,49 +362,51 @@ void atender_operacion_cpu(int cliente_socket) {
 			free(operacion_crear);
 			free(operacion_crear_mdj->ruta_archivo);
 			free(operacion_crear_mdj);
-
-			}
-			break;
-			//debo enviar a mdj borrar determinado archivo
-			case BORRAR:{
-
-				void* buffer = malloc(paquete->tamanio_mensaje);
-				recv(cliente_socket,&buffer,paquete->tamanio_mensaje,MSG_WAITALL);
-				operacion_archivo* operacion_archivo = deserializar_operacion_archivo(buffer);
-
-				log_info(dam_log,"/Procesando/ Borrar Archivo, PID: %s, Archivo: %s,",operacion_archivo->pid,operacion_archivo->ruta_archivo);
-
-				int* tam_buffer_mdj = malloc(sizeof(int));
-				operacion_archivo_mdj* operacion_archivo_mdj = malloc(sizeof(operacion_archivo_mdj));
-				operacion_archivo_mdj->ruta_archivo = string_duplicate(operacion_archivo->ruta_archivo);
-
-				void* buffer_mdj = serializar_operacion_archivo_mdj(operacion_archivo_mdj,tam_buffer_mdj);
-
-				log_info(dam_log,"Enviando Peticion MDJ Borrar Archivo");
-
-				header_paquete* paquete=malloc(sizeof(header_paquete));
-				paquete->tipo_operacion = BORRAR_ARCHIVO;
-				paquete->tamanio_mensaje = *tam_buffer_mdj;
-
-				send(socket_mdj,paquete,sizeof(header_paquete),0);
-				send(socket_mdj,buffer_mdj,(size_t)tam_buffer_mdj,0);
-
-				//Debo hacer un recv del resultado de la operacion de MDJ e informar a SAFA
-
-				free(tam_buffer_mdj);
-				free(buffer);
-				free(buffer_mdj);
-				free(operacion_archivo->ruta_archivo);
-				free(operacion_archivo);
-				free(operacion_archivo_mdj->ruta_archivo);
-				free(operacion_archivo_mdj);
-
-			}
-			break;
-
-			}
+			free(paquete_mdj1);
 
 		}
+		break;
+		//debo enviar a mdj borrar determinado archivo
+		case BORRAR:{
+
+			void* buffer = malloc(paquete->tamanio_mensaje);
+			recv(cliente_socket,&buffer,paquete->tamanio_mensaje,MSG_WAITALL);
+			operacion_archivo* operacion_archivo = deserializar_operacion_archivo(buffer);
+
+			log_info(dam_log,"/Procesando/ Borrar Archivo, PID: %s, Archivo: %s,",operacion_archivo->pid,operacion_archivo->ruta_archivo);
+
+			int* tam_buffer_mdj = malloc(sizeof(int));
+			operacion_archivo_mdj* operacion_archivo_mdj = malloc(sizeof(operacion_archivo_mdj));
+			operacion_archivo_mdj->ruta_archivo = string_duplicate(operacion_archivo->ruta_archivo);
+
+			void* buffer_mdj = serializar_operacion_archivo_mdj(operacion_archivo_mdj,tam_buffer_mdj);
+
+			log_info(dam_log,"Enviando Peticion MDJ Borrar Archivo");
+
+			header_paquete* paquete_mdj2=malloc(sizeof(header_paquete));
+			paquete_mdj2->tipo_operacion = BORRAR_ARCHIVO;
+			paquete_mdj2->tamanio_mensaje = *tam_buffer_mdj;
+
+			send(socket_mdj,paquete_mdj2,sizeof(header_paquete),0);
+			send(socket_mdj,buffer_mdj,(size_t)tam_buffer_mdj,0);
+
+			//Debo hacer un recv del resultado de la operacion de MDJ e informar a SAFA
+
+			free(tam_buffer_mdj);
+			free(buffer);
+			free(buffer_mdj);
+			free(operacion_archivo->ruta_archivo);
+			free(operacion_archivo);
+			free(operacion_archivo_mdj->ruta_archivo);
+			free(operacion_archivo_mdj);
+			free(paquete_mdj2);
+
+		}
+		break;
+
+		}
+
+	}
 
 
 	free(paquete);
