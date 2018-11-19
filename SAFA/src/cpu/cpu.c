@@ -31,6 +31,13 @@ bool cpu_libre(cpu_struct *cpu) {
 }
 
 
+void reiniciar_cpu(cpu_struct cpu ){
+
+	cpu.dtb_ejecutar= NULL;
+	cpu.ocupada=0;
+}
+
+
 void inicializar_lista_cpus() {
 	cpus = list_create();
 }

@@ -53,7 +53,6 @@ t_list *dtb_listos_mayor_prioridad;
 
 sem_t sem_listo_max; //controlar multiprogramacion
 
-
 pthread_mutex_t sem_dtb_dummy_mutex; //mutex para dummy
 pthread_mutex_t sem_listo_mutex; //mutex para lista de listos
 pthread_mutex_t sem_cpu_mutex; //mutex para lista de cpus . SE PODRIA QUITAR

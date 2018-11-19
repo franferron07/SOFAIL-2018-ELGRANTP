@@ -43,6 +43,7 @@ void ejecutar_planificacion() {
 			dtb_ejecutar = aplicar_algoritmo_planificacion();
 			dtb_ejecutar->estado = EJECUTANDO;
 			log_info(safa_log, "Se encontro dtb a ejecutar: %s",dtb_ejecutar->id_dtb);
+			sem_post(&sem_listo_max);
 			pthread_mutex_unlock( &sem_listo_mutex );
 
 			/******** INDICO A CPU EL DTB A EJECUTAR *******/

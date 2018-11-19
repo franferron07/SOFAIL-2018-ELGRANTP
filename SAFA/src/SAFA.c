@@ -191,9 +191,10 @@ void *administrar_servidor(void *puntero_fd) {
 
 void atender_cliente_cpu( int *cliente_socket ){
 
-	request_operacion_type *header_operacion = NULL;
-	void *buffer_operacion = malloc(TAMANIO_REQUEST_OPERACION);
+	/*request_operacion_type *header_operacion = NULL;
+	void *buffer_operacion = malloc(TAMANIO_REQUEST_OPERACION);*/
 	int res ;
+	u_int8_t id_dtb ;
 
 	cpu_struct cpu_nueva;
 
@@ -203,23 +204,15 @@ void atender_cliente_cpu( int *cliente_socket ){
 		list_add(cpus, &cpu_nueva);
 	pthread_mutex_unlock(&sem_cpu_mutex);
 
-	/*
-	res = recv(*cliente_socket, buffer_operacion, TAMANIO_REQUEST_OPERACION,MSG_WAITALL);
-
-	if (res <= 0) {
-		log_error(safa_log, "¡Error en el mensaje con CPU!");
-		close(*cliente_socket);
-		free(buffer_operacion);
-	}*/
 
 
+	header_paquete* paquete = malloc(sizeof(header_paquete));
 	/****** ESPERANDO MENSAJES DE CPU *******/
-	while ( ( res = recv(*cliente_socket, buffer_operacion, TAMANIO_REQUEST_OPERACION,MSG_WAITALL) )  > 0) {
+	while ( ( res = recv(*cliente_socket, paquete, sizeof(header_paquete) ,MSG_WAITALL) )  > 0) {
 
-		header_operacion = deserializar_request_operacion(buffer_operacion);
-		log_info(safa_log, "Se recibio operacion del CPU: %s",header_operacion->tipo_operacion);
+		log_info(safa_log, "Se recibio operacion del CPU: %s",paquete->tipo_operacion);
 
-		switch (header_operacion->tipo_operacion ) {
+		switch (paquete->tipo_operacion ) {
 
 		case ENVIARDTB:{
 
@@ -243,28 +236,25 @@ void atender_cliente_cpu( int *cliente_socket ){
 
 		case BLOQUEARDTB:{
 
-			/*
-			 * TODO faltan los recv del id del dtb
-			 * */
-
-			/* ASUMIENDO QUE RECIBO EL ID DE DTB  */
-			int id_dtb_recibido=0;
-			log_info(safa_log, "Se recibe de cpu un Bloqueo de dtb id: %d",id_dtb_recibido);
+		    id_dtb = cpu_nueva.dtb_ejecutar->id_dtb;
+			log_info(safa_log, "Se recibe de cpu un Bloqueo de dtb id: %d",id_dtb );
 
 			/***** VERIFICO SI ES EL DUMMY *****/
-			if( dtb_dummy.id_dtb == id_dtb_recibido ){
+			if( dtb_dummy.id_dtb == id_dtb ){
 
 				reiniciar_dummy();
 				log_info(safa_log, "Se reinicio DUMMY");
 			}
 			else{
 
-				dtb_struct *dtb_a_bloquear = quitar_dtb_lista_id( dtb_ejecutando  ,id_dtb_recibido );
+				dtb_struct *dtb_a_bloquear = quitar_dtb_lista_id( dtb_ejecutando  , id_dtb );
 				dtb_a_bloquear->estado = BLOQUEADO;
 				list_add(dtb_bloqueados , dtb_a_bloquear);
-				log_info(safa_log, "Se bloquea dtb id: %d",id_dtb_recibido);
+				log_info(safa_log, "Se bloquea dtb id: %d",id_dtb);
 			}
 
+			/****** LIBERO CPU DEL DTB *******/
+			reiniciar_cpu( cpu_nueva );
 
 			/* TODO deberia hacer un send si fuera necesario para avisar a cpu que se recibe mensaje. */
 
@@ -273,11 +263,32 @@ void atender_cliente_cpu( int *cliente_socket ){
 
 		case TERMINARDTB:{
 
+			//AVISO DE FINALIZACION DE PROCESO
+			id_dtb = cpu_nueva.dtb_ejecutar->id_dtb;
+			log_info(safa_log, "Se recibe de cpu una finalizacion de dtb id: %d",id_dtb );
+
+
+			/***** FINALIZO DTB *****/
+			dtb_struct *dtb_finalizado = quitar_dtb_lista_id( dtb_ejecutando  , id_dtb );
+			dtb_finalizado->estado = FINALIZADO;
+			list_add(dtb_terminados , dtb_finalizado);
+			log_info(safa_log, "Se finaliza dtb id: %d",id_dtb);
+
+			/****** LIBERO CPU DEL DTB *******/
+			reiniciar_cpu( cpu_nueva );
 		}
 		break;
 
 		case FINDEQUANTUM:{
 
+			//CPU REALIZA EL QUANTUM
+			log_info(safa_log, "Se recibe de cpu un fin de quantum de dtb id: %d",cpu_nueva.dtb_ejecutar->id_dtb );
+
+			aumentar_sentencias_totales( cpu_nueva.dtb_ejecutar , cpu_nueva.dtb_ejecutar->quantum );
+			aumentar_sentencias_espera( cpu_nueva.dtb_ejecutar->quantum );
+
+			/* LIBERO CPU DEL DTB */
+			reiniciar_cpu( cpu_nueva );
 		}
 		break;
 
@@ -311,18 +322,51 @@ void atender_cliente_cpu( int *cliente_socket ){
 		}
 		break;
 
+
+		case CERRARARCHIVO:{
+
+			log_info(safa_log, "Se recibe de cpu un Cierre de archivo de dtb id: %d",cpu_nueva.dtb_ejecutar->id_dtb );
+
+
+			/***** RECIBO PATH *****/
+			header_paquete *paquete = malloc( sizeof( header_paquete ) );
+			res = recv(*cliente_socket, paquete, sizeof(header_paquete),MSG_WAITALL);
+			if (res <= 0) {
+							log_info(safa_log, "Error en el mensaje");
+							//TODO habria que hacer return
+			}
+
+			void *buffer= malloc( paquete->tamanio_mensaje );
+			res = recv(*cliente_socket, buffer, paquete->tamanio_mensaje , MSG_WAITALL);
+			if (res <= 0) {
+				log_info(safa_log, "Error en el mensaje");
+				//TODO habria que hacer return
+			}
+
+			log_info(safa_log, "Se recibe path: %s de dtb:",buffer , cpu_nueva.dtb_ejecutar->id_dtb );
+			eliminar_path_dtb( cpu_nueva.dtb_ejecutar  , buffer );
+
+
+		}
+		break;
+
 		case QUANTUMEJECUTADO:{
 
-			/* TODO se recibe el id del dtb y el quantu que se ejecuto.
-			 * hacer los recv
-			 *  */
-			int id_dtb = 0;
+			u_int8_t quantum_ejecutado;
 
-			dtb_struct *dtb_encontrado = buscar_dtb_id( dtbs , id_dtb );
+			/************ RECIBO QUANTUM ************/
+			res = recv(*cliente_socket, &quantum_ejecutado, sizeof(u_int8_t),MSG_WAITALL);
+			if (res <= 0) {
+				log_info(safa_log, "Error en el mensaje");
+				//TODO habria que hacer return
+			}
 
-			/*TODO : aca se sumarian todas la parte de estadisticas del dtb.
-			 *
-			 * */
+			log_info(safa_log, "Se recibe de cpu un aviso de quantum ejecutado de dtb id: %d y quantum: %d",cpu_nueva.dtb_ejecutar->id_dtb , quantum_ejecutado);
+
+			aumentar_sentencias_totales( cpu_nueva.dtb_ejecutar , quantum_ejecutado );
+			aumentar_sentencias_espera( quantum_ejecutado );
+
+			//TODO verificar si cpu necesita confirmacion
 
 		}
 		break;
@@ -335,11 +379,12 @@ void atender_cliente_cpu( int *cliente_socket ){
 
 
 
-		if (header_operacion->clave != NULL){
-			free(header_operacion->clave );
-		}
+		//free(paquete);
+
 
 	}
+
+	free(paquete);
 
 
 	pthread_detach(pthread_self()); //libera recursos del hilo
@@ -370,6 +415,7 @@ void atender_cliente_dam( int *cliente_socket ){
 				 * de la cola de nuevos a listos y cambiar su estado . Y si no esta en cargandodummy se manda a lista de bloqueados.
 				 * */
 
+				/* hacer un recv con la strcut operacion archivo direccion. usar la funcion de deserealizar.  */
 
 			}
 			break;
@@ -383,10 +429,14 @@ void atender_cliente_dam( int *cliente_socket ){
 
 			case ARCHIVOMODIFICADO:{
 
+				/* TODO solo me pasa el pid de aviso de modificacion , desbvloqueo el dtb  */
+
 			}
 			break;
 
 			case ARCHIVOBORRADO:{
+
+				/* TODO solo me pasa el pid del dtb para desbloquear */
 
 			}
 			break;

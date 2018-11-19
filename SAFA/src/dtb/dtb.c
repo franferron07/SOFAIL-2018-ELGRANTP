@@ -48,7 +48,6 @@ void reiniciar_dummy(){
 
 	free(dtb_dummy.escriptorio);
 	dtb_dummy.id_dtb = -1;
-
 }
 
 
@@ -71,6 +70,34 @@ bool dtb_estado_nuevo(dtb_struct *dtb) {
 }
 
 
+void eliminar_path_dtb( dtb_struct *dtb   , char* path ){
+
+	bool dtb_tiene_path(direccion_struct *direccion) {
+		return string_equals_ignore_case( direccion->path , path  ) ;
+	}
+
+	direccion_struct *dir = list_remove_by_condition(dtb->direcciones,(void*)dtb_tiene_path);
+	free(dir->direccion);
+	free( dir->path );
+}
+
+
+
+void aumentar_sentencias_totales( dtb_struct *dtb , int quantum ){
+
+	dtb->sentencias_totales = dtb->sentencias_totales + quantum;
+}
+
+
+void aumentar_sentencias_espera( int quantum_ejecutado ){
+
+	void aumentar_espera(dtb_struct *dtb) {
+
+		dtb->sentencias_espera = dtb->sentencias_espera +  quantum_ejecutado;
+	}
+
+	list_iterate( dtb_nuevos , (void*)aumentar_espera );
+}
 
 
 
