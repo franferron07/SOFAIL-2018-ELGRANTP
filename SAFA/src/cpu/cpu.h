@@ -10,6 +10,7 @@
 
 cpu_struct crear_cpu(int socket);
 cpu_struct *obtener_cpu_libre();
+void reiniciar_cpu(cpu_struct cpu); //ocupada en false y dtb en null indicando que la cpu vuelve a estar disponible
 void inicializar_lista_cpus();
 void liberar_cpu(cpu_struct * cpu);
 void liberar_recursos_cpu();

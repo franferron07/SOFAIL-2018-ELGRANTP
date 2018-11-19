@@ -6,6 +6,7 @@
 #include <string.h>
 #include <commons/config.h>
 #include <commons/log.h>
+#include "../commons/commons.h"
 
 #define RR_STRING "RR"
 #define VRR_STRING "VRR"
@@ -33,5 +34,9 @@ void imprimir_config();
 void liberar_recursos_configuracion();
 char* obtener_nombre_algoritmo(safa_config safa);
 void destruir_archivo_log(t_log *safa_log);
+
+
+//segun la multiprogramacion cambiada hace los post o wait correspondientes para aumentar la multiprogramacion o disminuirla. Si es igual no se hace nada.
+void actualizar_multiprogramacion(int multi_anterior , int multi_actual);
 
 #endif /* CONFIG_CONFIG_H_ */

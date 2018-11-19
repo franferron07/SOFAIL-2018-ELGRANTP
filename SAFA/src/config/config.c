@@ -59,3 +59,36 @@ char* obtener_nombre_algoritmo(safa_config safa) {
 		return "";
 	}
 }
+
+
+void actualizar_multiprogramacion(int multi_anterior , int multi_actual){
+
+	int cont = 0 ;
+	int cantidad=0;
+
+	//Si multi anterior mayor a la actual realizo wait
+	if( multi_anterior > multi_actual ){
+
+		cantidad = multi_anterior - multi_actual;
+		while( cont < cantidad ){
+
+			sem_wait( &sem_listo_max );
+			cont++;
+		}
+	}
+
+	//si multi actual es mayor a la anterior realizo post
+	if( multi_actual > multi_anterior ){
+
+		cantidad= multi_actual - multi_anterior;
+		while( cont < cantidad ){
+
+			sem_post( &sem_listo_max );
+			cont++;
+		}
+	}
+
+}
+
+
+
