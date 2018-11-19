@@ -76,6 +76,35 @@ void* serializar_header_conexion(header_conexion_type *header) {
 	return buffer;
 }
 
+void* serializar_linea_struct(linea_struct *linea,int max_linea, int* tam_buffer) {
+
+	int TAMANIO_BUFFER = sizeof(linea->pid) + sizeof(linea->flag_fin_linea)+max_linea;
+
+	void* buffer = malloc(TAMANIO_BUFFER);
+
+	int lastIndex = 0;
+
+	serialize_data(&(linea->pid), sizeof(linea->pid), &buffer, &lastIndex);
+	serialize_data(&(linea->flag_fin_linea), sizeof(linea->flag_fin_linea), &buffer, &lastIndex);
+	serialize_data(&(linea->linea), max_linea, &buffer, &lastIndex);
+
+	*tam_buffer = TAMANIO_BUFFER;
+
+	return buffer;
+}
+
+linea_struct* deserializar_linea_struct(void* buffer,int max_linea) {
+
+	linea_struct* linea_struct = malloc(sizeof(linea_struct));
+	int lastIndex = 0;
+
+	deserialize_data(&(linea_struct->pid),sizeof(linea_struct->pid), buffer, &lastIndex);
+	deserialize_data(&(linea_struct->flag_fin_linea),sizeof(linea_struct->flag_fin_linea), buffer, &lastIndex);
+	myMemCpy(&(linea_struct->linea), buffer+lastIndex, max_linea);
+
+	return linea_struct;
+}
+
 void myMemCpy(void *dest, void *src, size_t n)
 {
    // Typecast src and dest addresses to (char *)
@@ -462,7 +491,7 @@ dtb_struct* deserializar_dtb(void *buffer){
 
 
 		//TODO: en estas 2 lineas esta el problema y tambien la solucion...
-		//deserialize_data(&direccion,tamanio_direccion, buffer, &lastIndex);
+		//deserialize_data(&direccitypedef struct {
 		//direccion[tamanio_direccion] = '\0';
 
 

@@ -44,8 +44,8 @@ void conectar_safa(dam_config);
 void conectar_mdj(dam_config);
 void conectar_fm9(dam_config);
 
-void enviar_linea(int socket_fm9,char* linea);
-int send_ts(int s, char *buf, int *len);
+void enviar_linea(int socket_fm9,char* linea,int pid);
+int send_ls(int s, char *buf, int *len);
 
 void conexion_cpu (void *parametro);
 void realizarHandshakeCpu(int cliente_socket);

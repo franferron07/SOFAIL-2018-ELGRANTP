@@ -88,7 +88,7 @@ void aceptarConexiones() {
 }
 
 void realizarConexiones() {
-	conectar_safa(dam);
+	//conectar_safa(dam);
 	//conectar_mdj(dam);
 	conectar_fm9(dam);
 	/*if (socket_safa <= 0 || socket_mdj <= 0 || socket_fm9 <= 0) {
@@ -179,28 +179,46 @@ void realizarHandshakeCpu(int cliente_socket) {
 	free(buffer_reconocimiento);
 }
 
-void enviar_linea(int socket_fm9,char* linea)
+void enviar_linea(int socket_fm9,char* linea,int pid)
 {
 	header_paquete* paquete_fm9=malloc(sizeof(header_paquete));
 	paquete_fm9->tipo_instancia = DAM;
 	paquete_fm9->tipo_operacion = INSERTAR;
-	paquete_fm9->tamanio_mensaje = MAX_LINEA;
+
+	linea_struct* linea_struct = malloc(sizeof(linea_struct));
+	linea_struct->pid = pid;
+	linea_struct->linea = linea;
+	linea_struct->flag_fin_linea = 0;
+	//esto depende si es la ultima linea MDJ->DAM (fin), DAM-> FM9 (fin)
+
+	int tam_buffer;
+
+	void* buffer = serializar_linea_struct(linea_struct,MAX_LINEA,&tam_buffer);
+
+	paquete_fm9->tamanio_mensaje = tam_buffer;
 
 	send(socket_fm9,paquete_fm9,sizeof(header_paquete),0);
 
 	free(paquete_fm9);
 
-	int tam = MAX_LINEA;
-
-	send_ts(socket_fm9,linea,&tam);
+	send_ls(socket_fm9,buffer,&tam_buffer);
 
 }
 
-int send_ts(int socket, char *buf, int *len)
+int send_ls(int socket, char *buf, int *len)
 {
 	int total = 0;        // cuántos bytes hemos enviado
 	int bytesleft = *len; // cuántos se han quedado pendientes
 	int n;
+
+	n = send(socket, buf+total, sizeof(int), 0);
+	total += n;
+	bytesleft -= n;
+
+	n = send(socket, buf+total, sizeof(int), 0);
+	total += n;
+	bytesleft -= n;
+
 	while(total < *len) {
 		n = send(socket, buf+total, dam.transfer_size, 0);
 		if (n == -1) { break; }
@@ -214,7 +232,6 @@ int send_ts(int socket, char *buf, int *len)
 void atender_operacion_cpu(int cliente_socket) {
 
 	header_paquete* paquete = malloc(sizeof(header_paquete));
-	char linea[MAX_LINEA];
 
 	while ( (recv(cliente_socket, paquete, sizeof(header_paquete),MSG_WAITALL) )  > 0)
 	{
@@ -224,12 +241,15 @@ void atender_operacion_cpu(int cliente_socket) {
 
 		//solicitud a El Diego para que traiga desde el MDJ el archivo requerido
 		case ABRIR:{
+			char linea[MAX_LINEA];
 			void* buffer = malloc(paquete->tamanio_mensaje);
 			recv(cliente_socket,&buffer,paquete->tamanio_mensaje,MSG_WAITALL);
 
 			operacion_archivo* operacion_abrir = deserializar_operacion_archivo(buffer);
 
-			log_info(dam_log,"/Procesando/ Abrir Archivo, PID: %s, Archivo: %s",operacion_abrir->pid,operacion_abrir->ruta_archivo);
+			int pid = operacion_abrir->pid;
+
+			log_info(dam_log,"/Procesando/ Abrir Archivo, PID: %s, Archivo: %s",pid,operacion_abrir->ruta_archivo);
 
 			int* tam_buffer_mdj = malloc(sizeof(int));
 			operacion_archivo_mdj* operacion_archivo_mdj = malloc(sizeof(operacion_archivo_mdj));
@@ -274,7 +294,7 @@ void atender_operacion_cpu(int cliente_socket) {
 					log_info(dam_log,"LINEA COMPLETA CON BARRA_N");
 					log_info(dam_log,"%s",linea);
 
-					enviar_linea(socket_fm9,linea);
+					enviar_linea(socket_fm9,linea,pid);
 
 					lastIndex=0;
 					memset( linea, '\0', sizeof(char)*MAX_LINEA );
@@ -287,7 +307,7 @@ void atender_operacion_cpu(int cliente_socket) {
 						myMemCpy(&(linea[lastIndex]), buffer_chars, restante);
 						log_info(dam_log,"LINEA COMPLETA: %s",linea);
 
-						enviar_linea(socket_fm9,linea);
+						enviar_linea(socket_fm9,linea,pid);
 
 						lastIndex=0;
 						memset( linea, '\0', sizeof(char)*MAX_LINEA );
@@ -305,7 +325,7 @@ void atender_operacion_cpu(int cliente_socket) {
 						if(lastIndex == MAX_LINEA)
 						{
 							log_info(dam_log,"LINEA COMPLETA");
-							enviar_linea(socket_fm9,linea);
+							enviar_linea(socket_fm9,linea,pid);
 
 							lastIndex=0;
 							memset( linea, '\0', sizeof(char)*MAX_LINEA );

@@ -108,6 +108,12 @@ typedef struct {
  * */
 
 typedef struct {
+	int pid;
+	int flag_fin_linea;
+	char *linea;
+} linea_struct;
+
+typedef struct {
 	tipo_instancia_e tipo_instancia;
 	int tamanio_mensaje;
 	int tipo_operacion;
@@ -200,6 +206,9 @@ void* serializar_dtb(dtb_struct *dtb, int * tamanio_buffer);
 dtb_struct* deserializar_dtb(void *buffer);
 
 int tamanio_dtb(dtb_struct *dtb);
+
+void* serializar_linea_struct(linea_struct *linea,int max_linea, int* tam_buffer);
+linea_struct* deserializar_linea_struct(void* buffer,int max_linea);
 
 void* serializar_operacion_archivo(operacion_archivo* struct_archivo,
 		int* tamanio_buffer);
