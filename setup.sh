@@ -50,7 +50,7 @@ function instalarLibs(){
   cd $ORIG_PATH"/custom_library"
   sudo make
   sudo make install
-  #export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/workspace/custom_library/Debug/
+  #export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/git/tp-2018-2c-QUANTUM/qcommons/Qcommons
   #echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/your/custom/path/" >> ~/.bashrc
   cd $ORIG_PATH
 

@@ -65,15 +65,13 @@ void crear_servidor() {
 }
 
 void atender_conexiones() {
-	int socket_cliente, *socket_nuevo;
+	int socket_cliente;
 	while ((socket_cliente = aceptar_conexion(socket_fm9))) {
 		log_info(fm9_log, "Se agrego una nueva conexión, socket: %d",
 				socket_cliente);
 
-		socket_nuevo = malloc(1);
-		*socket_nuevo = socket_cliente;
 		pthread_create(&hilo_cliente, NULL, (void*) administrar_servidor,
-				(void*) &socket_nuevo);
+				(void*) &socket_cliente);
 	}
 	if (socket_cliente < 0) {
 		log_error(fm9_log, "Error al aceptar nueva conexión");
@@ -85,8 +83,8 @@ void administrar_servidor(void *puntero_fd) {
 	paquete_struct* paquete;
 	void* datos;
 	int datos_a_recibir = 0;
-	while ((datos_a_recibir = recibir_datos(&paquete, socket_actual,
-			sizeof(header_paquete))) > 0) {
+	while ((recv(socket_actual, paquete, sizeof(header_paquete), MSG_WAITALL))
+			> 0) {
 		datos = paquete->mensaje;
 		switch (paquete->encabezado->tipo_instancia) {
 		case CPU:
@@ -127,8 +125,10 @@ int recibir_datos(void* paquete, int socketFD, uint32_t cant_a_recibir) {
 
 void coordinarDAM(int socket, void* datos, paquete_struct* paquete) {
 	switch (paquete->encabezado->tipo_operacion) {
+	int pid;
+	char *linea;
 	case HANDSHAKE:
-		if (send(socket, (void*) fm9.max_linea, sizeof(fm9.max_linea), 0)
+		if ((send(socket, (void*) &fm9.max_linea, sizeof(fm9.max_linea), 0))
 				!= sizeof(fm9.max_linea)) {
 			log_error(fm9_log, "¡No se pudo devolver el handshake al DAM!");
 			close(socket);
@@ -138,6 +138,15 @@ void coordinarDAM(int socket, void* datos, paquete_struct* paquete) {
 		}
 		break;
 	case INSERTAR:
+		linea = malloc(fm9.max_linea);
+		log_info(fm9_log, "INSERTAR LINEA...");
+
+		recv(socket, &pid, sizeof(int), MSG_WAITALL);
+		log_info(fm9_log, "pid: %d", pid);
+
+		recv(socket, linea, fm9.max_linea, MSG_WAITALL);
+		log_info(fm9_log, "LINEA: %s", linea);
+
 //		int memoria_requerida = *((int*) datos);
 		datos += sizeof(int);
 		char* file_name = malloc(strlen(datos));
