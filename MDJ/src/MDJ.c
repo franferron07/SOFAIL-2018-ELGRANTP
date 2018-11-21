@@ -78,9 +78,9 @@ void setBloqueActuaLleno(){//agregar un 1 al bitmap.bin
 
 
 
-void getBloqueLibre_file(){
+void getBloqueLibre_path(){
 	int j;
-	for( j =0;testear_bloque_libre_en_posicion(j);j++);//hasta un bloque lbre
+	for( j =0;testear_bloque_libre_en_posicion(j);j++);//hasta un bloque lbre,OK
 	sprintf(bloqueActual_path,"%d.bin",j);//rehacer path con punto de ontaje y carpeta segun dam
 //	bloqueActual_path = fopen(path_del_bloque_libre,"w+");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
 //	return bloqueActual_path;
@@ -93,7 +93,7 @@ void crearBloques(int cantidad){
 	for(int var = 0;var<cantidad;var++){
 		char* unPath = malloc(100);
 		sprintf(unPath,"%d.bin",var);
-		FILE* f = txt_open_for_append(unPath);
+		FILE* f = fopen(unPath,"w+");
 		txt_close_file(f);
 		free(unPath);
 	}
@@ -117,7 +117,7 @@ void  ejecutar_linea_entrante(char* buffer_entrante){
 }
 void persistirContenido(char * contenido){
 	 bloqueActual_path=malloc(400);
-	for(getBloqueLibre_file();quedaContenidoParaMapear(contenido);getBloqueLibre_file()){
+	for(getBloqueLibre_path();quedaContenidoParaMapear(contenido);getBloqueLibre_path()){
 			persistirAlBloque(bloqueActual_path,contenido);
 			if(estaLLenoElBloqueActual())setear_bloque_ocupado_en_posicion(bloqueActual_int);
 		}
@@ -262,7 +262,7 @@ void cargar_configuracion_metadata(){
 	if(configuracion_cfg_temporal==NULL)perror("no cargo bien  Metadata.bin\n");
 //	(&metadata)->cantidad_bloques=config_get_int_value(configuracion_cfg_temporal,"CANTIDAD_BLOQUES");
 	metadata.cantidad_bloques=config_get_int_value(configuracion_cfg_temporal,"CANTIDAD_BLOQUES");
-	metadata.tamanio_de_bloque=config_get_int_value(configuracion_cfg_temporal,"TAMANIO_BLOQUES");
+	metadata.tamanio_de_bloque=5;//config_get_int_value(configuracion_cfg_temporal,"TAMANIO_BLOQUES");
 	config_destroy(configuracion_cfg_temporal);
 }
 void mostrar_configuracion_metadata(){

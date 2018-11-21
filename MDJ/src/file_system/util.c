@@ -36,4 +36,4 @@ int cantidadDeCaracteres_path(char* path ){//OK
 	fclose(f);
 	return n ;
 }
-bool quedaContenidoParaMapear(char* contenido){return strlen(contenido)>0;}
+bool quedaContenidoParaMapear(char* contenido){return strlen(contenido)>0 && contenido!=NULL;}
