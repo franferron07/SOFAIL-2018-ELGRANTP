@@ -37,15 +37,14 @@ mostrar_configuracion_metadata();
 
 char bits[metadata.cantidad_bloques/8];
 configurar_bitmap(bits,metadata.cantidad_bloques/8);
-
-
+setear_bloque_ocupado_en_posicion(62);
 mostrar_bitarray();
 
+puts("lol");
+//free(bloqueActual_path);
+crearBloques(10);
 consola_fifa();
-free(bloqueActual_path);
-
-
-
+//persistirAlBloque("1.bin","contenido");
 puts("fin");
 	return 0;
 }
@@ -79,15 +78,25 @@ void setBloqueActuaLleno(){//agregar un 1 al bitmap.bin
 
 
 
-char* getBloqueLibre_file(){
+void getBloqueLibre_file(){
 	int j;
 	for( j =0;testear_bloque_libre_en_posicion(j);j++);//hasta un bloque lbre
 	sprintf(bloqueActual_path,"%d.bin",j);//rehacer path con punto de ontaje y carpeta segun dam
 //	bloqueActual_path = fopen(path_del_bloque_libre,"w+");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
-	return bloqueActual_path;
+//	return bloqueActual_path;
 }
 bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque){
 	return cantidadDeCaracteres_file(bloqueActual)<tamanioDeBloque;
+}
+void crearBloques(int cantidad){
+//	int n = metadata.cantidad_bloques;
+	for(int var = 0;var<cantidad;var++){
+		char* unPath = malloc(100);
+		sprintf(unPath,"%d.bin",var);
+		FILE* f = txt_open_for_append(unPath);
+		txt_close_file(f);
+		free(unPath);
+	}
 }
 
 //BITMAP end
@@ -108,7 +117,7 @@ void  ejecutar_linea_entrante(char* buffer_entrante){
 }
 void persistirContenido(char * contenido){
 	 bloqueActual_path=malloc(400);
-	for(bloqueActual_path=getBloqueLibre_file();quedaContenidoParaMapear(contenido);bloqueActual_path=getBloqueLibre_file()){
+	for(getBloqueLibre_file();quedaContenidoParaMapear(contenido);getBloqueLibre_file()){
 			persistirAlBloque(bloqueActual_path,contenido);
 			if(estaLLenoElBloqueActual())setear_bloque_ocupado_en_posicion(bloqueActual_int);
 		}

@@ -31,7 +31,7 @@ int cantidadDeCaracteres_file(FILE* bloque){
 	return i;
 }
 int cantidadDeCaracteres_path(char* path ){//OK
-	FILE * f = fopen(path,"r");
+	FILE * f = fopen(path,"r+");
 	int n = cantidadDeCaracteres_file(f);
 	fclose(f);
 	return n ;
