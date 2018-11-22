@@ -21,4 +21,8 @@ char* recortarPrimerosCaracteres(char* s, int primerosCaracteres);//ok y  malloq
 int cantidadDeCaracteres_file(FILE* bloque);
 int cantidadDeCaracteres_path(char* path );//ok
 bool quedaContenidoParaMapear(char* contenido);
+
+
+void crearBloques(int cantidad);//ok
+
 #endif /* CONFIG_UTIL_H_ */

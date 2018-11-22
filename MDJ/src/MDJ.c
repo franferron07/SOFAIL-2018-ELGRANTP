@@ -42,6 +42,7 @@ mostrar_bitarray();
 
 puts("lol");
 //free(bloqueActual_path);
+printf("cantidad de libres %d\n",getCantidadDeBloquesLibres());
 crearBloques(10);
 consola_fifa();
 //persistirAlBloque("1.bin","contenido");
@@ -75,12 +76,8 @@ void mostrar_bitarray(){
 void setBloqueActuaLleno(){//agregar un 1 al bitmap.bin
 	bitarray_set_bit(bitarray_,bloqueActual_int);
 }
-
-
-
 void getBloqueLibre_path(){
-	int j;
-	for( j =0;testear_bloque_libre_en_posicion(j);j++);//hasta un bloque lbre,OK
+	int j=getBloqueLibre_int();
 	sprintf(bloqueActual_path,"%d.bin",j);//rehacer path con punto de ontaje y carpeta segun dam
 //	bloqueActual_path = fopen(path_del_bloque_libre,"w+");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
 //	return bloqueActual_path;
@@ -88,16 +85,58 @@ void getBloqueLibre_path(){
 bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque){
 	return cantidadDeCaracteres_file(bloqueActual)<tamanioDeBloque;
 }
-void crearBloques(int cantidad){
-//	int n = metadata.cantidad_bloques;
-	for(int var = 0;var<cantidad;var++){
-		char* unPath = malloc(100);
-		sprintf(unPath,"%d.bin",var);
-		FILE* f = fopen(unPath,"w+");
-		txt_close_file(f);
-		free(unPath);
+
+
+//INTERFAZ MDJ
+bool validarArchivo(char* pathDelArchivo){//ver si existe el archivo
+	bool existeArchivo=false;
+	int tamanioDeLosBloques,cantidadDeBloques;
+	int bloques[cantidadDeBloques];
+	return existeArchivo;
+}
+void obtenerDatos(char* pathDelArchivo,int offset, int size){
+	if(validarArchivo(pathDelArchivo))perror("No existe el Archivo , se debe validar primero");
+	else{
+
 	}
 }
+void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo){
+	int cantidadDeBloques=getCantidadDeBloquesLibres();
+	int tamanioDeBloque=metadata.tamanio_de_bloque;
+	int bytesLibres=cantidadDeBloques*tamanioDeBloque;//lo hago largo para  expresividad
+	if(bytesLibres>=cantidadDeBytesDelArchivo)perror("No se puede crearArchivo()");
+	else{
+		t_config aux = config_create(pathDelArchivo);
+		if(aux==NULL)perror("error en crearArchivo(), en config");
+		config_set_value(aux,"BLOQUES ",getBloquesLibres_list());
+	}
+}
+int getBloqueLibre_int(){//obtiene el proximo bloque libre OK
+	int j;
+	for( j =0;testear_bloque_libre_en_posicion(j);j++);//hasta un bloque lbre,OK
+	setear_bloque_ocupado_en_posicion(j);
+	return j;
+}
+t_list getBloquesLibres_list(){
+	t_list lista=list_create();
+	for(int p=0;p<getCantidadDeBloquesLibres();p++ ){
+		list_add(&lista,getBloqueLibre_int());
+	}
+	return lista;
+}
+int getCantidadDeBloquesLibres(){//ok
+	int aux,  contador=0;
+	for(aux=0;aux<metadata.cantidad_bloques;aux++){
+		if(testear_bloque_libre_en_posicion(aux)==0)contador++;
+	}
+	return contador;
+}
+
+
+void guardarArchivo(char* pathDelArchivo,int offset,int size, char* buffer){
+
+}
+//INTERFAZ MDJ
 
 //BITMAP end
 

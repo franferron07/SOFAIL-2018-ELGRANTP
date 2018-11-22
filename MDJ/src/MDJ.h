@@ -76,9 +76,22 @@ void  persistirAlBloque(char* unBloquePath, char * contenido);
 
 
 
+//INTERFAZ MDJ
+typedef struct {
+	char* nombreDelScript;//el archivo contien los scripts
+	//en path esta el archivo de configuracion que refencia a los bloques y  los bytes consumidos
+	char* pathDelArchivo;//ubicacion en donde debo almacenar
+	char* buffer;//contenido del archivo o scripts
+}mdj_interfaz;
 
 
+bool validarArchivo(char* pathDelArchivo);//ver si existe el archivo
+void obtenerDatos(char* pathDelArchivo,int offset, int size);
+void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo);
+int getCantidadDeBloquesLibres();//ok , segun bitarray
 
+
+//INTERFAZ MDJ
 
 //METADATA
 struct METADATA{

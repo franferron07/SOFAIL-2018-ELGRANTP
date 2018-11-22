@@ -37,3 +37,13 @@ int cantidadDeCaracteres_path(char* path ){//OK
 	return n ;
 }
 bool quedaContenidoParaMapear(char* contenido){return strlen(contenido)>0 && contenido!=NULL;}
+void crearBloques(int cantidad){//ok
+//	int n = metadata.cantidad_bloques;
+	for(int var = 0;var<cantidad;var++){
+		char* unPath = malloc(100);
+		sprintf(unPath,"%d.bin",var);
+		FILE* f = fopen(unPath,"w+");
+		txt_close_file(f);
+		free(unPath);
+	}
+}
