@@ -15,11 +15,11 @@ int main(int argc, char *argv[]) {
 
 	imprimir_config();
 
-//	conectarse_con_safa();
-/*
-	conectarse_con_diego();
+	//conectarse_con_safa();
+
+	//conectarse_con_diego();
 	conectarse_con_fm9();
-*/
+
 	/**
 	 * ####Lectura de Escriptorio
 	 *
@@ -43,56 +43,27 @@ int main(int argc, char *argv[]) {
 		free(linea);
 */
 
-	puts("");
-
-	dtb_struct dtb_a_enviar;
-	dtb_a_enviar.id_dtb = 15;
-	dtb_a_enviar.escriptorio=strdup("/direccion/memoria/carpeta/escriptorios/");
-	dtb_a_enviar.program_counter = 7;
-	dtb_a_enviar.inicializado = 1;
-	dtb_a_enviar.quantum = 4;
-	dtb_a_enviar.direcciones = list_create();
-	list_add(dtb_a_enviar.direcciones, strdup("/sistemas/algoritmos/khg74jk/"));
-	list_add(dtb_a_enviar.direcciones, strdup("/sistemas/paradigmas/piu39gh/"));
-	list_add(dtb_a_enviar.direcciones, strdup("/sistemas/operativos/mry58lq/"));
-
-
-	printf("id_dtb: %d\n",dtb_a_enviar.id_dtb);
-	printf("longitud escriptorio: %d\n",strlen(dtb_a_enviar.escriptorio));
-	printf("escriptorio: %s\n",dtb_a_enviar.escriptorio);
-	printf("program_counter: %d\n",dtb_a_enviar.program_counter);
-	printf("inicializado: %d\n",dtb_a_enviar.inicializado);
-	printf("quantum: %d\n",dtb_a_enviar.quantum);
-	puts("Direcciones: ");
-	list_iterate(dtb_a_enviar.direcciones, (void *)puts);
-
-
-
-/*
- 	//prueba de deserializacion de DTB
-	int tamanio_buffer;
-	void * dtb_serializado = serializar_dtb(&dtb_a_enviar, &tamanio_buffer);
-	printf("DTB tamanio %d\n",tamanio_buffer);
-
-	//int result = send(socket_safa, dtb_serializado, tamanio_buffer, 0);
-	//printf("result:  %d",result);
-	dtb_struct* dtb_deserializado = deserializar_dtb(dtb_serializado);
-
-	exit(0);
-	puts("//////DTB DESERIALIZADO//////");
-	printf("id_dtb: %d\n",dtb_deserializado->id_dtb);
-	printf("longitud escriptorio: %d\n",strlen(dtb_deserializado->escriptorio));
-	printf("escriptorio: %s\n",dtb_deserializado->escriptorio);
-	printf("program_counter: %d\n",dtb_deserializado->program_counter);
-	printf("inicializado: %d\n",dtb_deserializado->inicializado);
-	printf("quantum: %d\n",dtb_deserializado->quantum);
-	puts("Direcciones: ");
-	//list_iterate(dtb_deserializado->direcciones, (void *)puts);
-	puts("///FIN DTB DESERIALIZADO/////");
-*/
 
 	//liberar_recursos(EXIT_SUCCESS);
 }
+
+void conectarse_con_fm9(){
+	obtener_socket_cliente(&socket_fm9,cpu.ip_fm9,cpu.puerto_fm9);
+	//ejecutar_handshake(socket_fm9,"DAM",DAM,dam_log);
+
+	header_paquete* paquete = malloc(sizeof(header_paquete));
+	paquete->tipo_instancia = CPU;
+	paquete->tipo_operacion = HANDSHAKE;
+
+	log_info(cpu_log,"HANDSHAKE con FM9");
+	send(socket_fm9,paquete,sizeof(header_paquete),0);
+	//recv(socket_fm9,&MAX_LINEA,sizeof(int),MSG_WAITALL);
+
+	//free(paquete);
+
+	//log_info(cpu_log,"TAM LINEA: %d", MAX_LINEA);
+}
+
 
 void  conectarse_con_safa(){
 	log_info(cpu_log, "Conectandome a SAFA.");

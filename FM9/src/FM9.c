@@ -80,13 +80,14 @@ void atender_conexiones() {
 
 void administrar_servidor(void *puntero_fd) {
 	int socket_actual = *(int*) puntero_fd;
-	paquete_struct* paquete;
-	void* datos;
+	header_paquete* paquete = malloc(sizeof(header_paquete));
+	void* datos = NULL;
 	int datos_a_recibir = 0;
+	puts("administrar_servidor");
 	while ((recv(socket_actual, paquete, sizeof(header_paquete), MSG_WAITALL))
 			> 0) {
-		datos = paquete->mensaje;
-		switch (paquete->encabezado->tipo_instancia) {
+		//datos = paquete->mensaje;
+		switch (paquete->tipo_instancia) {
 		case CPU:
 			coordinarCPU(socket_actual, datos, paquete);
 			break;
@@ -123,8 +124,8 @@ int recibir_datos(void* paquete, int socketFD, uint32_t cant_a_recibir) {
 	return recibido;
 }
 
-void coordinarDAM(int socket, void* datos, paquete_struct* paquete) {
-	switch (paquete->encabezado->tipo_operacion) {
+void coordinarDAM(int socket, void* datos, header_paquete* paquete) {
+	switch (paquete->tipo_operacion) {
 	int pid;
 	char *linea;
 	case HANDSHAKE:
@@ -157,9 +158,10 @@ void coordinarDAM(int socket, void* datos, paquete_struct* paquete) {
 	}
 }
 
-void coordinarCPU(int socket, void* datos, paquete_struct* paquete) {
-	switch (paquete->encabezado->tipo_operacion) {
+void coordinarCPU(int socket, void* datos, header_paquete* paquete) {
+	switch (paquete->tipo_operacion) {
 	case HANDSHAKE:
+		log_info(fm9_log, "El cliente %d se ha conectado correctamente",socket);
 		break;
 	case ACTUALIZAR:
 		break;

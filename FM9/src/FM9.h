@@ -30,8 +30,8 @@ void administrar_servidor(void *puntero_fd);
 void iniciar_administracion_memoria();
 void liberar_recursos(int tipo_salida);
 void terminar_exitosamente();
-void coordinarDAM(int socket, void* datos, paquete_struct* paquete);
-void coordinarCPU(int socket, void* datos, paquete_struct* paquete);
+void coordinarDAM(int socket, void* datos, header_paquete* paquete);
+void coordinarCPU(int socket, void* datos, header_paquete* paquete);
 int recibir_datos(void* paquete, int socketFD, uint32_t cant_a_recibir);
 
 #endif /* FM9_H_ */

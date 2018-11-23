@@ -29,7 +29,7 @@ typedef enum {
 	DESCARGAR = 31, /*dam->fm9 direccion de donde esta, me tenes que ir mandando las lineas hasta donde termina*/
 
 	/**
-	 * Operacion entre DAM/FM9
+	 * Operacion entre CPU/FM9
 	 * */
 	ACTUALIZAR = 32,
 	ELIMINAR = 33,
