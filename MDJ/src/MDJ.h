@@ -90,6 +90,9 @@ void obtenerDatos(char* pathDelArchivo,int offset, int size);
 void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo);
 int getCantidadDeBloquesLibres();//ok , segun bitarray
 
+t_list* getBloquesLibres_list();
+char* concatenarBloque(char** bloques,int cantidadDeBloques);
+
 
 //INTERFAZ MDJ
 

@@ -44,9 +44,29 @@ puts("lol");
 //free(bloqueActual_path);
 printf("cantidad de libres %d\n",getCantidadDeBloquesLibres());
 crearBloques(10);
-consola_fifa();
+//consola_fifa();
 //persistirAlBloque("1.bin","contenido");
+
+//remove("2.bin");
+//FILE* f = fopen("../lol/lol.txt","w+");
+//fclose(f);
+
+char** algo=malloc(100);
+	algo[0]="1";
+	algo[1]="5";
+	puts(algo[0]);
+	puts(algo[1]);
+	t_config* aux=config_create("checkpoint.escriptorio");
+		int cantidadDeBloques=(6/metadata.tamanio_de_bloque)+1;
+
+		config_save(aux);
+		config_destroy(aux);
+
+free(algo);
+
 puts("fin");
+puts(concatenarBloque(algo, 2));
+
 	return 0;
 }
 
@@ -66,6 +86,9 @@ void configurar_bitmap(char bitmap_array[], int cantidadDeBytes){
 
 void setear_bloque_ocupado_en_posicion(off_t pos){//ok
 	bitarray_set_bit(bitarray_,pos);
+}
+void setear_bloque_libre_en_posicion(off_t pos){//ok
+	bitarray_clean_bit(bitarray_,pos);
 }
 bool testear_bloque_libre_en_posicion(int pos){
 	return bitarray_test_bit(bitarray_,(off_t)(pos));
@@ -89,10 +112,18 @@ bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque){
 
 //INTERFAZ MDJ
 bool validarArchivo(char* pathDelArchivo){//ver si existe el archivo
-	bool existeArchivo=false;
-	int tamanioDeLosBloques,cantidadDeBloques;
-	int bloques[cantidadDeBloques];
-	return existeArchivo;
+  	int contador_bloques_aux=0;
+  	int cantidadDeBloques=0,bytesOcupados=0;
+  		t_config* aux=config_create(pathDelArchivo);
+  		bytesOcupados=config_get_int_value(aux,"TAMANIO");
+  		cantidadDeBloques=(bytesOcupados/metadata.tamanio_de_bloque)+1;
+  		char** bloques_aux= config_get_array_value(aux,"BLOQUES");
+  		for (int var = 0; var < cantidadDeBloques; ++var) {
+  			if(testear_bloque_libre_en_posicion(atoi(bloques_aux[var])))contador_bloques_aux++;
+  		}
+  		free(bloques_aux);
+  		config_destroy(aux);
+	return contador_bloques_aux==cantidadDeBloques;
 }
 void obtenerDatos(char* pathDelArchivo,int offset, int size){
 	if(validarArchivo(pathDelArchivo))perror("No existe el Archivo , se debe validar primero");
@@ -106,9 +137,10 @@ void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo){
 	int bytesLibres=cantidadDeBloques*tamanioDeBloque;//lo hago largo para  expresividad
 	if(bytesLibres>=cantidadDeBytesDelArchivo)perror("No se puede crearArchivo()");
 	else{
-		t_config aux = config_create(pathDelArchivo);
+		t_config *aux = config_create(pathDelArchivo);
 		if(aux==NULL)perror("error en crearArchivo(), en config");
 		config_set_value(aux,"BLOQUES ",getBloquesLibres_list());
+		config_destroy(aux);
 	}
 }
 int getBloqueLibre_int(){//obtiene el proximo bloque libre OK
@@ -117,8 +149,8 @@ int getBloqueLibre_int(){//obtiene el proximo bloque libre OK
 	setear_bloque_ocupado_en_posicion(j);
 	return j;
 }
-t_list getBloquesLibres_list(){
-	t_list lista=list_create();
+t_list* getBloquesLibres_list(){
+	t_list *lista=list_create();
 	for(int p=0;p<getCantidadDeBloquesLibres();p++ ){
 		list_add(&lista,getBloqueLibre_int());
 	}
@@ -135,6 +167,37 @@ int getCantidadDeBloquesLibres(){//ok
 
 void guardarArchivo(char* pathDelArchivo,int offset,int size, char* buffer){
 
+}
+
+void borrarArchivo(char* pathDelArchivo){
+	int cantidadDeBloques=0,bytesOcupados=0;
+	t_config* aux=config_create(pathDelArchivo);
+	bytesOcupados=config_get_int_value(aux,"TAMANIO");
+	cantidadDeBloques=(bytesOcupados/metadata.tamanio_de_bloque)+1;
+	printf(" cantidad de bloques a borrar: %d \n",cantidadDeBloques);
+//	int bloques[cantidadDeBloques];
+	char** bloques_aux= config_get_array_value(aux,"BLOQUES");
+	for(int var=0;var<cantidadDeBloques;var++){
+		setear_bloque_libre_en_posicion(atoi(bloques_aux[var]));
+	}
+	free(bloques_aux);
+	config_destroy(aux);
+}
+char* concatenarBloque(char** bloques,int cantidadDeBloques){//falta
+	char* aux_bloques=malloc(cantidadDeBloques*sizeof(char)*3);
+	if(bloques==NULL){
+		perror("error de concatenar bloque");//_bloques=strdup("[]");
+	}
+	else {
+		aux_bloques=strcat(aux_bloques,"[");
+		aux_bloques=strcat(aux_bloques,bloques[0]);
+		for (int var = 1; var < cantidadDeBloques; ++var) {
+			aux_bloques=strcat(aux_bloques,",");
+			aux_bloques=strcat(aux_bloques,bloques[var]);
+		}
+		aux_bloques=strcat(aux_bloques,"]");
+	}
+	return aux_bloques;
 }
 //INTERFAZ MDJ
 
@@ -296,7 +359,7 @@ void escuchar_mensajes_entrantes(){
 
 
 //METADATA
-void cargar_configuracion_metadata(){
+void cargar_configuracion_metadata(){//tamaniohardcodeado para probar
 	t_config *configuracion_cfg_temporal=cargar_en_memoria_cfg("Metadata.bin");
 	if(configuracion_cfg_temporal==NULL)perror("no cargo bien  Metadata.bin\n");
 //	(&metadata)->cantidad_bloques=config_get_int_value(configuracion_cfg_temporal,"CANTIDAD_BLOQUES");
