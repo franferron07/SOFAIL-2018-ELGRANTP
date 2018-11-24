@@ -85,13 +85,13 @@ typedef struct {
 }mdj_interfaz;
 
 
-bool validarArchivo(char* pathDelArchivo);//ver si existe el archivo
+bool validarArchivo(char* pathDelArchivo);//ver si existe el archivo , OK
 void obtenerDatos(char* pathDelArchivo,int offset, int size);
 void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo);
 int getCantidadDeBloquesLibres();//ok , segun bitarray
 
 t_list* getBloquesLibres_list();
-char* concatenarBloque(char** bloques,int cantidadDeBloques);
+char* config_concatenarBloque(char** bloques,int cantidadDeBloques);
 
 
 //INTERFAZ MDJ
@@ -123,7 +123,7 @@ void mostrar_bitarray();
 
 void getBloqueLibre_path();
 bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque);
-void configurar_bitmap(char bitmap_array[],int cantidadDeBytes);
+void cargar_configuracion_bitmap(char bitmap_array[],int cantidadDeBytes);
 
 
 //BITMAP end

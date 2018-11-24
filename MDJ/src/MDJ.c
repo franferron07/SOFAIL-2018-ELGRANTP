@@ -36,42 +36,47 @@ cargar_configuracion_metadata();
 mostrar_configuracion_metadata();
 
 char bits[metadata.cantidad_bloques/8];
-configurar_bitmap(bits,metadata.cantidad_bloques/8);
+cargar_configuracion_bitmap(bits,metadata.cantidad_bloques/8);
+
+
 setear_bloque_ocupado_en_posicion(62);
 mostrar_bitarray();
 
-puts("lol");
 //free(bloqueActual_path);
 printf("cantidad de libres %d\n",getCantidadDeBloquesLibres());
-crearBloques(10);
+crearBloques(metadata.cantidad_bloques/8);
 //consola_fifa();
-//persistirAlBloque("1.bin","contenido");
+//persistirAlBloque("1.bin","example , algun historial");
+printf("espacio restante de 1.bin es %d  ;\n",espacioRestanteAlBloque("1.bin"));
 
-//remove("2.bin");
-//FILE* f = fopen("../lol/lol.txt","w+");
-//fclose(f);
+puts("begin validar archivo ");
+setear_bloque_ocupado_en_posicion(0);
+setear_bloque_ocupado_en_posicion(1);
+setear_bloque_ocupado_en_posicion(2);
+setear_bloque_ocupado_en_posicion(3);
+setear_bloque_ocupado_en_posicion(4);
 
-char** algo=malloc(100);
-	algo[0]="1";
-	algo[1]="5";
-	puts(algo[0]);
-	puts(algo[1]);
-	t_config* aux=config_create("checkpoint.escriptorio");
-		int cantidadDeBloques=(6/metadata.tamanio_de_bloque)+1;
+printf("validar : %d \n",validarArchivo("checkpoint.escriptorio"));
+puts("fin validar archivo ");
 
-		config_save(aux);
-		config_destroy(aux);
-
-free(algo);
-
+//puts("borrar archivo");
+//borrarArchivo("checkpoint.escriptorio");
+//mostrar_bitarray();
+//puts("fin borrar archivo");
+//
+//puts("probando strcat()");
+//char* aux = malloc(10);
+//aux=strcat(aux," No");
+//puts(aux);
+//puts("fin strcat");
+free(bitarray_);
 puts("fin");
-puts(concatenarBloque(algo, 2));
-
+fprintf(stderr,"un error");
 	return 0;
 }
 
 //BITMAP begin
-void configurar_bitmap(char bitmap_array[], int cantidadDeBytes){
+void cargar_configuracion_bitmap(char bitmap_array[], int cantidadDeBytes){
 //	static char  bitmap_array[cantidadDeBytes];
 	for(int k =0;k<cantidadDeBytes;k++)bitmap_array[k]=0b00000000;
 //	char* bitmap_string=malloc(cantidadDeBytes);
@@ -111,22 +116,35 @@ bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque){
 
 
 //INTERFAZ MDJ
-bool validarArchivo(char* pathDelArchivo){//ver si existe el archivo
+bool validarArchivo(char* pathDelArchivo){//ver si existe el archivo, OK, se puede borrar todos los printf()
   	int contador_bloques_aux=0;
   	int cantidadDeBloques=0,bytesOcupados=0;
   		t_config* aux=config_create(pathDelArchivo);
+  		if (aux==NULL) {
+  			perror("->validarArchivo() ,no existe el archivo o path incorrecto");
+  			return false;
+		}
   		bytesOcupados=config_get_int_value(aux,"TAMANIO");
   		cantidadDeBloques=(bytesOcupados/metadata.tamanio_de_bloque)+1;
   		char** bloques_aux= config_get_array_value(aux,"BLOQUES");
-  		for (int var = 0; var < cantidadDeBloques; ++var) {
+  		printf("cantidad de bloques  : %d \n",cantidadDeBloques);
+  		printf("metadata tamanio del bloque : %d \n",metadata.tamanio_de_bloque);
+  		printf("metadata tamanio del bloque : %d \n",metadata.tamanio_de_bloque);
+  		printf("bytes ocupados :  %d \n",config_get_int_value(aux,"TAMANIO"));
+  		puts("ciclo for ");
+  		for (int var = 0; var < cantidadDeBloques; var++) {
+  			printf(" bloque %d iesimo ocupado \n", atoi(bloques_aux[var]));
   			if(testear_bloque_libre_en_posicion(atoi(bloques_aux[var])))contador_bloques_aux++;
   		}
+  		puts("despues d ciclo for ");
+			printf("contador: %d y cantidad:  %d \n", contador_bloques_aux,cantidadDeBloques);
+
   		free(bloques_aux);
   		config_destroy(aux);
 	return contador_bloques_aux==cantidadDeBloques;
 }
 void obtenerDatos(char* pathDelArchivo,int offset, int size){
-	if(validarArchivo(pathDelArchivo))perror("No existe el Archivo , se debe validar primero");
+	if(validarArchivo(pathDelArchivo))perror("->obtenerdatos() , No existe el Archivo , se debe validar primero");
 	else{
 
 	}
@@ -135,15 +153,15 @@ void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo){
 	int cantidadDeBloques=getCantidadDeBloquesLibres();
 	int tamanioDeBloque=metadata.tamanio_de_bloque;
 	int bytesLibres=cantidadDeBloques*tamanioDeBloque;//lo hago largo para  expresividad
-	if(bytesLibres>=cantidadDeBytesDelArchivo)perror("No se puede crearArchivo()");
+	if(bytesLibres>=cantidadDeBytesDelArchivo)perror("No se puede crearArchivo(), espacio insuficiente");
 	else{
 		t_config *aux = config_create(pathDelArchivo);
 		if(aux==NULL)perror("error en crearArchivo(), en config");
-		config_set_value(aux,"BLOQUES ",getBloquesLibres_list());
+		config_set_value(aux,"BLOQUES",getBloquesLibres_list());//preguntar  el tercer parametro
 		config_destroy(aux);
 	}
 }
-int getBloqueLibre_int(){//obtiene el proximo bloque libre OK
+int getBloqueLibre_int(){//obtiene el proximo bloque libre ,OK
 	int j;
 	for( j =0;testear_bloque_libre_en_posicion(j);j++);//hasta un bloque lbre,OK
 	setear_bloque_ocupado_en_posicion(j);
@@ -172,18 +190,19 @@ void guardarArchivo(char* pathDelArchivo,int offset,int size, char* buffer){
 void borrarArchivo(char* pathDelArchivo){
 	int cantidadDeBloques=0,bytesOcupados=0;
 	t_config* aux=config_create(pathDelArchivo);
+	if(aux==NULL)perror("->borrarArchivo() , no existe el archivo o path incorrecto");
 	bytesOcupados=config_get_int_value(aux,"TAMANIO");
 	cantidadDeBloques=(bytesOcupados/metadata.tamanio_de_bloque)+1;
 	printf(" cantidad de bloques a borrar: %d \n",cantidadDeBloques);
-//	int bloques[cantidadDeBloques];
 	char** bloques_aux= config_get_array_value(aux,"BLOQUES");
 	for(int var=0;var<cantidadDeBloques;var++){
 		setear_bloque_libre_en_posicion(atoi(bloques_aux[var]));
+		remove(pathDelArchivo);
 	}
 	free(bloques_aux);
 	config_destroy(aux);
 }
-char* concatenarBloque(char** bloques,int cantidadDeBloques){//falta
+char* config_concatenarBloque(char** bloques,int cantidadDeBloques){//falta
 	char* aux_bloques=malloc(cantidadDeBloques*sizeof(char)*3);
 	if(bloques==NULL){
 		perror("error de concatenar bloque");//_bloques=strdup("[]");
@@ -228,14 +247,18 @@ void persistirContenido(char * contenido){
 }
 
 
- int  espacioRestanteAlBloque(){
-	return metadata.tamanio_de_bloque-cantidadDeCaracteres_path(bloqueActual_path);
+ int  espacioRestanteAlBloque(char* pathDelBloque){
+	int resto =  metadata.tamanio_de_bloque-cantidadDeCaracteres_path(pathDelBloque);
+//	if (resto<0) { // no deberia de pasar esto
+//		setear_bloque_ocupado_en_posicion(bloqueActual_int);
+//	}
+	return resto;
 }
 
 
 void  persistirAlBloque(char* unBloquePath, char * contenido){
 	char* recorte =NULL;
-	recorte=recortarPrimerosCaracteres(contenido,minimo(metadata.tamanio_de_bloque,espacioRestanteAlBloque()));
+	recorte=recortarPrimerosCaracteres(contenido,espacioRestanteAlBloque(unBloquePath));
 	printf("se va a mapear al bloque %s y el restante es %s \n",recorte,contenido);
 //	 sprintf(bloqueActual_path,"%d.bin",bloqueActual_int);
 
@@ -248,7 +271,7 @@ bool estaLLenoElBloqueActual(){
 	return cantidadDeCaracteres_path(bloqueActual_path)==metadata.tamanio_de_bloque;
 }
 
-bool terminoDeMapearContenido(){
+bool terminoDeMapearContenido(){//en revision
 	bool hayCaracteresParaMapear=strlen(buffer_input_keyboard)>0;
 	return bitarray_test_bit(bitarray_,bloqueActual_int)&&hayCaracteresParaMapear;
 }
@@ -364,7 +387,7 @@ void cargar_configuracion_metadata(){//tamaniohardcodeado para probar
 	if(configuracion_cfg_temporal==NULL)perror("no cargo bien  Metadata.bin\n");
 //	(&metadata)->cantidad_bloques=config_get_int_value(configuracion_cfg_temporal,"CANTIDAD_BLOQUES");
 	metadata.cantidad_bloques=config_get_int_value(configuracion_cfg_temporal,"CANTIDAD_BLOQUES");
-	metadata.tamanio_de_bloque=5;//config_get_int_value(configuracion_cfg_temporal,"TAMANIO_BLOQUES");
+	metadata.tamanio_de_bloque=config_get_int_value(configuracion_cfg_temporal,"TAMANIO_BLOQUES");
 	config_destroy(configuracion_cfg_temporal);
 }
 void mostrar_configuracion_metadata(){
