@@ -84,11 +84,14 @@ typedef struct {
 	char* buffer;//contenido del archivo o scripts
 }mdj_interfaz;
 
-
-bool validarArchivo(char* pathDelArchivo);//ver si existe el archivo , OK
+//ver si existe el archivo , OK
+bool validarArchivo(char* pathDelArchivo);
 void obtenerDatos(char* pathDelArchivo,int offset, int size);
 void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo);
-int getCantidadDeBloquesLibres();//ok , segun bitarray
+//ok , segun bitarray
+int getCantidadDeBloquesLibres();
+//borra el .escriptorio y setea el bitmap
+void borrarArchivo(char* pathDelArchivo);
 
 t_list* getBloquesLibres_list();
 char* config_concatenarBloque(char** bloques,int cantidadDeBloques);

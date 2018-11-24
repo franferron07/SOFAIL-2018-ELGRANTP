@@ -71,7 +71,7 @@ puts("fin validar archivo ");
 //puts("fin strcat");
 free(bitarray_);
 puts("fin");
-fprintf(stderr,"un error");
+
 	return 0;
 }
 
@@ -113,10 +113,11 @@ void getBloqueLibre_path(){
 bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque){
 	return cantidadDeCaracteres_file(bloqueActual)<tamanioDeBloque;
 }
+//BITMAP end
 
 
 //INTERFAZ MDJ
-bool validarArchivo(char* pathDelArchivo){//ver si existe el archivo, OK, se puede borrar todos los printf()
+bool validarArchivo(char* pathDelArchivo){//ver si existe el archivo, OK, se puede borrar todos los printf() y puts(),era para probar
   	int contador_bloques_aux=0;
   	int cantidadDeBloques=0,bytesOcupados=0;
   		t_config* aux=config_create(pathDelArchivo);
@@ -153,7 +154,7 @@ void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo){
 	int cantidadDeBloques=getCantidadDeBloquesLibres();
 	int tamanioDeBloque=metadata.tamanio_de_bloque;
 	int bytesLibres=cantidadDeBloques*tamanioDeBloque;//lo hago largo para  expresividad
-	if(bytesLibres>=cantidadDeBytesDelArchivo)perror("No se puede crearArchivo(), espacio insuficiente");
+	if(bytesLibres>=cantidadDeBytesDelArchivo)perror("No se puede crearArchivo(), espacio o bloques insuficientes");
 	else{
 		t_config *aux = config_create(pathDelArchivo);
 		if(aux==NULL)perror("error en crearArchivo(), en config");
@@ -187,7 +188,7 @@ void guardarArchivo(char* pathDelArchivo,int offset,int size, char* buffer){
 
 }
 
-void borrarArchivo(char* pathDelArchivo){
+void borrarArchivo(char* pathDelArchivo){//ok
 	int cantidadDeBloques=0,bytesOcupados=0;
 	t_config* aux=config_create(pathDelArchivo);
 	if(aux==NULL)perror("->borrarArchivo() , no existe el archivo o path incorrecto");
@@ -219,8 +220,6 @@ char* config_concatenarBloque(char** bloques,int cantidadDeBloques){//falta
 	return aux_bloques;
 }
 //INTERFAZ MDJ
-
-//BITMAP end
 
 
 void consola_fifa(){
