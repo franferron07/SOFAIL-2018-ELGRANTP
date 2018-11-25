@@ -22,6 +22,8 @@ int cantidadDeCaracteres_file(FILE* bloque);
 int cantidadDeCaracteres_path(char* path );//ok
 bool quedaContenidoParaMapear(char* contenido);
 
+char* str_concat(  char* from,const char* add);//devuelve algo malloqueado,OK,guarda
+char* intToString(int n);//OK,se puede borrar el printf
 
 void crearBloques(int cantidad);//ok
 

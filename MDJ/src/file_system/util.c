@@ -37,7 +37,7 @@ int cantidadDeCaracteres_path(char* path ){//OK
 	return n ;
 }
 bool quedaContenidoParaMapear(char* contenido){return strlen(contenido)>0 && contenido!=NULL;}
-void crearBloques(int cantidad){//ok
+void crearBloques(int cantidad){//ok, se puede mejorar con realloc
 //	int n = metadata.cantidad_bloques;
 	for(int var = 0;var<cantidad;var++){
 		char* unPath = malloc(100);
@@ -47,3 +47,22 @@ void crearBloques(int cantidad){//ok
 		free(unPath);
 	}
 }
+char* str_concat(  char* from,const char* add){//devuelve algo malloqueado,OK,guarda
+	if(from==NULL)return strdup(add);
+	else{
+		int malloq=(strlen(from)+strlen(add))*sizeof(char);
+		char* aux = malloc(malloq);
+		sprintf(aux,"%s%s",from,add);
+		free(from);
+		return aux;
+	}
+}
+char* intToString(int n){//OK,se puede borrar el printf
+	int cifras =(int)log10((double)n)+1;
+//	float cifras = log10f((float)n)+1;
+	printf("cifras: %d \n",cifras);
+	char* aux = malloc(cifras);
+	sprintf(aux,"%d",n);
+	return aux;
+}
+

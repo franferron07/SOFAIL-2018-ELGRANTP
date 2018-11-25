@@ -56,7 +56,6 @@ void mostrar_configuracion_mdj();
 void mdj_liberar_recursos();
 
 
-//MDJ
 
 void escuchar_mensajes_entrantes();
 
@@ -90,6 +89,9 @@ void obtenerDatos(char* pathDelArchivo,int offset, int size);
 void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo);
 //ok , segun bitarray
 int getCantidadDeBloquesLibres();
+
+//solo para crearArchivo ,da en formato "[1,2,3,54,56,6]"
+char* getBloquesLibres_string(int cantidadDeBloques);
 //borra el .escriptorio y setea el bitmap
 void borrarArchivo(char* pathDelArchivo);
 

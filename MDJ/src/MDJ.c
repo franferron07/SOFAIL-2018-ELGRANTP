@@ -30,24 +30,20 @@ pthread_attr_t hilo_consola_fifa;
 //bitmap_file=NULL;
 //bitarray=NULL;
 int main(void) {
+//carga de configuracion
 cargar_configuracion_mdj();
 mostrar_configuracion_mdj();
 cargar_configuracion_metadata();
 mostrar_configuracion_metadata();
-
 char bits[metadata.cantidad_bloques/8];
 cargar_configuracion_bitmap(bits,metadata.cantidad_bloques/8);
-
+//fin de carga de config
 
 setear_bloque_ocupado_en_posicion(62);
 mostrar_bitarray();
 
-//free(bloqueActual_path);
 printf("cantidad de libres %d\n",getCantidadDeBloquesLibres());
-crearBloques(metadata.cantidad_bloques/8);
-//consola_fifa();
-//persistirAlBloque("1.bin","example , algun historial");
-printf("espacio restante de 1.bin es %d  ;\n",espacioRestanteAlBloque("1.bin"));
+crearBloques(16);
 
 puts("begin validar archivo ");
 setear_bloque_ocupado_en_posicion(0);
@@ -59,19 +55,17 @@ setear_bloque_ocupado_en_posicion(4);
 printf("validar : %d \n",validarArchivo("checkpoint.escriptorio"));
 puts("fin validar archivo ");
 
-//puts("borrar archivo");
-//borrarArchivo("checkpoint.escriptorio");
-//mostrar_bitarray();
-//puts("fin borrar archivo");
-//
-//puts("probando strcat()");
-//char* aux = malloc(10);
-//aux=strcat(aux," No");
-//puts(aux);
-//puts("fin strcat");
+setear_bloque_ocupado_en_posicion(0);
+setear_bloque_ocupado_en_posicion(1);
+setear_bloque_ocupado_en_posicion(2);
+setear_bloque_ocupado_en_posicion(4);
+
+
+mostrar_bitarray();
+puts("getBloquesString");
+crearArchivo("checkpoint.escriptorio",300);
 free(bitarray_);
 puts("fin");
-
 	return 0;
 }
 
@@ -150,17 +144,43 @@ void obtenerDatos(char* pathDelArchivo,int offset, int size){
 
 	}
 }
-void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo){
-	int cantidadDeBloques=getCantidadDeBloquesLibres();
-	int tamanioDeBloque=metadata.tamanio_de_bloque;
-	int bytesLibres=cantidadDeBloques*tamanioDeBloque;//lo hago largo para  expresividad
-	if(bytesLibres>=cantidadDeBytesDelArchivo)perror("No se puede crearArchivo(), espacio o bloques insuficientes");
+void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo){//OK
+	int bloques_a_ocupar=((cantidadDeBytesDelArchivo-1)/metadata.tamanio_de_bloque)+1;
+	if(getCantidadDeBloquesLibres()<bloques_a_ocupar || bloques_a_ocupar<0)perror("No se puede crearArchivo(), espacio o bloques insuficientes");
 	else{
+		crearBloques(bloques_a_ocupar);
 		t_config *aux = config_create(pathDelArchivo);
 		if(aux==NULL)perror("error en crearArchivo(), en config");
-		config_set_value(aux,"BLOQUES",getBloquesLibres_list());//preguntar  el tercer parametro
+		printf("bloques a ocupar :%d \n", bloques_a_ocupar);
+		printf("TAMANIO :%d \n", cantidadDeBytesDelArchivo);
+		char* s2 = getBloquesLibres_string(bloques_a_ocupar);
+		printf("BLOQUES= :%s \n",s2);
+
+		config_set_value(aux,"BLOQUES",s2);
+		config_set_value(aux,"TAMANIO",intToString(cantidadDeBytesDelArchivo));//preguntar  el tercer parametro
+		config_save_in_file(aux,pathDelArchivo);
 		config_destroy(aux);
+		free(s2);
+		puts("fin crearArchivo()");
 	}
+}
+char* getBloquesLibres_string(int cantidadDeBloques){//OK,solo para crearArchivo ,da en formato "[1,2,3,54,56,6]"
+//	char* bloques_string=(char*)malloc(cantidadDeBloques*sizeof(char)*3);
+	char* aux=strdup("[");
+	t_list *bloques_libres_aux=getBloquesLibres_list(cantidadDeBloques);
+	aux=str_concat(aux,intToString((int)list_get(bloques_libres_aux,0)));
+	if(cantidadDeBloques==1){
+			aux=str_concat(aux,"]");
+			list_destroy(bloques_libres_aux);
+			return aux;
+	}
+	for(int var = 1; var < cantidadDeBloques; var++) {
+			aux=str_concat(aux,",");
+			aux=str_concat(aux,intToString((int)list_get(bloques_libres_aux,var)));
+	}
+		list_destroy(bloques_libres_aux);
+		aux=str_concat(aux,"]");
+	return aux;
 }
 int getBloqueLibre_int(){//obtiene el proximo bloque libre ,OK
 	int j;
@@ -168,10 +188,10 @@ int getBloqueLibre_int(){//obtiene el proximo bloque libre ,OK
 	setear_bloque_ocupado_en_posicion(j);
 	return j;
 }
-t_list* getBloquesLibres_list(){
+t_list* getBloquesLibres_list(int cantidadDeBloques){
 	t_list *lista=list_create();
-	for(int p=0;p<getCantidadDeBloquesLibres();p++ ){
-		list_add(&lista,getBloqueLibre_int());
+	for(int p=0;p<cantidadDeBloques;p++ ){
+		list_add(lista,getBloqueLibre_int());
 	}
 	return lista;
 }
@@ -203,22 +223,7 @@ void borrarArchivo(char* pathDelArchivo){//ok
 	free(bloques_aux);
 	config_destroy(aux);
 }
-char* config_concatenarBloque(char** bloques,int cantidadDeBloques){//falta
-	char* aux_bloques=malloc(cantidadDeBloques*sizeof(char)*3);
-	if(bloques==NULL){
-		perror("error de concatenar bloque");//_bloques=strdup("[]");
-	}
-	else {
-		aux_bloques=strcat(aux_bloques,"[");
-		aux_bloques=strcat(aux_bloques,bloques[0]);
-		for (int var = 1; var < cantidadDeBloques; ++var) {
-			aux_bloques=strcat(aux_bloques,",");
-			aux_bloques=strcat(aux_bloques,bloques[var]);
-		}
-		aux_bloques=strcat(aux_bloques,"]");
-	}
-	return aux_bloques;
-}
+
 //INTERFAZ MDJ
 
 
