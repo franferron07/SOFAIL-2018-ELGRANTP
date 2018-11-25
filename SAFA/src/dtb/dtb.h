@@ -18,6 +18,7 @@ void reiniciar_dummy(); //REINICIA DTB DUMMY PARA QUE PUEDA SER INICIALIZADO POR
 dtb_struct *obtener_dtb_a_ejecutar_dummy(); //funcion que me devuelve el primer dtb de la lista de nuevos en estado nuevo
 bool dtb_estado_nuevo(dtb_struct *dtb); 	// indica si dtb esta en estado nuevo .
 
+void agregar_direccion_a_dtb( dtb_struct *dtb , direccion_struct *direccion );  //agrego la direccion al dtb
 void eliminar_path_dtb( dtb_struct *dtb   , char* path ); //elimina path de la lista de direcciones.
 
 

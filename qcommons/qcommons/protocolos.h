@@ -144,6 +144,7 @@ typedef struct {
 	uint8_t sentencias_espera;
 	uint8_t sentencias_dam;
 	uint8_t sentencias_totales;
+	uint8_t sentencias_mdj;
 } dtb_struct;
 
 typedef struct {

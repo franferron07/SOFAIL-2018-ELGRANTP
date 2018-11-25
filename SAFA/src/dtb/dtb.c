@@ -70,6 +70,13 @@ bool dtb_estado_nuevo(dtb_struct *dtb) {
 }
 
 
+
+void agregar_direccion_a_dtb( dtb_struct *dtb , direccion_struct *direccion ){
+
+	list_add(dtb->direcciones , direccion);
+}
+
+
 void eliminar_path_dtb( dtb_struct *dtb   , char* path ){
 
 	bool dtb_tiene_path(direccion_struct *direccion) {

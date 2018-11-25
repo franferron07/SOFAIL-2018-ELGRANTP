@@ -191,8 +191,7 @@ void *administrar_servidor(void *puntero_fd) {
 
 void atender_cliente_cpu( int *cliente_socket ){
 
-	/*request_operacion_type *header_operacion = NULL;
-	void *buffer_operacion = malloc(TAMANIO_REQUEST_OPERACION);*/
+
 	int res ;
 	u_int8_t id_dtb ;
 
@@ -204,9 +203,8 @@ void atender_cliente_cpu( int *cliente_socket ){
 		list_add(cpus, &cpu_nueva);
 	pthread_mutex_unlock(&sem_cpu_mutex);
 
-
-
 	header_paquete* paquete = malloc(sizeof(header_paquete));
+
 	/****** ESPERANDO MENSAJES DE CPU *******/
 	while ( ( res = recv(*cliente_socket, paquete, sizeof(header_paquete) ,MSG_WAITALL) )  > 0) {
 
@@ -253,8 +251,6 @@ void atender_cliente_cpu( int *cliente_socket ){
 				log_info(safa_log, "Se bloquea dtb id: %d",id_dtb);
 			}
 
-			/****** LIBERO CPU DEL DTB *******/
-			reiniciar_cpu( cpu_nueva );
 
 			/* TODO deberia hacer un send si fuera necesario para avisar a cpu que se recibe mensaje. */
 
@@ -274,8 +270,6 @@ void atender_cliente_cpu( int *cliente_socket ){
 			list_add(dtb_terminados , dtb_finalizado);
 			log_info(safa_log, "Se finaliza dtb id: %d",id_dtb);
 
-			/****** LIBERO CPU DEL DTB *******/
-			reiniciar_cpu( cpu_nueva );
 		}
 		break;
 
@@ -332,8 +326,8 @@ void atender_cliente_cpu( int *cliente_socket ){
 			header_paquete *paquete = malloc( sizeof( header_paquete ) );
 			res = recv(*cliente_socket, paquete, sizeof(header_paquete),MSG_WAITALL);
 			if (res <= 0) {
-							log_info(safa_log, "Error en el mensaje");
-							//TODO habria que hacer return
+				log_info(safa_log, "Error en el mensaje");
+				//TODO habria que hacer return
 			}
 
 			void *buffer= malloc( paquete->tamanio_mensaje );
@@ -366,7 +360,8 @@ void atender_cliente_cpu( int *cliente_socket ){
 			aumentar_sentencias_totales( cpu_nueva.dtb_ejecutar , quantum_ejecutado );
 			aumentar_sentencias_espera( quantum_ejecutado );
 
-			//TODO verificar si cpu necesita confirmacion
+			/****** LIBERO CPU DEL DTB *******/
+			reiniciar_cpu( cpu_nueva );
 
 		}
 		break;
@@ -396,47 +391,94 @@ void atender_cliente_cpu( int *cliente_socket ){
 void atender_cliente_dam( int *cliente_socket ){
 
 
-	request_operacion_type *header_operacion = NULL;
-	void *buffer_operacion = malloc(TAMANIO_REQUEST_OPERACION);
+	/*request_operacion_type *header_operacion = NULL;
+	void *buffer_operacion = malloc(TAMANIO_REQUEST_OPERACION);*/
+
+	header_paquete* paquete = malloc(sizeof(header_paquete));
 	int res ;
 
-
 	/****** ESPERANDO MENSAJES DE DAM *******/
-	while ( ( res = recv(*cliente_socket, buffer_operacion, TAMANIO_REQUEST_OPERACION,MSG_WAITALL) )  > 0) {
+	while ( ( res = recv(*cliente_socket, paquete, sizeof(header_paquete) ,MSG_WAITALL) )  > 0) {
 
-		switch (header_operacion->tipo_operacion ) {
+		switch (paquete->tipo_operacion ) {
 
 			case ARCHIVOCARGADO:{
 
-				/*TODO se realiza otro recv para recibir el path del
-				 * archivo cargado el id de dtb y en donde se cargo. si salio ok se debe desbloquear dtb y sino cerrarlo-*/
+				/* Aviso de carga de archivo en un dtb. se verifica si es de una operacion de dummy o un dtb que este bloqueado */
 
-				/* TODO verificar si el id del dtb corresponde a un dtb en estado cargandoDUmmy si lo es debe pasarse el id del dtb original
-				 * de la cola de nuevos a listos y cambiar su estado . Y si no esta en cargandodummy se manda a lista de bloqueados.
-				 * */
+				/******************************* RECIBO ARCHIVO***************************/
+				void *buffer_direccion = malloc(sizeof( operacion_archivo_direccion) );
+				res = recv(*cliente_socket, buffer_direccion, sizeof( operacion_archivo_direccion) ,MSG_WAITALL);
+				operacion_archivo_direccion *direccion = deserializar_operacion_archivo_direccion( buffer_direccion );
 
-				/* hacer un recv con la strcut operacion archivo direccion. usar la funcion de deserealizar.  */
+				log_info(safa_log, "Se recibe de dam aviso de archivo cargado del dtb:%d",direccion->pid);
+
+				dtb_struct *dtb = buscar_dtb_id( dtbs , direccion->pid);
+
+				/**** AGREGO DIRECCION DE ARCHIVO A DTB ****/
+				agregar_direccion_a_dtb( dtb , direccion->direccion );
+
+
+				/* VERIFICO SI ES UNA OPERACION DE DUMMY */
+				if( dtb->estado == CARGANDODUMMY  ){
+
+					/* TODO habria que reveeer el plp , aca habria que poder pasar a listos el dtb pero se debe verificar la multiprog. Buscar alguna forma
+					 * de implementarlo. o poner en un estado el dtb para que el plp pueda tomarlo en algun momento y pasarlo a listos
+					 * */
+
+					//enviar_dtb_listos( dtb );
+				}
+				else{
+					/* DESBLOQUEO DTB */
+					desbloquear_dtb(dtb);
+
+				}
+
+
 
 			}
 			break;
 
 			case ARCHIVOCREADO:{
 
-				/*TODO se realiza otro recv con el id del dtb que hizo el abrir, se debe desbloquear el dtb si salio todo ok */
+
+				/********** RECIBO ID DTB*************/
+				u_int8_t id_dtb;
+				res = recv(*cliente_socket, &id_dtb, sizeof(u_int8_t),MSG_WAITALL);
+				dtb_struct *dtb = buscar_dtb_id( dtbs , id_dtb);
+
+				log_info(safa_log, "Se recibe de dam aviso de archivo creado del dtb:%d",id_dtb);
+
+				/* DESBLOQUEO DTB */
+				desbloquear_dtb(dtb);
 
 			}
 			break;
 
 			case ARCHIVOMODIFICADO:{
 
-				/* TODO solo me pasa el pid de aviso de modificacion , desbvloqueo el dtb  */
+				/********** RECIBO ID DTB*************/
+				u_int8_t id_dtb;
+				res = recv(*cliente_socket, &id_dtb, sizeof(u_int8_t),MSG_WAITALL);
+				dtb_struct *dtb = buscar_dtb_id( dtbs , id_dtb);
 
+				log_info(safa_log, "Se recibe de dam aviso de archivo modificado del dtb:%d",id_dtb);
+
+				/* DESBLOQUEO DTB */
+				desbloquear_dtb(dtb);
 			}
 			break;
 
 			case ARCHIVOBORRADO:{
 
-				/* TODO solo me pasa el pid del dtb para desbloquear */
+				u_int8_t id_dtb;
+				res = recv(*cliente_socket, &id_dtb, sizeof(u_int8_t),MSG_WAITALL);
+				dtb_struct *dtb = buscar_dtb_id( dtbs , id_dtb);
+
+				log_info(safa_log, "Se recibe de dam aviso de archivo modificado del dtb:%d",id_dtb);
+
+				/* DESBLOQUEO DTB */
+				desbloquear_dtb(dtb);
 
 			}
 			break;
@@ -448,7 +490,10 @@ void atender_cliente_dam( int *cliente_socket ){
 
 	}
 
+	free(paquete);
 
+	pthread_detach(pthread_self()); //libera recursos del hilo
+	pthread_exit(NULL);
 
 }
 

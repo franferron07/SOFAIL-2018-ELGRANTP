@@ -83,15 +83,10 @@ void ejecutar_planificacion_largo_plazo(){
 			dtb->estado = CARGANDODUMMY;
 			log_info(safa_log, "DTB dummy inicializado");
 
+			/* AGREGO DTB A LISTO */
+			agregar_dtb_a_listos( &dtb_dummy );
+			log_info(safa_log, "DUMMY pasado a listos con el id:%d",dtb_dummy.id_dtb);
 
-			/**************** AGREGO DUMMY A LISTOS SI MULTIPROGRAMACION LO PERMITE **************************/
-			sem_wait(&sem_listo_max);
-			pthread_mutex_lock(&sem_listo_mutex);
-
-			list_add(dtb_listos, &dtb_dummy);
-			log_info(safa_log, "DUMMY pasado a listos");
-
-			pthread_mutex_unlock(&sem_listo_mutex);
 
 		}
 
@@ -153,10 +148,41 @@ dtb_struct* aplicarPropio() {
 
 	dtb_struct* dtbAEjecutar = NULL;
 
-	return dtbAEjecutar;
+	int mayor=-1;
+	int id_mayor=-1;
 
+
+	void prioridad_mdj (dtb_struct *dtb) {
+
+		if(dtb->sentencias_mdj > mayor ){
+
+			id_mayor = dtb->id_dtb;
+		}
+
+	}
+	//itero cada elemento de la lista y busco el que tenga mayor sentencias a mdj
+	list_iterate(dtb_ejecutando, (void*)prioridad_mdj);
+
+	dtbAEjecutar = quitar_dtb_lista_id( dtb_ejecutando , id_mayor );
+	list_add(dtb_ejecutando , dtbAEjecutar);
+
+	return dtbAEjecutar;
 }
 
+
+
+void agregar_dtb_a_listos( dtb_struct *dtb ){
+
+	/**************** AGREGO DTB A LISTOS SI MULTIPROGRAMACION LO PERMITE **************************/
+	sem_wait(&sem_listo_max);
+	pthread_mutex_lock(&sem_listo_mutex);
+
+	list_add(dtb_listos, &dtb);
+	dtb->estado = LISTO;
+
+	pthread_mutex_unlock(&sem_listo_mutex);
+
+}
 
 
 
@@ -181,6 +207,16 @@ dtb_struct* buscar_dtb_id( t_list *lista  ,int id ){
 
 }
 
+
+
+void desbloquear_dtb( dtb_struct* dtb ){
+
+	quitar_dtb_lista_id( dtb_bloqueados , dtb->id_dtb );
+
+	agregar_dtb_a_listos( dtb );
+	log_info(safa_log, "DTB pasado a listos: %d" , dtb->id_dtb);
+
+}
 
 
 recurso_struct* buscar_recurso( char*nombre_recurso ){
