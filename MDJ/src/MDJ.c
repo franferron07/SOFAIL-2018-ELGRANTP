@@ -63,7 +63,7 @@ setear_bloque_ocupado_en_posicion(4);
 
 mostrar_bitarray();
 puts("getBloquesString");
-crearArchivo("checkpoint.escriptorio",300);
+crearArchivo("checkpoint.escriptorio",299);
 free(bitarray_);
 puts("fin");
 	return 0;
@@ -145,7 +145,8 @@ void obtenerDatos(char* pathDelArchivo,int offset, int size){
 	}
 }
 void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo){//OK
-	int bloques_a_ocupar=((cantidadDeBytesDelArchivo-1)/metadata.tamanio_de_bloque)+1;
+	int bloques_a_ocupar=((cantidadDeBytesDelArchivo)/metadata.tamanio_de_bloque);
+	if((cantidadDeBytesDelArchivo%metadata.tamanio_de_bloque)!=0)bloques_a_ocupar++;
 	if(getCantidadDeBloquesLibres()<bloques_a_ocupar || bloques_a_ocupar<0)perror("No se puede crearArchivo(), espacio o bloques insuficientes");
 	else{
 		crearBloques(bloques_a_ocupar);
@@ -155,7 +156,6 @@ void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo){//OK
 		printf("TAMANIO :%d \n", cantidadDeBytesDelArchivo);
 		char* s2 = getBloquesLibres_string(bloques_a_ocupar);
 		printf("BLOQUES= :%s \n",s2);
-
 		config_set_value(aux,"BLOQUES",s2);
 		config_set_value(aux,"TAMANIO",intToString(cantidadDeBytesDelArchivo));//preguntar  el tercer parametro
 		config_save_in_file(aux,pathDelArchivo);
