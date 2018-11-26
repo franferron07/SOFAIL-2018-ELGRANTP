@@ -1,3 +1,4 @@
+
 /*
  ============================================================================
  Name        : MDJ.c
@@ -40,26 +41,6 @@ cargar_configuracion_bitmap(bits,metadata.cantidad_bloques/8);
 //fin de carga de config
 
 setear_bloque_ocupado_en_posicion(62);
-mostrar_bitarray();
-
-printf("cantidad de libres %d\n",getCantidadDeBloquesLibres());
-crearBloques(16);
-
-puts("begin validar archivo ");
-setear_bloque_ocupado_en_posicion(0);
-setear_bloque_ocupado_en_posicion(1);
-setear_bloque_ocupado_en_posicion(2);
-setear_bloque_ocupado_en_posicion(3);
-setear_bloque_ocupado_en_posicion(4);
-
-printf("validar : %d \n",validarArchivo("checkpoint.escriptorio"));
-puts("fin validar archivo ");
-
-setear_bloque_ocupado_en_posicion(0);
-setear_bloque_ocupado_en_posicion(1);
-setear_bloque_ocupado_en_posicion(2);
-setear_bloque_ocupado_en_posicion(4);
-
 
 mostrar_bitarray();
 puts("getBloquesString");
@@ -77,7 +58,7 @@ void cargar_configuracion_bitmap(char bitmap_array[], int cantidadDeBytes){
 //	memset(bitmap_string,'0',cantidadDeBytes);//mejor con array
 	printf("strlen es  %d con valor %s \n",cantidadDeBytes,bitmap_array);
 	bitarray_ = bitarray_create_with_mode(bitmap_array, cantidadDeBytes, LSB_FIRST);
-	bitmap_file=fopen("Bitmap.bin","w+");
+	bitmap_file=fopen("Bitmap.bin","w+r");
 	txt_write_in_file(bitmap_file,bitarray_->bitarray);//hacerlo con mmap()
 //	memmove(bitmap_file,bitarray_->bitarray,bitarray_->size);
 	txt_close_file(bitmap_file);
@@ -101,7 +82,8 @@ void setBloqueActuaLleno(){//agregar un 1 al bitmap.bin
 void getBloqueLibre_path(){
 	int j=getBloqueLibre_int();
 	sprintf(bloqueActual_path,"%d.bin",j);//rehacer path con punto de ontaje y carpeta segun dam
-//	bloqueActual_path = fopen(path_del_bloque_libre,"w+");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
+	FILE* f_aux= fopen(bloqueActual_path,"w+r");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
+	txt_close_file(f_aux);
 //	return bloqueActual_path;
 }
 bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque){
@@ -112,7 +94,8 @@ bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque){
 
 //INTERFAZ MDJ
 bool validarArchivo(char* pathDelArchivo){//ver si existe el archivo, OK, se puede borrar todos los printf() y puts(),era para probar
-  	int contador_bloques_aux=0;
+  	puts("---------validacion de archivo-------");
+	int contador_bloques_aux=0;
   	int cantidadDeBloques=0,bytesOcupados=0;
   		t_config* aux=config_create(pathDelArchivo);
   		if (aux==NULL) {
@@ -120,15 +103,16 @@ bool validarArchivo(char* pathDelArchivo){//ver si existe el archivo, OK, se pue
   			return false;
 		}
   		bytesOcupados=config_get_int_value(aux,"TAMANIO");
-  		cantidadDeBloques=(bytesOcupados/metadata.tamanio_de_bloque)+1;
+  		cantidadDeBloques=(bytesOcupados/metadata.tamanio_de_bloque);
+  		if((bytesOcupados%metadata.tamanio_de_bloque)!=0)cantidadDeBloques++;//esto es importante ,es como saber el numero de paginas ocupadasb
   		char** bloques_aux= config_get_array_value(aux,"BLOQUES");
   		printf("cantidad de bloques  : %d \n",cantidadDeBloques);
   		printf("metadata tamanio del bloque : %d \n",metadata.tamanio_de_bloque);
   		printf("metadata tamanio del bloque : %d \n",metadata.tamanio_de_bloque);
   		printf("bytes ocupados :  %d \n",config_get_int_value(aux,"TAMANIO"));
-  		puts("ciclo for ");
+  		puts("inicio ciclo for ");
   		for (int var = 0; var < cantidadDeBloques; var++) {
-  			printf(" bloque %d iesimo ocupado \n", atoi(bloques_aux[var]));
+  			printf(" bloque %s iesimo ocupado ?\n", (bloques_aux[var]));
   			if(testear_bloque_libre_en_posicion(atoi(bloques_aux[var])))contador_bloques_aux++;
   		}
   		puts("despues d ciclo for ");
@@ -136,15 +120,17 @@ bool validarArchivo(char* pathDelArchivo){//ver si existe el archivo, OK, se pue
 
   		free(bloques_aux);
   		config_destroy(aux);
+  		puts("-------------fin validacion de archivo-------------------");
 	return contador_bloques_aux==cantidadDeBloques;
 }
-void obtenerDatos(char* pathDelArchivo,int offset, int size){
-	if(validarArchivo(pathDelArchivo))perror("->obtenerdatos() , No existe el Archivo , se debe validar primero");
+void obtener_datos(char* pathDelArchivo,int offset, int size){
+	if(validarArchivo(pathDelArchivo))fprintf(stderr,"->obtener_datos() no se puede validar path : %s",pathDelArchivo);
 	else{
 
 	}
 }
 void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo){//OK
+	puts("---------crearArchivo()-------------------");
 	int bloques_a_ocupar=((cantidadDeBytesDelArchivo)/metadata.tamanio_de_bloque);
 	if((cantidadDeBytesDelArchivo%metadata.tamanio_de_bloque)!=0)bloques_a_ocupar++;
 	if(getCantidadDeBloquesLibres()<bloques_a_ocupar || bloques_a_ocupar<0)perror("No se puede crearArchivo(), espacio o bloques insuficientes");
@@ -155,7 +141,7 @@ void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo){//OK
 		printf("bloques a ocupar :%d \n", bloques_a_ocupar);
 		printf("TAMANIO :%d \n", cantidadDeBytesDelArchivo);
 		char* s2 = getBloquesLibres_string(bloques_a_ocupar);
-		printf("BLOQUES= :%s \n",s2);
+		printf("BLOQUES= %s \n",s2);
 		config_set_value(aux,"BLOQUES",s2);
 		config_set_value(aux,"TAMANIO",intToString(cantidadDeBytesDelArchivo));//preguntar  el tercer parametro
 		config_save_in_file(aux,pathDelArchivo);
@@ -163,6 +149,7 @@ void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo){//OK
 		free(s2);
 		puts("fin crearArchivo()");
 	}
+	puts("--------------fin crearArchivo()-----------");
 }
 char* getBloquesLibres_string(int cantidadDeBloques){//OK,solo para crearArchivo ,da en formato "[1,2,3,54,56,6]"
 //	char* bloques_string=(char*)malloc(cantidadDeBloques*sizeof(char)*3);
@@ -204,11 +191,15 @@ int getCantidadDeBloquesLibres(){//ok
 }
 
 
-void guardarArchivo(char* pathDelArchivo,int offset,int size, char* buffer){
+void guardar_datos(char* pathDelArchivo,int offset,int size, char* buffer){
+	if(validarArchivo(pathDelArchivo))fprintf(stderr,"error en validar path : %s",pathDelArchivo);
+	else {
 
+	}
 }
 
 void borrarArchivo(char* pathDelArchivo){//ok
+	puts("----------------borrarArchivo()---------");
 	int cantidadDeBloques=0,bytesOcupados=0;
 	t_config* aux=config_create(pathDelArchivo);
 	if(aux==NULL)perror("->borrarArchivo() , no existe el archivo o path incorrecto");
@@ -222,6 +213,7 @@ void borrarArchivo(char* pathDelArchivo){//ok
 	}
 	free(bloques_aux);
 	config_destroy(aux);
+	puts("-------------fin de borrarArchivo()----------");
 }
 
 //INTERFAZ MDJ

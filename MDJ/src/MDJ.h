@@ -85,7 +85,7 @@ typedef struct {
 
 //ver si existe el archivo , OK
 bool validarArchivo(char* pathDelArchivo);
-void obtenerDatos(char* pathDelArchivo,int offset, int size);
+void obtener_datos(char* pathDelArchivo,int offset, int size);
 void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo);
 //ok , segun bitarray
 int getCantidadDeBloquesLibres();

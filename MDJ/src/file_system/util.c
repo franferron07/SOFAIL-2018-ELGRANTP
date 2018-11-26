@@ -57,11 +57,12 @@ char* str_concat(  char* from,const char* add){//devuelve algo malloqueado,OK,gu
 		return aux;
 	}
 }
-char* intToString(int n){//OK,se puede borrar el printf
-	int cifras =(int)log10((double)n)+1;
-//	float cifras = log10f((float)n)+1;
-	printf("cifras: %d \n",cifras);
-	char* aux = malloc(cifras);
+char* intToString( int n){//OK,se puede borrar el printf
+//	int cantidadDeDigitos;
+//	int resto=n*10;
+//	for(cantidadDeDigitos=0;resto%10==0;cantidadDeDigitos++)resto=resto/10;
+//	char* aux = malloc(cantidadDeDigitos*sizeof(char));
+	char* aux = malloc(4);
 	sprintf(aux,"%d",n);
 	return aux;
 }
