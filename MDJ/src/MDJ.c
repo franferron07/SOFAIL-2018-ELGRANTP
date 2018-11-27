@@ -47,6 +47,8 @@ puts("getBloquesString");
 crearArchivo("checkpoint.escriptorio",299);
 free(bitarray_);
 puts("fin");
+
+uint8_t byte ;
 	return 0;
 }
 
