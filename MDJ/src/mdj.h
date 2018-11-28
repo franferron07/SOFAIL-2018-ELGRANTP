@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include <commons/config.h> //Commons config archivo
 #include <commons/string.h> //Commons string
-#include <qcommons/socketServer.h> //Libreria Socket Servidor
 
 #include <commons/log.h>
 #include <stdbool.h>
@@ -19,44 +18,49 @@
 
 #include <stdarg.h>
 #include <pthread.h>
-#include <qcommons/socket_viejo.h> //Libreria Socket Cliente
 
+#include <readline/readline.h>
+#include <readline/history.h>
+
+#include "multiplexacion/multiplexacion.h"
+#include "util/util.h"
+#include "file_system/metadata.h"
+#include "file_system/bitmap.h"
+
+#define  MAX_INPUT_BUFFER 1000
 //----------------------------
-typedef struct{
-	char* puerto;
-	int retardo;
-	char* punto_de_montaje;
-	char * ip;
-}MDJ;
+char* buffer_input_keyboard;//string de entrada  de teclado;
 //----------------------------
 
-
-t_log *logger= NULL;
-fd_set descriptoresLectura;	/* Descriptores de interes para select() */
-int maximo;							/* Número de descriptor más grande */
-int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
-int numeroClientes;			/* Número clientes conectados */
-int socketServidor;				/* Descriptor del socket servidor */
 
 Socket mdj_socket; //socket MDJ
 
-//variables globales
-MDJ* mdj=NULL;
-
-Socket mdj_socket;//socket mdj
-
-//funciones
-void liberar_memoria_de_configuracion(MDJ* configuracion_inicial);
-//freeshea el puntero de configuracion inicial
-void montar_configuracion(t_config* ,MDJ*);
-void mostrar_configuracion();
-t_config* cargar_en_memoria_cfg(char*);
-void config_destroy_mdj(MDJ* );
-//--------------
-void mdj_inicializar();
 
 
-void mostrar_y_guardar_log(char * s, ...); //imprime como printf y guarda en log
-void guardar_log(char * ); // solo guarda log
+
+void consola_fifa();
+void  ejecutar_linea_entrante(char* buffer_entrante);
+void persistirContenido(char * contenido);
+ int  espacioRestanteAlBloque(char* pathDelBloque);
+void  persistirAlBloque(char* unBloquePath, char * contenido);
+bool estaLLenoElBloqueActual();
+bool terminoDeMapearContenido();//en revision
+
+
+//  begin INTERFAZ MDJ
+bool validarArchivo(char* pathDelArchivo);//ver si existe el archivo, OK, se puede borrar todos los printf() y puts(),era para probar
+
+void obtener_datos(char* pathDelArchivo,int offset, int size);
+void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo);//OK
+char* getBloquesLibres_string(int cantidadDeBloques);//OK,solo para crearArchivo ,da en formato "[1,2,3,54,56,6]"
+
+t_list* getBloquesLibres_list(int cantidadDeBloques);
+int getCantidadDeBloquesLibres();//ok
+
+void guardar_datos(char* pathDelArchivo,int offset,int size, char* buffer);
+void borrarArchivo(char* pathDelArchivo);//ok
+//  end INTERFAZ MDJ
+
+
 
 #endif /* MDJ_H_ */
