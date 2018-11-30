@@ -23,7 +23,7 @@ int main(void) {
 	imprimir_config();
 
 	//Realizar Conexiones hacia SAFA, FM9, MDJ
-	realizarConexiones();
+	//realizarConexiones();
 
 	//Servidor con Hilos
 	servidorDAM();
@@ -136,47 +136,9 @@ void conexion_cpu (void *parametro) {
 	int cliente_socket = *(int *) parametro;
     log_info(dam_log, "Conectado CPU");
 
-	realizarHandshakeCpu(cliente_socket);
-
 	atender_operacion_cpu(cliente_socket);
 
-
     //cerrar_socket(*sock);
-}
-
-void realizarHandshakeCpu(int cliente_socket) {
-	header_conexion_type* header_conexion = NULL;
-	mensaje_reconocimiento_type mensaje_reconocimiento;
-	void* buffer_reconocimiento;
-	void* buffer_header = malloc(TAMANIO_HEADER_CONEXION);
-	/************ LEER EL HANDSHAKE ************/
-	int res = recv(cliente_socket, buffer_header, TAMANIO_HEADER_CONEXION,
-			MSG_WAITALL);
-	if (res <= 0) {
-		log_error(dam_log, "¡Error en el handshake con el cliente! %d", res);
-		close(cliente_socket);
-		free(buffer_header);
-	}
-	header_conexion = deserializar_header_conexion(buffer_header);
-	log_info(dam_log, "Se realizo handshake del cliente: %s",
-			header_conexion->nombre_instancia);
-	/************ RESPONDER AL HANDSHAKE ************/
-	strcpy(mensaje_reconocimiento.nombre_instancia, "DAM");
-	buffer_reconocimiento = serializar_mensaje_reconocimiento(
-			&mensaje_reconocimiento);
-	if (send(cliente_socket, buffer_reconocimiento,
-			TAMANIO_MENSAJE_RECONOCIMIENTO, 0)
-			!= TAMANIO_MENSAJE_RECONOCIMIENTO) {
-		log_error(dam_log, "¡No se pudo devolver el handshake al cliente!");
-		close(cliente_socket);
-	} else {
-		log_info(dam_log, "El cliente %s se ha conectado correctamente",
-				header_conexion->nombre_instancia);
-	}
-
-	free(buffer_header);
-	free(header_conexion);
-	free(buffer_reconocimiento);
 }
 
 void enviar_linea(int socket_fm9,char* linea,int pid)
@@ -235,7 +197,7 @@ void atender_operacion_cpu(int cliente_socket) {
 
 	while ( (recv(cliente_socket, paquete, sizeof(header_paquete),MSG_WAITALL) )  > 0)
 	{
-		log_info(dam_log, "Se recibio operacion del CPU: %s",paquete->tipo_operacion);
+		log_info(dam_log, "Se recibio operacion del CPU: %d",paquete->tipo_operacion);
 		switch (paquete->tipo_operacion)
 		{
 
@@ -243,13 +205,13 @@ void atender_operacion_cpu(int cliente_socket) {
 		case ABRIR:{
 			char linea[MAX_LINEA];
 			void* buffer = malloc(paquete->tamanio_mensaje);
-			recv(cliente_socket,&buffer,paquete->tamanio_mensaje,MSG_WAITALL);
+			recv(cliente_socket,buffer,paquete->tamanio_mensaje,MSG_WAITALL);
 
 			operacion_archivo* operacion_abrir = deserializar_operacion_archivo(buffer);
 
 			int pid = operacion_abrir->pid;
 
-			log_info(dam_log,"/Procesando/ Abrir Archivo, PID: %s, Archivo: %s",pid,operacion_abrir->ruta_archivo);
+			log_info(dam_log,"/Procesando/ Abrir Archivo, PID: %d, Archivo: %s",pid,operacion_abrir->ruta_archivo);
 
 			int* tam_buffer_mdj = malloc(sizeof(int));
 			operacion_archivo_mdj* operacion_archivo_mdj = malloc(sizeof(operacion_archivo_mdj));
@@ -352,7 +314,7 @@ void atender_operacion_cpu(int cliente_socket) {
 		case CREAR:{
 
 			void* buffer = malloc(paquete->tamanio_mensaje);
-			recv(cliente_socket,&buffer,paquete->tamanio_mensaje,MSG_WAITALL);
+			recv(cliente_socket,buffer,paquete->tamanio_mensaje,MSG_WAITALL);
 
 			operacion_crear* operacion_crear = deserializar_operacion_crear(buffer);
 
@@ -390,7 +352,7 @@ void atender_operacion_cpu(int cliente_socket) {
 		case BORRAR:{
 
 			void* buffer = malloc(paquete->tamanio_mensaje);
-			recv(cliente_socket,&buffer,paquete->tamanio_mensaje,MSG_WAITALL);
+			recv(cliente_socket,buffer,paquete->tamanio_mensaje,MSG_WAITALL);
 			operacion_archivo* operacion_archivo = deserializar_operacion_archivo(buffer);
 
 			log_info(dam_log,"/Procesando/ Borrar Archivo, PID: %s, Archivo: %s,",operacion_archivo->pid,operacion_archivo->ruta_archivo);
