@@ -15,13 +15,13 @@ int cargar_archivo_config(char* path) {
 	log_info(cpu_log, ".:: Cargando configuracion ::.");
 
 	cpu.ip_safa = malloc(10 * sizeof(char));
-	cpu.ip_diego = malloc(10 * sizeof(char));
+	cpu.ip_dam = malloc(10 * sizeof(char));
 	cpu.ip_fm9 = malloc(10 * sizeof(char));
 
 	strcpy(cpu.ip_safa, config_get_string_value(config, "IP_SAFA"));
 	cpu.puerto_safa = config_get_int_value(config, "PUERTO_SAFA");
-	strcpy(cpu.ip_diego, config_get_string_value(config, "IP_DIEGO"));
-	cpu.puerto_diego = config_get_int_value(config, "PUERTO_DIEGO");
+	strcpy(cpu.ip_dam, config_get_string_value(config, "IP_DIEGO"));
+	cpu.puerto_dam = config_get_int_value(config, "PUERTO_DIEGO");
 	strcpy(cpu.ip_fm9, config_get_string_value(config, "IP_FM9"));
 	cpu.puerto_fm9 = config_get_int_value(config, "PUERTO_FM9");
 	cpu.retardo = config_get_int_value(config, "RETARDO");
@@ -49,8 +49,8 @@ void imprimir_config() {
 	log_info(cpu_log, ".:: Imprimiendo configuracion ::.");
 	log_info(cpu_log, "IP_SAFA: %s", cpu.ip_safa);
 	log_info(cpu_log, "PUERTO_SAFA: %d", cpu.puerto_safa);
-	log_info(cpu_log, "IP_DIEGO: %s", cpu.ip_diego);
-	log_info(cpu_log, "PUERTO_DIEGO: %d", cpu.puerto_diego);
+	log_info(cpu_log, "IP_DIEGO: %s", cpu.ip_dam);
+	log_info(cpu_log, "PUERTO_DIEGO: %d", cpu.puerto_dam);
 	log_info(cpu_log, "IP_FM9: %s", cpu.ip_fm9);
 	log_info(cpu_log, "PUERTO_FM9: %d", cpu.puerto_fm9);
 	log_info(cpu_log, "RETARDO: %d", cpu.retardo);
@@ -58,7 +58,7 @@ void imprimir_config() {
 
 void liberar_recursos_configuracion() {
 	free(cpu.ip_safa);
-	free(cpu.ip_diego);
+	free(cpu.ip_dam);
 	free(cpu.ip_fm9);
 }
 

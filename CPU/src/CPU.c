@@ -17,8 +17,11 @@ int main(int argc, char *argv[]) {
 
 	//conectarse_con_safa();
 
-	//conectarse_con_diego();
-	conectarse_con_fm9();
+	conectarse_con_dam();
+	//conectarse_con_fm9();
+
+	DAM_abrir(5,"queondawacho/todopiola/");
+
 
 	/**
 	 * ####Lectura de Escriptorio
@@ -65,10 +68,18 @@ void conectarse_con_fm9(){
 }
 
 
+void  conectarse_con_dam(){
+	log_info(cpu_log, "Conectandome a DAM.");
+	obtener_socket_cliente(&socket_dam,cpu.ip_dam,cpu.puerto_dam);
+
+
+
+}
+
 void  conectarse_con_safa(){
 	log_info(cpu_log, "Conectandome a SAFA.");
 	obtener_socket_cliente(&socket_safa,cpu.ip_safa,cpu.puerto_safa);
-	ejecutar_handshake(socket_safa,"CPU",CPU,cpu_log);
+
 }
 
 
@@ -147,6 +158,20 @@ void SAFA_avisar_espera_de_carga(char *path){
 
 void DAM_abrir(uint8_t id_dtb,char * path){
 	//TODO: enviar solicitud a diego para traer path desde mdj
+	operacion_archivo operacion_abrir;
+	operacion_abrir.pid = id_dtb;
+	operacion_abrir.ruta_archivo = strdup(path);
+	int tamanio;
+	void * buffer = serializar_operacion_archivo(&operacion_abrir,&tamanio);
+	header_paquete* paquete = malloc(sizeof(header_paquete));
+	paquete->tipo_instancia = CPU;
+	paquete->tipo_operacion = ABRIR;
+	paquete->tamanio_mensaje = tamanio;
+
+	log_info(cpu_log,"OPERACION ABRIR DAM");
+	send(socket_dam,paquete,sizeof(header_paquete),0);
+	send(socket_dam,buffer,tamanio,0);
+
 }
 
 bool se_encuentra_archivo_en_gdt(char *path){
@@ -335,7 +360,7 @@ void signal_catch(int signal) {
 
 void exit_gracefully(int ret_val) {
 	close(socket_safa);
-	close(socket_diego);
+	close(socket_dam);
 	close(socket_fm9);
 	exit(ret_val);
 }

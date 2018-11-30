@@ -18,7 +18,7 @@
 #define EXTENSION_FILE_LOG_CPU ".log"
 #define CPU_NAME "CPU"
 
-int socket_safa, socket_diego, socket_fm9;
+int socket_safa, socket_dam, socket_fm9;
 struct_instruccion instruccion;
 dtb_struct dtb_ejecutado;
 //INFO: dtb_ejecutado lo voy a actualizar cada vez que ejecuto un dtb
@@ -27,7 +27,7 @@ dtb_struct dtb_ejecutado;
 
 //Funciones
 void conectarse_con_safa();
-void conectarse_con_diego();
+void conectarse_con_dam();
 void conectarse_con_fm9();
 int inicializar(char* nombre_archivo_log);
 char* crear_nombre_file_log();

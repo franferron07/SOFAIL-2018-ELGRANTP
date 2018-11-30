@@ -1,5 +1,7 @@
 #include "protocolos.h"
 
+
+//funcion deprecada
 int enviar_header_conexion(int socket_server, char* nombre_instancia,
 		tipo_instancia_e tipo_instancia, t_log *logger) {
 
@@ -24,6 +26,7 @@ int enviar_header_conexion(int socket_server, char* nombre_instancia,
 	return 0;
 }
 
+//funcion deprecada
 int esperar_reconocimiento(int socket_servidor, t_log *logger) {
 	void* buffer_reconocimiento = malloc(TAMANIO_MENSAJE_RECONOCIMIENTO);
 
@@ -45,6 +48,7 @@ int esperar_reconocimiento(int socket_servidor, t_log *logger) {
 	return 0;
 }
 
+//funcion deprecada
 int ejecutar_handshake(int socket_servidor, char* nombre_instancia,
 		tipo_instancia_e tipo_instancia, t_log *logger) {
 
@@ -421,7 +425,7 @@ void* serializar_dtb(dtb_struct *dtb, int * tamanio_buffer){
 int tamanio_dtb( dtb_struct *dtb ){
 	//esta funcion calcula el tamaño que va a tener el buffer de un dtb
 	//no se usa por ahora...
-	//va a ser util al momento de enviar un send
+	//va a ser util?????, se puede usar el int * tamanio_buffer de serializar_dtb al momento de enviar un send
 	//aunque tambien se puede solucionar ese problema agregando un parametro mas a la funcion serializar
 	//que acepte un puntero a int y cambie el valor por el tamanio del buffer
 
@@ -439,10 +443,6 @@ int tamanio_dtb( dtb_struct *dtb ){
 }
 
 dtb_struct* deserializar_dtb(void *buffer){
-	//tal como su nombre lo dice esta funcion deserializa un dtb a partir de un buffer
-	//este dtb a deserializar es completamente dinamico en la cantida de direcciones y tamanio de cada direccion
-	//tiene un error de stack smashing en las lineas 213 y 214, si lo descomentas funcion
-	//pero en algun lugar hay un stack smashing...
 	dtb_struct* dtb = malloc(sizeof(dtb_struct));
 	int lastIndex = 0;
 
@@ -489,30 +489,7 @@ dtb_struct* deserializar_dtb(void *buffer){
 
 		list_add(dtb->direcciones,direcciones);
 
-
-		//TODO: en estas 2 lineas esta el problema y tambien la solucion...
-		//deserialize_data(&direccitypedef struct {
-		//direccion[tamanio_direccion] = '\0';
-
-
-
-
-		//printf("direccion: %s\n",direccion);
-		//list_add(dtb->direcciones,strdup(direccion));
-
-		//tamanio_direccion = 0;
-		//break;
-
-
 	}
-	//free(direccion);
-	//TODO: corregir (stack smashing error)
-	/*
-	puts("///////////////////////");
-	puts("Direcciones: ");
-	list_iterate(dtb->direcciones, (void *)puts);
-	puts("///////////////////////");
-*/
 	return dtb;
 
 }

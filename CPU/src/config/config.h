@@ -11,8 +11,8 @@
 typedef struct {
 	char* ip_safa;
 	int puerto_safa;
-	char* ip_diego;
-	int puerto_diego;
+	char* ip_dam;
+	int puerto_dam;
 	char* ip_fm9;
 	int puerto_fm9;
 	int retardo;
