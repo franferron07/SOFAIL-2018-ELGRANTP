@@ -9,13 +9,13 @@
 
 
 //BITMAP begin
-void cargar_configuracion_bitmap(char bitmap_array[], int cantidadDeBytes){
+void cargar_configuracion_bitmap(){
 	bloqueActual_int=0;
 	bitarray_=NULL;
-//	static char  bitmap_array[cantidadDeBytes];
+	char bits[metadata.cantidad_bloques/8];//bits es una variable auxiliar
+	char* bitmap_array=strdup(bits);
+	int cantidadDeBytes=metadata.cantidad_bloques/8;
 	for(int k =0;k<cantidadDeBytes;k++)bitmap_array[k]=0b00000000;
-//	char* bitmap_string=malloc(cantidadDeBytes);
-//	memset(bitmap_string,'0',cantidadDeBytes);//mejor con array
 	printf("strlen es  %d con valor %s \n",cantidadDeBytes,bitmap_array);
 	bitarray_ = bitarray_create_with_mode(bitmap_array, cantidadDeBytes, LSB_FIRST);
 	bitmap_file=fopen("Bitmap.bin","w+r");

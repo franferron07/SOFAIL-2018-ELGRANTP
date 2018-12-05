@@ -18,6 +18,7 @@
 
 
 #include <qcommons/socket_viejo.h> //Libreria Socket Cliente
+#include "../config/config.h"
 
 int socketServidor;				/* Descriptor del socket servidor */
 int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
@@ -28,7 +29,9 @@ int maximo;							/* Número de descriptor más grande */
 
 
 ///* char* buffer : Buffer para leer de los socket */
-void escuchaMensajes(char* ip, char* puerto, char* buffer,int max_input_buffer);
+
+char* buffer_mensajes_recibidos;
+void escuchaMensajes();
 
 
 #endif /* MULTIPLEXACION_MULTIPLEXACION_H_ */

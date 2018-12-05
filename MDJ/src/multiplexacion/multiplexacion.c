@@ -7,14 +7,18 @@
 #include "multiplexacion.h"
 /*
  * Programa principal.
- * Ejemplo de un Servidor con Multiplexación Ip: 127.0.0.1, Puerto: 8080
+ * Ejemplo de un Servidor con Multiplexación Ip: 127.0.0.1, Puerto: 8080//omitir esto
  * Crea un socket servidor y se mete en un select() a la espera de clientes.
  * Cuando un cliente se conecta, le atiende y lo añade al select() y se
  * queda constamente en un while infinito para actuar como server
  */
-void escuchaMensajes(char* ip, char* puerto, char* buffer,int max_input_buffer){
+
+
+void escuchaMensajes(){
+	printf(" MDJ escuchando... .\n");
+	buffer_mensajes_recibidos=malloc(MAX_INPUT_BUFFER);
 	numeroClientes= 0;
-	Socket socket = crear_socket(ip,puerto);
+	Socket socket = crear_socket(mdj.ip,mdj.puerto);
 		socketServidor = socket.socket;
 		//Asocio el servidor a un puerto
 		asociar_puerto(socket);
@@ -62,10 +66,10 @@ void escuchaMensajes(char* ip, char* puerto, char* buffer,int max_input_buffer){
 					{
 						/* Se lee lo enviado por el cliente y se escribe en pantalla */
 	//					buffer=malloc(1090);
-						 bytesRecibidos=Lee_Socket (socketCliente[i_esimo_cliente],buffer,max_input_buffer);
+						 bytesRecibidos=Lee_Socket (socketCliente[i_esimo_cliente],buffer_mensajes_recibidos,MAX_INPUT_BUFFER);
 						if ((bytesRecibidos > 0)){
 //						 if (((strlen(buffer)) > 0)){
-							printf ("Cliente %d envía %s con %d bytes\n", i_esimo_cliente+1, buffer,strlen(buffer));
+							printf ("Cliente %d envía %s con %d bytes\n", i_esimo_cliente+1, buffer_mensajes_recibidos,strlen(buffer_mensajes_recibidos));
 	//						free(buffer);
 						}
 
@@ -86,4 +90,5 @@ void escuchaMensajes(char* ip, char* puerto, char* buffer,int max_input_buffer){
 				if (FD_ISSET (socketServidor, &descriptoresLectura))
 					nuevoCliente (socketServidor, socketCliente, &numeroClientes);
 			}
+		free(buffer_mensajes_recibidos);
 }

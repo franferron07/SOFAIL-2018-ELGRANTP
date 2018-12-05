@@ -32,7 +32,7 @@ void mostrar_bitarray();
 
 void getBloqueLibre_path();
 bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque);
-void cargar_configuracion_bitmap(char bitmap_array[],int cantidadDeBytes);
+void cargar_configuracion_bitmap();
 int getBloqueLibre_int();//obtiene el proximo bloque libre ,OK
 
 

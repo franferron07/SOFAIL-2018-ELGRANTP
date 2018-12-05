@@ -27,15 +27,14 @@
 #include "file_system/metadata.h"
 #include "file_system/bitmap.h"
 
-#define  MAX_INPUT_BUFFER 1000
 //----------------------------
 char* buffer_input_keyboard;//string de entrada  de teclado;
 //----------------------------
-
-
 Socket mdj_socket; //socket MDJ
 
-
+//begin auxiliares
+void cargarConfiguracionMDJ();
+//end auxiliares
 
 
 void consola_fifa();

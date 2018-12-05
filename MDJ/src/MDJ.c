@@ -9,38 +9,51 @@
  */
 
 
-#include "mdj.h"
+#include "MDJ.h"
 
-pthread_attr_t hilo_escucha;
-pthread_attr_t hilo_consola_fifa;
+pthread_t hilo_escucha_v2;
+pthread_t hilo_consola_fifa_v2;
 
-
+pthread_t hilo_inicio_aux;
 
 
 
 int main(void) {
-char* buffer=malloc(1000);
-cargar_configuracion_mdj("mdj.config");
-mostrar_configuracion_mdj();
-cargar_configuracion_metadata("Metadata.bin");
-mostrar_configuracion_metadata();
 
-char bits[metadata.cantidad_bloques/8];
-cargar_configuracion_bitmap(bits,metadata.cantidad_bloques/8);
-setear_bloque_ocupado_en_posicion(62);
-setear_bloque_ocupado_en_posicion(61);
+	pthread_create(&hilo_inicio_aux, NULL, cargarConfiguracionMDJ,NULL);
+	pthread_join(hilo_inicio_aux, NULL);
+	pthread_attr_destroy(&hilo_inicio_aux);
 
-mostrar_bitarray();
+	pthread_create(&hilo_escucha_v2, NULL,escuchaMensajes,NULL);
+//	pthread_create(&hilo_consola_fifa_v2, NULL, &consola_fifa, NULL);
 
+//	pthread_join(&hilo_escucha_v2, NULL);
+//	pthread_join(&hilo_consola_fifa_v2,NULL);
 
-	printf("Servidor ... .\n");
-
-	//Creo un Socket para actuar como Servidor
-//	escuchaMensajes("127.0.0.1","8080",buffer,MAX_INPUT_BUFFER);OK
+	pthread_attr_destroy(&hilo_escucha_v2);
+//	pthread_attr_destroy(&hilo_consola_fifa_v2);
 
 	consola_fifa();
 
-	free(buffer);
+
+bitarray_destroy(bitarray_);
+	return 0;
+}
+
+void cargarConfiguracionMDJ(){
+
+	cargar_configuracion_mdj("mdj.config");
+	mostrar_configuracion_mdj();
+	cargar_configuracion_metadata("Metadata.bin");
+	mostrar_configuracion_metadata();
+	cargar_configuracion_bitmap();
+
+	setear_bloque_ocupado_en_posicion(62);
+	setear_bloque_ocupado_en_posicion(61);
+	setear_bloque_ocupado_en_posicion(5);
+
+
+	mostrar_bitarray();
 }
 
 void consola_fifa(){
@@ -58,15 +71,9 @@ void  ejecutar_linea_entrante(char* buffer_entrante){
 }
 void persistirContenido(char * contenido){
 	 bloqueActual_path=malloc(MAX_INPUT_BUFFER);
-//	for(;;getBloqueLibre_path()){
-//
-////			puts(bloqueActual_path);
-////			if(estaLLenoElBloqueActual())setear_bloque_ocupado_en_posicion(bloqueActual_int);
-//
-//		}
-	do {getBloqueLibre_path();
-	persistirAlBloque(bloqueActual_path,contenido);
-
+	do {
+		getBloqueLibre_path();
+		persistirAlBloque(bloqueActual_path,contenido);
 	} while (quedaContenidoParaMapear(contenido));
 //			setear_bloque_ocupado_en_posicion(bloqueActual_int);
 	free(bloqueActual_path);

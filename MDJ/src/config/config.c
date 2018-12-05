@@ -12,7 +12,7 @@
 void cargar_configuracion_mdj(const char* pathConfig){
 	t_config*aux=config_create(pathConfig);
 	 	if(aux==NULL){
-	 		perror("No se encuentra archivo MDJ.cfg \n");
+	 		perror("No se encuentra archivo MDJ.CONFIG \n");
 	 		log_error(mdj_log, "No se encuentra archivo MDJ.cfg \n");
 	 	}
 	 	else{
