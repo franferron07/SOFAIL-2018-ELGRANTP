@@ -57,15 +57,25 @@ dtb_struct *obtener_dtb_a_ejecutar_dummy(){
 
 	dtb_struct *dtb_libre = NULL;
 
-	dtb_libre = list_find( dtb_nuevos , (void*)dtb_estado_nuevo );
+	dtb_libre = list_find( dtb_nuevos , (void*)dtb_estado_nuevo_cargado );
 
 	return dtb_libre;
 }
 
 
-bool dtb_estado_nuevo(dtb_struct *dtb) {
+dtb_struct *obtener_dtb_a_listos(){
 
-	if(dtb->estado == NUEVO) return true;
+	dtb_struct *dtb_libre = NULL;
+
+	dtb_libre = list_find( dtb_nuevos , (void*)dtb_estado_nuevo_cargado);
+
+	return dtb_libre;
+}
+
+
+bool dtb_estado_nuevo_cargado(dtb_struct *dtb) {
+
+	if(dtb->estado == NUEVO || dtb->estado == CARGALISTA ) return true;
 	return false;
 }
 

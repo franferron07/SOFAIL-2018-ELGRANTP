@@ -13,7 +13,7 @@
 dtb_struct * aplicar_algoritmo_planificacion();
 void set_quantum(int p_quantum);
 void set_algoritmo(int p_algoritmo);
-void ejecutar_planificacion();
+void ejecutar_planificacion_corto_plazo();
 void ejecutar_planificacion_largo_plazo();
 dtb_struct* aplicarRR();
 dtb_struct* aplicarVRR();

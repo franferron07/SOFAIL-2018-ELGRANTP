@@ -11,7 +11,7 @@
 #include "../config/config.h"
 #include "../cpu/cpu.h"
 #include "../dtb/dtb.h"
-
+#include "../planificacion/planificacion.h"
 
 #define CONSOLA_TERMINAR -1
 #define CONSOLA_CONTINUAR 0
@@ -32,6 +32,8 @@ int consola_leer_comando();
 int obtener_valor_por_clave(char *clave);
 static const int TAMANIO_ENTRADA_STDIN = 50;
 
+
+void consola();
 
 int generar_id_dtb();
 

@@ -129,7 +129,7 @@ typedef struct {
  * */
 
 typedef enum {
-	NUEVO = 1, LISTO = 2, EJECUTANDO = 3, BLOQUEADO = 4, CARGANDODUMMY = 5 , FINALIZADO = 6
+	NUEVO = 1, LISTO = 2, EJECUTANDO = 3, BLOQUEADO = 4, CARGANDODUMMY = 5 , CARGALISTA = 6 , FINALIZADO = 7
 } tipo_estado_dtb;
 
 

@@ -1,6 +1,8 @@
 #include "SAFA.h"
 
 int main(int argc, char *argv[]) {
+
+
 	if (inicializar() < 0) {
 		liberar_recursos(EXIT_FAILURE);
 		return -1;
@@ -8,19 +10,22 @@ int main(int argc, char *argv[]) {
 
 	imprimir_config();
 
-
 	pthread_create(&hilo_principal, NULL, (void*) iniciar_safa, NULL);
+	//verificar_estado();
+	cpu_conectado =true;
+	dam_conectado = true;
+	status_safa= INICIALIZADO;
 
-	verificar_estado();
 
-	pthread_create(&hilo_consola, NULL, (void*) escuchar_consola, NULL);
-	pthread_create(&hilo_planificacion, NULL, (void*) ejecutar_planificacion,NULL);
-	pthread_create(&hilo_plp, NULL, (void*) ejecutar_planificacion_largo_plazo, NULL);
 
+	iniciar_consola();
+
+	iniciar_planificacion();
+
+	//pthread_join(hilo_consola, NULL);
+	pthread_join(hilo_principal , NULL);
 	pthread_join(hilo_plp, NULL);
-	pthread_join(hilo_consola, NULL);
-	pthread_cancel(hilo_principal);
-	pthread_cancel(hilo_planificacion);
+	pthread_join(hilo_pcp , NULL);
 	liberar_recursos(EXIT_SUCCESS);
 	return 0;
 }
@@ -62,16 +67,6 @@ void inicializar_semaforos(){
 
 }
 
-void escuchar_consola() {
-	log_info(safa_log, "Se inicio hilo con la consola");
-
-	while (true) {
-		if (consola_leer_comando(safa_log) == CONSOLA_TERMINAR) {
-			pthread_exit(0);
-			return;
-		}
-	}
-}
 
 void iniciar_safa() {
 	log_info(safa_log, "Se inicio hilo principal SAFA");
@@ -79,6 +74,24 @@ void iniciar_safa() {
 	log_info(safa_log, "Esperando por conexiones entrantes...");
 	atender_conexiones();
 	pthread_exit(0);
+}
+
+void iniciar_consola(){
+
+	log_info(safa_log, "Se inicio hilo con la consola");
+	pthread_create(&hilo_consola, NULL, (void*) consola, NULL);
+
+	pthread_detach(hilo_consola);
+}
+
+void iniciar_planificacion(){
+
+	log_info(safa_log, "Se inicio hilo con PLP  y PCP");
+	pthread_create(&hilo_pcp, NULL, (void*) ejecutar_planificacion_corto_plazo,NULL);
+	pthread_create(&hilo_plp, NULL, (void*) ejecutar_planificacion_largo_plazo, NULL);
+
+	//pthread_detach(hilo_pcp);
+	//pthread_detach(hilo_plp);
 }
 
 
@@ -229,6 +242,7 @@ void atender_cliente_cpu( int *cliente_socket ){
 
 		case CERRARCONEXION:{
 
+			/* TODO: quitar cpu de la lista. verificar si tenia un dtb asignado, si es si llevar ese dtb a lista de listos.  */
 		}
 		break;
 
@@ -422,19 +436,14 @@ void atender_cliente_dam( int *cliente_socket ){
 				/* VERIFICO SI ES UNA OPERACION DE DUMMY */
 				if( dtb->estado == CARGANDODUMMY  ){
 
-					/* TODO habria que reveeer el plp , aca habria que poder pasar a listos el dtb pero se debe verificar la multiprog. Buscar alguna forma
-					 * de implementarlo. o poner en un estado el dtb para que el plp pueda tomarlo en algun momento y pasarlo a listos
-					 * */
-
-					//enviar_dtb_listos( dtb );
+					/******* CAMBIO ESTADO DE DTB ******/
+					dtb->estado= CARGALISTA;
 				}
 				else{
 					/* DESBLOQUEO DTB */
 					desbloquear_dtb(dtb);
 
 				}
-
-
 
 			}
 			break;

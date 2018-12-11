@@ -16,8 +16,7 @@ void set_algoritmo(int p_algoritmo) {
 }
 
 
-
-void ejecutar_planificacion() {
+void ejecutar_planificacion_corto_plazo() {
 
 	cpu_struct *cpu_ejecutar= NULL;
 	dtb_struct *dtb_ejecutar = NULL;
@@ -68,25 +67,40 @@ void ejecutar_planificacion_largo_plazo(){
 	while(1){
 
 		/**** si hay dtb para ejecutar(en estado nuevo) *******/
-		dtb = obtener_dtb_a_ejecutar_dummy();
+		//dtb = obtener_dtb_a_ejecutar_dummy();
+
+		dtb = obtener_dtb_a_listos();
+
 		if( dtb != NULL ){
 
-			log_info(safa_log, "Se toma DTB para inicializar procesos dummy: %d",dtb->id_dtb);
+			log_info(safa_log, "Se encuentra DTB para pasar a cola de LISTOS con id: %d",dtb->id_dtb);
 
-			/***** ESPERAMOS A QUE DUMMY ESTE DISPONIBLE PARA REALIZAR PASAJE A LISTO *******/
-			while( dtb_dummy.id_dtb != -1 ){
+			//VERIFICO SI ES PARA CARGAR DUMMY O PARA PASAR DIRECTAMENTE A LISTOS
+			if( dtb->estado == NUEVO ){
+
+				/***** ESPERAMOS A QUE DUMMY ESTE DISPONIBLE PARA REALIZAR PASAJE A LISTO *******/
+				while( dtb_dummy.id_dtb != -1 ){
+
+				}
+				log_info(safa_log, "El dummy esta disponible");
+
+				inicializar_dummy(dtb);
+				dtb->estado = CARGANDODUMMY;
+				log_info(safa_log, "DTB dummy inicializado");
+
+				/* AGREGO DTB A LISTO */
+				agregar_dtb_a_listos( &dtb_dummy );
+				log_info(safa_log, "DUMMY pasado a listos con el id:%d",dtb_dummy.id_dtb);
+			}
+			else{
+
+				/* AGREGO DTB A LISTO */
+				agregar_dtb_a_listos( dtb );
+				quitar_dtb_lista_id( dtb_nuevos , dtb->id_dtb );
+
+				log_info(safa_log, "DTB pasado a listos con el id:%d",dtb->id_dtb);
 
 			}
-			log_info(safa_log, "El dummy esta disponible");
-
-			inicializar_dummy(dtb);
-			dtb->estado = CARGANDODUMMY;
-			log_info(safa_log, "DTB dummy inicializado");
-
-			/* AGREGO DTB A LISTO */
-			agregar_dtb_a_listos( &dtb_dummy );
-			log_info(safa_log, "DUMMY pasado a listos con el id:%d",dtb_dummy.id_dtb);
-
 
 		}
 

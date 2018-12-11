@@ -41,14 +41,14 @@ pthread_t hilo_pcp;
 pthread_t hilo_cliente;
 pthread_t hilo_consola;
 pthread_t hilo_principal;
-pthread_t hilo_planificacion;
 
 void inicializar_dummy( dtb_struct *dtb );
 
 int inicializar();
 void inicializar_semaforos();
-void escuchar_consola();
 void iniciar_safa();
+void iniciar_consola();
+void iniciar_planificacion();
 void verificar_estado();
 bool puede_iniciar_safa();
 void crear_servidor();

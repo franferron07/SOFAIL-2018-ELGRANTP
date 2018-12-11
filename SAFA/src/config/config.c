@@ -25,7 +25,7 @@ int cargar_archivo_config(char* path) {
 }
 
 int crear_log() {
-	safa_log = log_create("safa.log", "El-Gran-TP-SAFA", true, LOG_LEVEL_TRACE);
+	safa_log = log_create("safa.log", "El-Gran-TP-SAFA", false, LOG_LEVEL_TRACE);
 	if (safa_log == NULL) {
 		printf("No se pudo crear el log. Abortando ejecución\n");
 		return EXIT_FAILURE;
