@@ -15,12 +15,12 @@ int main(int argc, char *argv[]) {
 
 	imprimir_config();
 
-	//conectarse_con_safa();
+	conectarse_con_safa();
 
-	conectarse_con_dam();
+	//conectarse_con_dam();
 	//conectarse_con_fm9();
 
-	DAM_abrir(5,"queondawacho/todopiola/");
+	//DAM_abrir(5,"queondawacho/todopiola/");
 
 
 	/**
@@ -79,6 +79,25 @@ void  conectarse_con_dam(){
 void  conectarse_con_safa(){
 	log_info(cpu_log, "Conectandome a SAFA.");
 	obtener_socket_cliente(&socket_safa,cpu.ip_safa,cpu.puerto_safa);
+
+	send(socket_safa,CPU,sizeof(header_paquete),MSG_WAITALL);
+
+
+	header_paquete* paquete = malloc(sizeof(header_paquete));
+	paquete->tipo_instancia = CPU;
+	paquete->tipo_operacion = ENVIARDTB;
+	log_info(cpu_log,"ENVIARDTB con SAFA");
+	send(socket_safa,paquete,sizeof(header_paquete),MSG_WAITALL);
+
+	//recibiendo DTB
+	uint8_t tamanio_buffer;
+	recv(socket_safa,&tamanio_buffer,sizeof(uint8_t),MSG_WAITALL);
+	void * buffer = malloc(tamanio_buffer);
+	recv(socket_safa,&buffer, tamanio_buffer ,MSG_WAITALL);
+
+	dtb_struct * dtb = deserializar_dtb(buffer);
+
+	dtb_ejecutado = * dtb;
 
 }
 
@@ -310,11 +329,12 @@ int validar_parametros_consola(int cant_parametros) {
 		return -1;
 	}
 
+	/*
 	if (cant_parametros < 3) {
 		printf("Ingrese una ruta a un script Escriptorio!\n");
 		return -1;
 	}
-
+	 */
 	return 0;
 }
 
