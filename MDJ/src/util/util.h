@@ -11,7 +11,14 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
+#include <sys/mman.h>
+
+#include <commons/string.h>
+#include <commons/collections/list.h>
 
 #define loop while(1)
 #define minimo(unNum,otroNum)  ((unNum>otroNum)?otroNum:unNum)
@@ -26,5 +33,11 @@ char* str_concat(  char* from,const char* add);//devuelve algo malloqueado,OK,gu
 char* intToString( int n);//OK,se puede borrar el printf
 
 void crearBloques(int cantidad);//ok
+off_t cantidadDeCaracteresDeFile(const char* pathFile);
+
+char* fileToString(const char* pathFile);
+char* fileToString_v2(const char* pathFile);
+
+
 
 #endif /* CONFIG_UTIL_H_ */

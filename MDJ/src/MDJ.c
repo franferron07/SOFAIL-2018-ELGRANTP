@@ -23,20 +23,42 @@ int main(void) {
 	pthread_create(&hilo_inicio_aux, NULL, cargarConfiguracionMDJ,NULL);
 	pthread_join(hilo_inicio_aux, NULL);
 	pthread_attr_destroy(&hilo_inicio_aux);
+//
+//	pthread_create(&hilo_escucha_v2, NULL,escuchaMensajes,NULL);
+////	pthread_create(&hilo_consola_fifa_v2, NULL, &consola_fifa, NULL);
+//
+////	pthread_join(&hilo_escucha_v2, NULL);
+////	pthread_join(&hilo_consola_fifa_v2,NULL);
+//
+//	pthread_attr_destroy(&hilo_escucha_v2);
+////	pthread_attr_destroy(&hilo_consola_fifa_v2);
+//
+//	consola_fifa();
+//finalizarMDJ();
 
-	pthread_create(&hilo_escucha_v2, NULL,escuchaMensajes,NULL);
-//	pthread_create(&hilo_consola_fifa_v2, NULL, &consola_fifa, NULL);
-
-//	pthread_join(&hilo_escucha_v2, NULL);
-//	pthread_join(&hilo_consola_fifa_v2,NULL);
-
-	pthread_attr_destroy(&hilo_escucha_v2);
-//	pthread_attr_destroy(&hilo_consola_fifa_v2);
-
-	consola_fifa();
 
 
-bitarray_destroy(bitarray_);
+
+//	printf("cantidad %d \n",cantidadDeCaracteresDeFile("Metadata.bin"));
+//	char* aux = (fileToString_v2("Metadata.bin"));
+//	puts(aux);
+//	aux=str_concat(aux,"NOOOO");
+//	puts(aux);
+//	char* aux2 = obtenerString(aux,2,10);
+//	puts(aux2);
+//	free(aux2);
+//	free(aux);
+//	puts("fin");
+
+//	bloquesToList("fifa-examples/fifa-entrega/Archivos/scripts/bloqueo.escriptorio");
+
+//	puts(bloquesToString("scripts/la_12.escriptorio"));
+//	puts(fileToString_v2("fifa-examples/fifa-entrega/Bloques/1.bin"));
+	obtener_datos("scripts/la_12.escriptorio",1,130);
+	printf("%d \n",(validarArchivo("scripts/la_12.escriptorio")));
+
+	finalizarMDJ();
+	puts("fin");
 	return 0;
 }
 
@@ -44,7 +66,7 @@ void cargarConfiguracionMDJ(){
 
 	cargar_configuracion_mdj("mdj.config");
 	mostrar_configuracion_mdj();
-	cargar_configuracion_metadata("Metadata.bin");
+	cargar_configuracion_metadata("fifa-examples/fifa-entrega/Metadata/Metadata.bin");
 	mostrar_configuracion_metadata();
 	cargar_configuracion_bitmap();
 
@@ -55,7 +77,9 @@ void cargarConfiguracionMDJ(){
 
 	mostrar_bitarray();
 }
-
+void finalizarMDJ(){
+	bitarray_destroy(bitarray_);
+}
 void consola_fifa(){
 	puts("press \"exit\" para salir de consola ");
 	loop{
@@ -111,41 +135,46 @@ bool terminoDeMapearContenido(){//en revision
 
 
 //INTERFAZ MDJ
-bool validarArchivo(char* pathDelArchivo){//ver si existe el archivo, OK, se puede borrar todos los printf() y puts(),era para probar
+bool validarArchivo(const char* pathDelArchivo){//ver si existe el archivo, OK, se puede borrar todos los printf() y puts(),era para probar
   	puts("---------validacion de archivo-------");
 	int contador_bloques_aux=0;
-  	int cantidadDeBloques=0,bytesOcupados=0;
-  		t_config* aux=config_create(pathDelArchivo);
-  		if (aux==NULL) {
-  			perror("->validarArchivo() ,no existe el archivo o path incorrecto");
+  	int cantidadDeBloquesPersistidos=0,bytesOcupados=0;
+
+  	char* pathCompleto_aux=malloc(2000);
+  	sprintf(pathCompleto_aux,"%s%s%s",mdj.punto_de_montaje,"Archivos/",pathDelArchivo);
+  		t_config* config_aux=config_create(pathCompleto_aux);
+
+  		if (config_aux==NULL) {
+  			fprintf(stderr,"->validarArchivo() ,no existe el archivo o path incorrecto : %s \n",pathDelArchivo);
   			return false;
 		}
-  		bytesOcupados=config_get_int_value(aux,"TAMANIO");
-  		cantidadDeBloques=(bytesOcupados/metadata.tamanio_de_bloque);
-  		if((bytesOcupados%metadata.tamanio_de_bloque)!=0)cantidadDeBloques++;//esto es importante ,es como saber el numero de paginas ocupadasb
-  		char** bloques_aux= config_get_array_value(aux,"BLOQUES");
-  		printf("cantidad de bloques  : %d \n",cantidadDeBloques);
-  		printf("metadata tamanio del bloque : %d \n",metadata.tamanio_de_bloque);
-  		printf("metadata tamanio del bloque : %d \n",metadata.tamanio_de_bloque);
-  		printf("bytes ocupados :  %d \n",config_get_int_value(aux,"TAMANIO"));
-  		puts("inicio ciclo for ");
-  		for (int var = 0; var < cantidadDeBloques; var++) {
-  			printf(" bloque %s iesimo ocupado ?\n", (bloques_aux[var]));
-  			if(testear_bloque_libre_en_posicion(atoi(bloques_aux[var])))contador_bloques_aux++;
+  		bytesOcupados=config_get_int_value(config_aux,"TAMANIO");
+  		cantidadDeBloquesPersistidos=(bytesOcupados/metadata.tamanio_de_bloque);
+  		if((bytesOcupados%metadata.tamanio_de_bloque)!=0)cantidadDeBloquesPersistidos++;//esto es importante ,es como saber el numero de paginas ocupadasb
+  		t_list *listaDeBloques=bloquesToList(pathCompleto_aux);
+  		for (int var = 0; var < cantidadDeBloquesPersistidos; var++) {
+  			if(testear_bloque_libre_en_posicion(list_get(listaDeBloques,var)))contador_bloques_aux++;
   		}
-  		puts("despues d ciclo for ");
-			printf("contador: %d y cantidad:  %d \n", contador_bloques_aux,cantidadDeBloques);
-
-  		free(bloques_aux);
-  		config_destroy(aux);
+  		list_destroy(listaDeBloques);
+  		free(pathCompleto_aux);
   		puts("-------------fin validacion de archivo-------------------");
-	return contador_bloques_aux==cantidadDeBloques;
+	return contador_bloques_aux==cantidadDeBloquesPersistidos;
 }
-void obtener_datos(char* pathDelArchivo,int offset, int size){
-	if(validarArchivo(pathDelArchivo))fprintf(stderr,"->obtener_datos() no se puede validar path : %s",pathDelArchivo);
-	else{
+char* obtener_datos(char* pathDelArchivo,int offset, int size){//Ok
+	puts("begin obtenerDatos()");
+//	if(validarArchivo(pathDelArchivo)){
+//		fprintf(stderr,"->obtener_datos() no se puede validar path : %s",pathDelArchivo);
+//		return NULL;
+//	}
+//	else{
+		char * unScript = bloquesToString(pathDelArchivo);
+		char * unScriptParcial =recortarString(unScript,offset,size);
+		free(unScript);
+		puts(unScriptParcial);
+		puts("end obtenerDatos()");
+		return unScriptParcial;
 
-	}
+//	}
 }
 void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo){//OK
 	puts("---------crearArchivo()-------------------");

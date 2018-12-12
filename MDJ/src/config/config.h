@@ -15,10 +15,10 @@
  char leyenda_temporal[MAX_INPUT_BUFFER];
  //----------------------------
  typedef struct{
- 	char puerto[100];
+ 	char puerto[50];
  	int retardo;
- 	char punto_de_montaje[100];
- 	char  ip[100];
+ 	char punto_de_montaje[150];
+ 	char  ip[60];
  }MDJ_CONFIG;
  //----------------------------
  MDJ_CONFIG mdj;

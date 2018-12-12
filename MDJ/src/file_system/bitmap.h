@@ -35,6 +35,13 @@ bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque);
 void cargar_configuracion_bitmap();
 int getBloqueLibre_int();//obtiene el proximo bloque libre ,OK
 
+//auxiliares
+char* bloquesToString(const char* pathFile);
+t_list* bloquesToList(const char* pathFile);
+void mostrarLista(t_list* listaDeBloques_);
+char* recortarString(const char* stream, off_t desde, off_t size);
+
+
 
 //BITMAP end
 

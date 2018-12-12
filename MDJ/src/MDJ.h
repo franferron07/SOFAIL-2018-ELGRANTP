@@ -34,6 +34,7 @@ Socket mdj_socket; //socket MDJ
 
 //begin auxiliares
 void cargarConfiguracionMDJ();
+void finalizarMDJ();
 //end auxiliares
 
 
@@ -47,9 +48,9 @@ bool terminoDeMapearContenido();//en revision
 
 
 //  begin INTERFAZ MDJ
-bool validarArchivo(char* pathDelArchivo);//ver si existe el archivo, OK, se puede borrar todos los printf() y puts(),era para probar
+bool validarArchivo(const char* pathDelArchivo);//ver si existe el archivo, OK, se puede borrar todos los printf() y puts(),era para probar
 
-void obtener_datos(char* pathDelArchivo,int offset, int size);
+char* obtener_datos(char* pathDelArchivo,int offset, int size);
 void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo);//OK
 char* getBloquesLibres_string(int cantidadDeBloques);//OK,solo para crearArchivo ,da en formato "[1,2,3,54,56,6]"
 
