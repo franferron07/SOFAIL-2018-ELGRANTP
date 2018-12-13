@@ -33,6 +33,8 @@ void mostrar_bitarray();
 void getBloqueLibre_path();
 bool estaLibreElBloqueActual(FILE* bloqueActual, int tamanioDeBloque);
 void cargar_configuracion_bitmap();
+
+//la posicion del bloque que devuelve se reserva en el bitmap
 int getBloqueLibre_int();//obtiene el proximo bloque libre ,OK
 
 //auxiliares
@@ -40,6 +42,7 @@ char* bloquesToString(const char* pathFile);
 t_list* bloquesToList(const char* pathFile);
 void mostrarLista(t_list* listaDeBloques_);
 char* recortarString(const char* stream, off_t desde, off_t size);
+size_t getCantidadDeBloquesOcupadosSegunPath(const char* pathFile);//OK
 
 
 

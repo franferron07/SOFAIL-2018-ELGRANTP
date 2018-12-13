@@ -10,6 +10,7 @@
 
 
 #include "MDJ.h"
+#define str_length(string) ((string==NULL)?0:strlen(string))
 
 pthread_t hilo_escucha_v2;
 pthread_t hilo_consola_fifa_v2;
@@ -18,12 +19,13 @@ pthread_t hilo_inicio_aux;
 
 
 
-int main(void) {
 
+int main(void) {
 	pthread_create(&hilo_inicio_aux, NULL, cargarConfiguracionMDJ,NULL);
 	pthread_join(hilo_inicio_aux, NULL);
 	pthread_attr_destroy(&hilo_inicio_aux);
-//
+	puts("despuees de inicializar");//hasta aca oK, probado
+
 //	pthread_create(&hilo_escucha_v2, NULL,escuchaMensajes,NULL);
 ////	pthread_create(&hilo_consola_fifa_v2, NULL, &consola_fifa, NULL);
 //
@@ -34,30 +36,28 @@ int main(void) {
 ////	pthread_attr_destroy(&hilo_consola_fifa_v2);
 //
 //	consola_fifa();
-//finalizarMDJ();
 
-
-
-
-//	printf("cantidad %d \n",cantidadDeCaracteresDeFile("Metadata.bin"));
-//	char* aux = (fileToString_v2("Metadata.bin"));
-//	puts(aux);
-//	aux=str_concat(aux,"NOOOO");
-//	puts(aux);
-//	char* aux2 = obtenerString(aux,2,10);
-//	puts(aux2);
-//	free(aux2);
-//	free(aux);
-//	puts("fin");
-
-//	bloquesToList("fifa-examples/fifa-entrega/Archivos/scripts/bloqueo.escriptorio");
-
-//	puts(bloquesToString("scripts/la_12.escriptorio"));
-//	puts(fileToString_v2("fifa-examples/fifa-entrega/Bloques/1.bin"));
-	obtener_datos("scripts/la_12.escriptorio",1,130);
+	obtener_datos("scripts/la_12.escriptorio",0,200);
 	printf("%d \n",(validarArchivo("scripts/la_12.escriptorio")));
+////
+	char panadero[]="scripts/riBerGanoPor.escriptorio";//unPath puede ser char* tambien
+//
+	puts("creaando archivo");
+	crearArchivo(panadero,400);//400 bytes reservados,OK
+	puts("guardando datos");
+	guardar_datos(panadero,0,strlen("Buenas Noches!"),"Buenas Noches!");
+////	guardar_datos(panadero,strlen("Buenas Noches!"),5,"QWERT");
+////	guardar_datos(panadero,strlen("Buenas Noches!")+5,1,"A");
+//puts("haberr");
+	puts("obteniedo datos");
+	obtener_datos(panadero,3,10);
+////	validarArchivo(panadero);
+////	printf("%d \n",(validarArchivo(panadero)));//tira false ,hay problemas con el manejo de bits
+	puts("por borrar archivo");
+	borrarArchivo(panadero);//ok
 
 	finalizarMDJ();
+
 	puts("fin");
 	return 0;
 }
@@ -70,12 +70,14 @@ void cargarConfiguracionMDJ(){
 	mostrar_configuracion_metadata();
 	cargar_configuracion_bitmap();
 
-	setear_bloque_ocupado_en_posicion(62);
-	setear_bloque_ocupado_en_posicion(61);
-	setear_bloque_ocupado_en_posicion(5);
+//	setear_bloque_ocupado_en_posicion(62);
+//	setear_bloque_ocupado_en_posicion(61);
+//	setear_bloque_ocupado_en_posicion(5);
+//	setear_bloque_ocupado_en_posicion(200);
 
 
-	mostrar_bitarray();
+
+//	mostrar_bitarray();//funciona , pero comento por que me ocupa pantalla
 }
 void finalizarMDJ(){
 	bitarray_destroy(bitarray_);
@@ -90,49 +92,16 @@ void consola_fifa(){
 	}
 }
 void  ejecutar_linea_entrante(char* buffer_entrante){
-//	system(buffer_entrante);
-	persistirContenido(buffer_entrante);
-}
-void persistirContenido(char * contenido){
-	 bloqueActual_path=malloc(MAX_INPUT_BUFFER);
-	do {
-		getBloqueLibre_path();
-		persistirAlBloque(bloqueActual_path,contenido);
-	} while (quedaContenidoParaMapear(contenido));
-//			setear_bloque_ocupado_en_posicion(bloqueActual_int);
-	free(bloqueActual_path);
-}
-
-
- int  espacioRestanteAlBloque(char* pathDelBloque){
-	int resto =  metadata.tamanio_de_bloque-cantidadDeCaracteres_path(pathDelBloque);
-//	if (resto<0) { // no deberia de pasar esto
-//		setear_bloque_ocupado_en_posicion(bloqueActual_int);
+	system(buffer_entrante);//la consola fifa solo ejecuta esto, ya que solo sirve si estan persistidos bien
+//	switch (buffer_entrante) {
+//		case "md5":
+//			perror("use md5sum y no md5");
+//			break;
+//		default:
+//			break;
 //	}
-	return resto;
+//	persistirContenido(buffer_entrante);
 }
-
-
-void  persistirAlBloque(char* unBloquePath, char * contenido){
-	char* recorte =NULL;
-	recorte=recortarPrimerosCaracteres(contenido,espacioRestanteAlBloque(unBloquePath));
-	printf("se va a mapear al bloque %s ,contenido: %s y el restante es %s \n",bloqueActual_path,recorte,contenido);
-//	 sprintf(bloqueActual_path,"%d.bin",bloqueActual_int);
-
-	FILE* bloqueActual =txt_open_for_append(unBloquePath);
-	txt_write_in_file(bloqueActual,recorte);
-	txt_close_file(bloqueActual);
-	free(recorte);
-}
-bool estaLLenoElBloqueActual(){
-	return cantidadDeCaracteres_path(bloqueActual_path)==metadata.tamanio_de_bloque;
-}
-
-bool terminoDeMapearContenido(){//en revision
-	bool hayCaracteresParaMapear=strlen(buffer_input_keyboard)>0;
-	return bitarray_test_bit(bitarray_,bloqueActual_int)&&hayCaracteresParaMapear;
-}
-
 
 //INTERFAZ MDJ
 bool validarArchivo(const char* pathDelArchivo){//ver si existe el archivo, OK, se puede borrar todos los printf() y puts(),era para probar
@@ -160,14 +129,14 @@ bool validarArchivo(const char* pathDelArchivo){//ver si existe el archivo, OK, 
   		puts("-------------fin validacion de archivo-------------------");
 	return contador_bloques_aux==cantidadDeBloquesPersistidos;
 }
-char* obtener_datos(char* pathDelArchivo,int offset, int size){//Ok
+char* obtener_datos(const char* pathDelArchivo,int offset, int size){//Ok
 	puts("begin obtenerDatos()");
 //	if(validarArchivo(pathDelArchivo)){
 //		fprintf(stderr,"->obtener_datos() no se puede validar path : %s",pathDelArchivo);
 //		return NULL;
 //	}
 //	else{
-		char * unScript = bloquesToString(pathDelArchivo);
+		char * unScript = bloquesToString(pathDelArchivo);//este ya se encarga de resolver el path
 		char * unScriptParcial =recortarString(unScript,offset,size);
 		free(unScript);
 		puts(unScriptParcial);
@@ -176,29 +145,117 @@ char* obtener_datos(char* pathDelArchivo,int offset, int size){//Ok
 
 //	}
 }
-void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo){//OK
+void crearArchivo( const char* pathDelArchivo,int cantidadDeBytesDelArchivoAReservar){//OK
 	puts("---------crearArchivo()-------------------");
-	int bloques_a_ocupar=((cantidadDeBytesDelArchivo)/metadata.tamanio_de_bloque);
-	if((cantidadDeBytesDelArchivo%metadata.tamanio_de_bloque)!=0)bloques_a_ocupar++;
-	if(getCantidadDeBloquesLibres()<bloques_a_ocupar || bloques_a_ocupar<0)perror("No se puede crearArchivo(), espacio o bloques insuficientes");
+	int cantidadDeBloquesAOcupar=((cantidadDeBytesDelArchivoAReservar)/metadata.tamanio_de_bloque);
+	if((cantidadDeBytesDelArchivoAReservar%metadata.tamanio_de_bloque)!=0)cantidadDeBloquesAOcupar++;
+
+	if(getCantidadDeBloquesLibres()<cantidadDeBloquesAOcupar || cantidadDeBloquesAOcupar<0)perror("No se puede crearArchivo(), espacio o bloques insuficientes");
 	else{
-		crearBloques(bloques_a_ocupar);
-		t_config *aux = config_create(pathDelArchivo);
-		if(aux==NULL)perror("error en crearArchivo(), en config");
-		printf("bloques a ocupar :%d \n", bloques_a_ocupar);
-		printf("TAMANIO :%d \n", cantidadDeBytesDelArchivo);
-		char* s2 = getBloquesLibres_string(bloques_a_ocupar);
-		printf("BLOQUES= %s \n",s2);
-		config_set_value(aux,"BLOQUES",s2);
-		config_set_value(aux,"TAMANIO",intToString(cantidadDeBytesDelArchivo));//preguntar  el tercer parametro
-		config_save_in_file(aux,pathDelArchivo);
-		config_destroy(aux);
-		free(s2);
-		puts("fin crearArchivo()");
+//		crearBloques(bloques_a_ocupar);
+		char* path_completo_aux = malloc(1500);
+		sprintf(path_completo_aux,"%s%s%s",mdj.punto_de_montaje,"Archivos/",pathDelArchivo);
+		FILE* soloParaCrearArchivo_=fopen(path_completo_aux,"w+");
+
+//		t_config *config_de_inicializacion_aux = config_create(path_completo_aux);//COMENTO CONFIG,POR  QUE FALLA , DEBERIA DE FUNCIONAR
+//		if(config_de_inicializacion_aux==NULL)fprintf(stderr,"error en crearArchivo(), en config para path %s \n",path_completo_aux);
+		printf("bloques a ocupar :%d  en %s \n", cantidadDeBloquesAOcupar,path_completo_aux);
+		free(path_completo_aux);
+		printf("TAMANIO :%d \n", cantidadDeBytesDelArchivoAReservar);
+		fprintf(soloParaCrearArchivo_,"TAMANIO=%d\n",cantidadDeBytesDelArchivoAReservar);
+		char* listaDeBloquesParaConfig = getBloquesLibres_string(cantidadDeBloquesAOcupar);
+		printf("BLOQUES: %s \n",listaDeBloquesParaConfig);
+		fprintf(soloParaCrearArchivo_,"BLOQUES=%s\n",listaDeBloquesParaConfig);
+//		config_set_value(config_de_inicializacion_aux,"BLOQUES",listaDeBloquesParaConfig);
+//		config_set_value(config_de_inicializacion_aux,"TAMANIO",intToString(cantidadDeBytesDelArchivoAReservar));//preguntar  el tercer parametro
+//		config_save_in_file(config_de_inicializacion_aux,pathDelArchivo);
+//		config_destroy(config_de_inicializacion_aux);//comento por que no lo persiste con config_save
+		free(listaDeBloquesParaConfig);
+		fclose(soloParaCrearArchivo_);
 	}
 	puts("--------------fin crearArchivo()-----------");
 }
-char* getBloquesLibres_string(int cantidadDeBloques){//OK,solo para crearArchivo ,da en formato "[1,2,3,54,56,6]"
+void borrarArchivo(const char* pathDelArchivo){//ok
+	puts("----------------borrarArchivo()---------");
+	int cantidadDeBloques=0,bytesOcupados=0;
+	char* path_completo_aux=malloc(1050);
+			sprintf(path_completo_aux,"%s%s%s",mdj.punto_de_montaje,"Archivos/",pathDelArchivo);
+	t_config* aux=config_create(path_completo_aux);
+	if(aux==NULL){
+		perror("->borrarArchivo() , no existe el archivo o path incorrecto");
+		puts("-------------fin de borrarArchivo()----------");
+		free(path_completo_aux);
+	}
+	else {
+		bytesOcupados=config_get_int_value(aux,"TAMANIO");
+		cantidadDeBloques=(bytesOcupados/metadata.tamanio_de_bloque)+1;
+		printf(" cantidad de bloques a borrar: %d \n",cantidadDeBloques);
+		char** bloques_aux= config_get_array_value(aux,"BLOQUES");
+		for(int var=0;var<cantidadDeBloques;var++){
+			setear_bloque_libre_en_posicion(atoi(bloques_aux[var]));
+		}
+		remove(path_completo_aux);
+		free(bloques_aux);
+		config_destroy(aux);
+		puts("-------------fin de borrarArchivo()----------");
+		free(path_completo_aux);
+	}
+}
+void guardar_datos(const char* pathDelArchivo,int offset,int size,const char* contenidoAGuardar){
+	char* pathCompletoDelArchivoAModificarOLeer_aux=malloc(1300);//de ejemplo , me importa que albergue el path completo
+
+
+	sprintf(pathCompletoDelArchivoAModificarOLeer_aux,"%s%s%s",mdj.punto_de_montaje,"Archivos/",pathDelArchivo);
+		int cantidadDeBloquesInvolucrados_y_ReservadosEnElPath=getCantidadDeBloquesOcupadosSegunPath(pathCompletoDelArchivoAModificarOLeer_aux);
+		t_list* listaDeBloquesSegunPath=bloquesToList(pathCompletoDelArchivoAModificarOLeer_aux);
+		mostrarLista(listaDeBloquesSegunPath);
+	//	FILE* bloquesInvolucrados[cantidadDeBloquesInvolucrados_y_ReservadosEnElPath];
+//		t_config* config_aux=config_create()
+		int offset_variable=offset;
+		char* contenido_buffer_variable=strdup(contenidoAGuardar);
+		size_t totalDeBytesReservados = metadata.tamanio_de_bloque*cantidadDeBloquesInvolucrados_y_ReservadosEnElPath;
+			if(totalDeBytesReservados< (offset+size)){
+				fprintf(stderr,"no hay bytes disponibles o bloques insuficientes para \"%s\" \n",pathDelArchivo);
+			}
+		for (int bloque_i_esimo = 0; bloque_i_esimo < cantidadDeBloquesInvolucrados_y_ReservadosEnElPath || str_length(contenido_buffer_variable)>0; bloque_i_esimo++) {
+			sprintf(pathCompletoDelArchivoAModificarOLeer_aux,"%s%s%d.bin",mdj.punto_de_montaje,"Bloques/",atoi(list_get(listaDeBloquesSegunPath,bloque_i_esimo)));
+	//		bloquesInvolucrados[bloque_i_esimo]=fopen(pathCompletoDelBloqueAModificar_aux,"r+w");
+//			salto1:
+			persistirAlBloque(pathCompletoDelArchivoAModificarOLeer_aux,&offset_variable,contenido_buffer_variable);
+//			if(!seNecesitaOtroBloque){
+//	//			fclose(bloquesInvolucrados[bloque_i_esimo]);
+////				break;
+//				goto salto1;
+//			}
+		}
+		free(pathCompletoDelArchivoAModificarOLeer_aux);
+		list_destroy(listaDeBloquesSegunPath);
+}
+
+void persistirAlBloque(const char* pathDeUnBloque,off_t * offset, char* buffer){
+	int tamanioBloque =metadata.tamanio_de_bloque;
+
+//
+	if(tamanioBloque<*offset){
+		*offset=*offset-tamanioBloque;
+		fprintf(stderr,"se necesita el siguiente bloque, bloque \"%s\"  esta ocupado ;\n",pathDeUnBloque);
+		return ;//necesito el siguiente bloque
+	}
+	else {
+		bool seNecesitaElSiguienteBloque=false;
+		size_t size_del_buffer=str_length(buffer);
+		FILE* unFile=fopen(pathDeUnBloque,"r+w");
+		fseek(unFile,*offset,SEEK_SET);
+		size_t cantidadAPersistir=minimo(tamanioBloque-*offset,str_length(buffer));//,(size_del_buffer);//+*offset-1);
+		char* bufferParcial=recortarPrimerosCaracteres(buffer,cantidadAPersistir);
+		fprintf(unFile,"%s",bufferParcial);
+		free(bufferParcial);
+		fclose(unFile);
+		return ;//seNecesitaElSiguienteBloque;
+	}
+}
+
+char* getBloquesLibres_string(int cantidadDeBloques){//OK,solo para crearArchivo ,da en formato "[1,2,3,54,56,6]" de ejemplo
 //	char* bloques_string=(char*)malloc(cantidadDeBloques*sizeof(char)*3);
 	char* aux=strdup("[");
 	t_list *bloques_libres_aux=getBloquesLibres_list(cantidadDeBloques);
@@ -232,31 +289,6 @@ int getCantidadDeBloquesLibres(){//ok
 	return contador;
 }
 
-
-void guardar_datos(char* pathDelArchivo,int offset,int size, char* buffer){
-	if(validarArchivo(pathDelArchivo))fprintf(stderr,"error en validar path : %s",pathDelArchivo);
-	else {
-
-	}
-}
-
-void borrarArchivo(char* pathDelArchivo){//ok
-	puts("----------------borrarArchivo()---------");
-	int cantidadDeBloques=0,bytesOcupados=0;
-	t_config* aux=config_create(pathDelArchivo);
-	if(aux==NULL)perror("->borrarArchivo() , no existe el archivo o path incorrecto");
-	bytesOcupados=config_get_int_value(aux,"TAMANIO");
-	cantidadDeBloques=(bytesOcupados/metadata.tamanio_de_bloque)+1;
-	printf(" cantidad de bloques a borrar: %d \n",cantidadDeBloques);
-	char** bloques_aux= config_get_array_value(aux,"BLOQUES");
-	for(int var=0;var<cantidadDeBloques;var++){
-		setear_bloque_libre_en_posicion(atoi(bloques_aux[var]));
-		remove(pathDelArchivo);
-	}
-	free(bloques_aux);
-	config_destroy(aux);
-	puts("-------------fin de borrarArchivo()----------");
-}
 
 //INTERFAZ MDJ
 

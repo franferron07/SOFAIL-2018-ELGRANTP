@@ -57,17 +57,17 @@ char* str_concat(  char* from,const char* add){//devuelve algo malloqueado,OK,gu
 		return aux;
 	}
 }
-char* intToString( int n){//OK,se puede borrar el printf
+char* intToString( int n){//OK
 //	int cantidadDeDigitos;
 //	int resto=n*10;
 //	for(cantidadDeDigitos=0;resto%10==0;cantidadDeDigitos++)resto=resto/10;
 
 //	char* aux = malloc(cantidadDeDigitos*sizeof(char));
-	char* aux = malloc(4);
+	char* aux = malloc(5);
 	sprintf(aux,"%d",n);
 	return aux;
 }
-off_t cantidadDeCaracteresDeFile(const char* pathFile){
+off_t cantidadDeCaracteresDeFile(const char* pathFile){//usar esto
 	off_t cantidad=0;
 	struct stat inFoDelInodo;
 	stat(pathFile,&inFoDelInodo);

@@ -40,25 +40,27 @@ void finalizarMDJ();
 
 void consola_fifa();
 void  ejecutar_linea_entrante(char* buffer_entrante);
-void persistirContenido(char * contenido);
- int  espacioRestanteAlBloque(char* pathDelBloque);
-void  persistirAlBloque(char* unBloquePath, char * contenido);
-bool estaLLenoElBloqueActual();
-bool terminoDeMapearContenido();//en revision
+//void persistirContenido(char * contenido);
+// int  espacioRestanteAlBloque(char* pathDelBloque);
+//void  persistirAlBloque(char* unBloquePath, char * contenido);
+//bool estaLLenoElBloqueActual();
+//bool terminoDeMapearContenido();//en revision
 
 
 //  begin INTERFAZ MDJ
 bool validarArchivo(const char* pathDelArchivo);//ver si existe el archivo, OK, se puede borrar todos los printf() y puts(),era para probar
+void guardar_datos(const char* pathFile,int offset,int size, const char* contenidoAGuardar);
+void borrarArchivo(const char* pathDelArchivo);//ok
+char* obtener_datos(const char* pathDelArchivo,int offset, int size);
+void crearArchivo(const char* pathDelArchivo,int cantidadDeBytesDelArchivo);//OK
 
-char* obtener_datos(char* pathDelArchivo,int offset, int size);
-void crearArchivo(char* pathDelArchivo,int cantidadDeBytesDelArchivo);//OK
+
+//auxiliares
 char* getBloquesLibres_string(int cantidadDeBloques);//OK,solo para crearArchivo ,da en formato "[1,2,3,54,56,6]"
-
-t_list* getBloquesLibres_list(int cantidadDeBloques);
+t_list* getBloquesLibres_list(int cantidadDeBloques);//OK
 int getCantidadDeBloquesLibres();//ok
+void persistirAlBloque(const char* pathDeUnBloque,off_t * offset, char* buffer);
 
-void guardar_datos(char* pathDelArchivo,int offset,int size, char* buffer);
-void borrarArchivo(char* pathDelArchivo);//ok
 //  end INTERFAZ MDJ
 
 

@@ -36,17 +36,19 @@ bool testear_bloque_libre_en_posicion(int pos){
 	return bitarray_test_bit(bitarray_,(off_t)(pos));
 }
 void mostrar_bitarray(){
-	for(int k =0;k<(bitarray_get_max_bit(bitarray_));k++)printf("test bit posicion, despues de seteo %d en pos %d \n", bitarray_test_bit(bitarray_,k),k);
+	for(int k =0;k<(bitarray_get_max_bit(bitarray_));k++)printf("test bit posicion, es  %d en posicion %d \n", bitarray_test_bit(bitarray_,k),k);
 }
 void setBloqueActuaLleno(){//agregar un 1 al bitmap.bin
 	bitarray_set_bit(bitarray_,bloqueActual_int);
 }
 void getBloqueLibre_path(){
-	int j=getBloqueLibre_int();
-	bloqueActual_int=j;
+	int posicionDeUnBloqueLibre=getBloqueLibre_int();
+	bloqueActual_int=posicionDeUnBloqueLibre;
 //	bloqueActual_path=malloc()
-	sprintf(bloqueActual_path,"%d.bin",j);//rehacer path con punto de ontaje y carpeta segun dam
+	char * path_completo_aux=malloc(1500);
+	sprintf(path_completo_aux,"%s%s%d.bin",mdj.punto_de_montaje,"Bloques/",posicionDeUnBloqueLibre);//ok
 	FILE* f_aux= fopen(bloqueActual_path,"w");//txt_open_for_append(path_bloque); SI LO ABRO COMO "W" SE BORRA EL CONTENIDO
+	free(path_completo_aux);
 	txt_close_file(f_aux);
 //	return bloqueActual_path;
 }
@@ -57,11 +59,13 @@ int getBloqueLibre_int(){//obtiene el proximo bloque libre ,OK
 	int j;
 	for( j =0;testear_bloque_libre_en_posicion(j);j++);//hasta un bloque lbre,OK
 
-	setear_bloque_ocupado_en_posicion(j);
 	if(j>metadata.cantidad_bloques){
 		perror("cantidad insuficiente de espacio o bloques ");
-		exit(EXIT_SUCCESS);
+//		exit(EXIT_SUCCESS);
 	}
+
+	setear_bloque_ocupado_en_posicion(j);
+
 	return j;
 }
 char* bloquesToString(const char* pathFile){//ok
@@ -97,7 +101,7 @@ t_list* bloquesToList(const char* pathFile){//Ok
 	return listaDeBloques_;
 }
 void mostrarLista(t_list* listaDeBloques_){
-	puts("--inicion mostrando lista de  bloques ");
+	puts("--inicio, mostrando lista de  bloques ");
 	for(int p =0; p<list_size(listaDeBloques_);p++){
 				puts(intToString(list_get(listaDeBloques_,p)));
 			}
@@ -107,6 +111,13 @@ void mostrarLista(t_list* listaDeBloques_){
 char* recortarString(const char* stream, off_t desde, off_t size){
 	char* parcial = string_substring(stream,(off_t)desde,(off_t)size);
 	return parcial;
+}
+size_t getCantidadDeBloquesOcupadosSegunPath(const char* pathFile){//OK
+	size_t cantidad=0;
+	t_list* listaDeBloques=bloquesToList(pathFile);
+	cantidad=list_size(listaDeBloques);
+	list_create(listaDeBloques);
+	return cantidad;
 }
 //BITMAP end
 
